@@ -1,25 +1,29 @@
 import random
 import time
 import kivy.uix.image
+from kivy.clock import Clock
 from functools import partial
-from helper_fns import get_enemy_start_end_positions
+from helper_fns import _get_enemy_start_end_positions
+
+enemy_hit_points = 6
 
 
-def spawn_enemy(self, screen_num, *largs):
+def spawn_enemy(self, screen_num, *args):
     curr_screen = self.root.screens[screen_num]
     if not curr_screen.character_killed and not curr_screen.phase_1_completed:
         r_duration = random.uniform(curr_screen.enemy_anim_duration_min,
                                     curr_screen.enemy_anim_duration_max)
-        spawn_pos, finish_pos = get_enemy_start_end_positions(self.side_bar_width,
-                                                              self.enemy_width,
-                                                              self.enemy_height)
+        spawn_pos, finish_pos = _get_enemy_start_end_positions(self.side_bar_width,
+                                                               self.enemy_width,
+                                                               self.enemy_height)
         enemy = kivy.uix.image.Image(source="graphics/entities/enemy.png",
                                      size_hint=(self.enemy_width, self.enemy_height),
                                      pos_hint=spawn_pos, allow_stretch=True)
         curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(enemy, index=-1)
         # create a unique identifier for each enemy
         time_stamp = str(time.time())
-        curr_screen.enemies_ids['enemy_' + time_stamp] = enemy
+        curr_screen.enemies_ids['enemy_' + time_stamp] = {'image': enemy,
+                                                          'hitpoints': enemy_hit_points}
         enemy_anim = kivy.animation.Animation(pos_hint=finish_pos,
                                               duration=r_duration)
         enemy_anim.bind(on_progress=partial(self.check_enemy_collision, enemy, screen_num))
@@ -38,8 +42,9 @@ def check_enemy_collision(self, enemy, screen_num, *args):
         curr_screen.character_killed = True
         kivy.animation.Animation.cancel_all(character_image)
         for enemy_key, enemy in curr_screen.enemies_ids.items():
-            kivy.animation.Animation.cancel_all(enemy)
+            kivy.animation.Animation.cancel_all(enemy['image'])
         kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 2)
+
 
 def enemy_animation_completed(self, enemy, time_stamp, screen_num, *args):
     # enemy_image = args[1]
@@ -47,3 +52,7 @@ def enemy_animation_completed(self, enemy, time_stamp, screen_num, *args):
     # kivy.animation.Animation.cancel_all(enemy)
     curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy)
     del curr_screen.enemies_ids['enemy_' + time_stamp]
+
+
+def stop_enemy_spawn(self, screen_num):
+    Clock.unschedule(partial(self.spawn_enemy, screen_num))

@@ -1,5 +1,7 @@
 import kivy.animation
 from functools import partial
+
+
 def start_character_animation(self, screen_num, touch_pos):
     curr_screen = self.root.screens[screen_num]
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
