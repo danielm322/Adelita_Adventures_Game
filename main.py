@@ -20,6 +20,7 @@ class GameApp(kivy.app.App):
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, stop_enemy_spawn
     from reward import spawn_reward, reward_animation_completed
     from boss import spawn_boss, boss_wins_animation, boss_defeat_animation_start, boss_defeat_animation_finish, check_boss_collision
+    from boss_reward import spawn_boss_reward, boss_reward_animation_completed
     side_bar_width = 0.08  # In screen percentage
     enemy_width = 0.15
     enemy_height = 0.18
@@ -78,7 +79,7 @@ class GameApp(kivy.app.App):
             self.spawn_boss(screen_num)
             for _, boss in curr_screen.bosses_ids.items():
                 boss['hitpoints'] = curr_screen.boss_hitpoints
-        curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = "Stars " + str(
+        curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
             curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
 
     def touch_down_handler(self, screen_num, args):
@@ -98,26 +99,6 @@ class GameApp(kivy.app.App):
 
     def back_to_main_screen(self, screenManager, *args):
         screenManager.current = "main"
-
-    def spawn_boss_reward(self, boss_center, screen_num):
-        curr_screen = self.root.screens[screen_num]
-        boss_reward = kivy.uix.image.Image(source=f"graphics/entities/boss_reward_{screen_num}.png",
-                                           size_hint=self.boss_reward_initial_size_hint,
-                                           pos=boss_center, allow_stretch=True)
-        curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(boss_reward, index=-1)
-        time_stamp = str(time.time())
-        curr_screen.bosses_rewards_ids['boss_reward_' + time_stamp] = boss_reward
-        boss_reward_anim = kivy.animation.Animation(size_hint=(1, 1),
-                                                    pos=(0, 0),
-                                                    duration=self.boss_reward_animation_duration)
-        boss_reward_anim.bind(on_complete=partial(self.boss_reward_animation_completed, time_stamp, screen_num))
-        boss_reward_anim.start(boss_reward)
-
-    def boss_reward_animation_completed(self,  time_stamp, screen_num, *args):
-        boss_reward = args[1]
-        curr_screen = self.root.screens[screen_num]
-        curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(boss_reward)
-        del curr_screen.bosses_rewards_ids['boss_reward_' + time_stamp]
 
 
 class MainScreen(kivy.uix.screenmanager.Screen):
@@ -144,6 +125,8 @@ class Level1(kivy.uix.screenmanager.Screen):
     boss_height = 0.45
     boss_movement_duration = 25
     boss_hitpoints = 15
+    character_hitpoints = 100
+    damage_received = 0
 
 
 class Level2(kivy.uix.screenmanager.Screen):
@@ -166,6 +149,8 @@ class Level2(kivy.uix.screenmanager.Screen):
     boss_height = 0.45
     boss_movement_duration = 25
     boss_hitpoints = 15
+    character_hitpoints = 100
+    damage_received = 0
 
 
 app = GameApp()

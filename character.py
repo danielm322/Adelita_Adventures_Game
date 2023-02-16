@@ -30,11 +30,13 @@ def check_character_collision(self, character_image, screen_num, *args):
             kivy.animation.Animation.cancel_all(reward)
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(reward)
             curr_screen.rewards_gathered += 1
-            curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = "Stars " + str(
-                curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
             if curr_screen.rewards_gathered == curr_screen.rewards_to_win_ph_1:
                 curr_screen.phase_1_completed = True
                 self.spawn_boss(screen_num)
+            if curr_screen.rewards_gathered > curr_screen.rewards_to_win_ph_1:
+                curr_screen.rewards_gathered = curr_screen.rewards_to_win_ph_1
+            curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
+                curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
 
     if len(rewards_to_delete) > 0:
         for reward_key in rewards_to_delete:

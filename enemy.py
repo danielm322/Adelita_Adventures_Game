@@ -35,15 +35,18 @@ def check_enemy_collision(self, enemy, screen_num, *args):
     curr_screen = self.root.screens[screen_num]
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
     gap_x = curr_screen.width * self.enemy_width / 3
-    gap_y = curr_screen.height * self.enemy_height / 3
+    gap_y = curr_screen.height * self.enemy_height / 2
     if enemy.collide_widget(character_image) and \
             abs(enemy.center[0] - character_image.center[0]) <= gap_x and \
             abs(enemy.center[1] - character_image.center[1]) <= gap_y:
-        curr_screen.character_killed = True
-        kivy.animation.Animation.cancel_all(character_image)
-        for enemy_key, enemy in curr_screen.enemies_ids.items():
-            kivy.animation.Animation.cancel_all(enemy['image'])
-        kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 2)
+        curr_screen.damage_received += 1
+        print(f'Damage: {curr_screen.damage_received}')
+        if curr_screen.damage_received == curr_screen.character_hitpoints:
+            curr_screen.character_killed = True
+            kivy.animation.Animation.cancel_all(character_image)
+            for enemy_key, enemy in curr_screen.enemies_ids.items():
+                kivy.animation.Animation.cancel_all(enemy['image'])
+            kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 2)
 
 
 def enemy_animation_completed(self, enemy, time_stamp, screen_num, *args):

@@ -102,9 +102,6 @@ def _find_kiss_endpoint_fast(character_image_center, touch_point, screen_size, k
 
 
 # def find_kiss_endpoint(character_image_center, touch_point, screen_size, kiss_width, kiss_height, side_bar_width):
-#     # TODO might be possible to optimize the calculation of endpoints by adding a padding tolerance so that it
-#     #  might be not necessary to calculate a new endpoint if only a small amount of pixels above or
-#     #  below a threshold
 #     # Check direction of shooting to decide which screen boundaries to assign
 #     # Check up and right
 #     if touch_point[0] > character_image_center[0] and touch_point[1] > character_image_center[1]:

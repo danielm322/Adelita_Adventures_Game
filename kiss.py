@@ -11,11 +11,11 @@ def shoot_kiss(self, screen_num, touch_point):
     # line_slope = (touch_point[1] - character_image_center[1]) / (touch_point[0] - character_image_center[0])
     # line_intercept = character_image_center[1] - character_image_center[0] * line_slope
     kiss_end_point = _find_kiss_endpoint_fast(character_image_center,
-                                             touch_point,
-                                             screen_size,
-                                             self.kiss_width,
-                                             self.kiss_height,
-                                             self.side_bar_width)
+                                              touch_point,
+                                              screen_size,
+                                              self.kiss_width,
+                                              self.kiss_height,
+                                              self.side_bar_width)
     kiss = kivy.uix.image.Image(source="graphics/entities/kiss1.png",
                                 size_hint=(self.kiss_width, self.kiss_height),
                                 pos=[character_image_center[0] - self.kiss_width * screen_size[0] / 2,
@@ -83,6 +83,9 @@ def check_kiss_collision(self, kiss, time_stamp, screen_num, *args):
                     bosses_to_delete.append(boss_key)
                     boss_center = boss['image'].center
                     kivy.animation.Animation.cancel_all(boss['image'])
+                    # Stop enemies animations if they exist
+                    for _, enemy in curr_screen.enemies_ids.items():
+                        kivy.animation.Animation.cancel_all(enemy['image'])
                     # Animate boss killing
                     self.boss_defeat_animation_start(boss['image'], screen_num)
                     # Spawn boss reward

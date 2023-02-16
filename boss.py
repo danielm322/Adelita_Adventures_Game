@@ -42,7 +42,8 @@ def boss_defeat_animation_start(self, boss, screen_num):
                curr_screen.size[1] * 0.5)
     boss_defeat_anim = kivy.animation.Animation(pos=new_pos,
                                                 size_hint=(0.1, 0.1),
-                                                duration=0.6)
+                                                duration=0.6,
+                                                transition='in_out_elastic')
     boss_defeat_anim.bind(on_complete=partial(self.boss_defeat_animation_finish, screen_num))
     boss_defeat_anim.start(boss)
 
