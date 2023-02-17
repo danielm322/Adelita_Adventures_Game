@@ -28,9 +28,20 @@ def boss_wins_animation(self, time_stamp, screen_num, *args):
     boss = args[1]
     curr_screen = self.root.screens[screen_num]
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
-
+    curr_screen.damage_received = curr_screen.character_hitpoints
+    damage_percent = float(curr_screen.damage_received) / float(curr_screen.character_hitpoints)
+    remaining_life_percent_lvl_widget = curr_screen.ids['remaining_life_percent_lvl' + str(screen_num)]
+    remaining_life_size_hint_y = remaining_life_percent_lvl_widget.remaining_life_size_hint_y
+    remaining_life_percent_lvl_widget.size_hint = \
+        (
+            remaining_life_percent_lvl_widget.size_hint[0],
+            remaining_life_size_hint_y - remaining_life_size_hint_y * damage_percent
+        )
     curr_screen.character_killed = True
+    self.sound_level_play.stop()
+    self.sound_game_over.play()
     kivy.animation.Animation.cancel_all(character_image)
+    kivy.animation.Animation.cancel_all(boss)
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         kivy.animation.Animation.cancel_all(enemy['image'])
     kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 2)
@@ -63,9 +74,23 @@ def check_boss_collision(self, time_stamp, screen_num, *args):
     if boss.collide_widget(character_image) and \
             abs(boss.center[0] - character_image.center[0]) <= gap_x and \
             abs(boss.center[1] - character_image.center[1]) <= gap_y:
-        curr_screen.character_killed = True
-        kivy.animation.Animation.cancel_all(character_image)
-        kivy.animation.Animation.cancel_all(boss)
-        for enemy_key, enemy in curr_screen.enemies_ids.items():
-            kivy.animation.Animation.cancel_all(enemy['image'])
-        kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 2)
+        curr_screen.damage_received += curr_screen.boss_damage
+        if curr_screen.damage_received > curr_screen.character_hitpoints:
+            curr_screen.damage_received = curr_screen.character_hitpoints
+        damage_percent = float(curr_screen.damage_received) / float(curr_screen.character_hitpoints)
+        remaining_life_percent_lvl_widget = curr_screen.ids['remaining_life_percent_lvl' + str(screen_num)]
+        remaining_life_size_hint_y = remaining_life_percent_lvl_widget.remaining_life_size_hint_y
+        remaining_life_percent_lvl_widget.size_hint = \
+            (
+                remaining_life_percent_lvl_widget.size_hint[0],
+                remaining_life_size_hint_y - remaining_life_size_hint_y * damage_percent
+            )
+        if curr_screen.damage_received == curr_screen.character_hitpoints:
+            curr_screen.character_killed = True
+            self.sound_level_play.stop()
+            self.sound_game_over.play()
+            kivy.animation.Animation.cancel_all(character_image)
+            kivy.animation.Animation.cancel_all(boss)
+            for enemy_key, enemy in curr_screen.enemies_ids.items():
+                kivy.animation.Animation.cancel_all(enemy['image'])
+            kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 2)

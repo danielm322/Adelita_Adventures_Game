@@ -1,7 +1,7 @@
 import time
-from kivy.config import Config
-Config.set('graphics', 'width', '800')
-Config.set('graphics', 'height', '400')
+# from kivy.config import Config
+# Config.set('graphics', 'width', '800')
+# Config.set('graphics', 'height', '400')
 from kivy.core.audio import SoundLoader
 import kivy.uix.image
 import kivy.app
@@ -150,7 +150,7 @@ class Level1(kivy.uix.screenmanager.Screen):
     shoot_state = False
     phase_1_completed = False
     level_completed = False
-    enemy_spawn_reward_probability = 0.15
+    enemy_spawn_reward_probability = 1
     char_anim_duration = 0.7
     kisses_ids = {}
     rewards_ids = {}
@@ -166,6 +166,7 @@ class Level1(kivy.uix.screenmanager.Screen):
     boss_height = 0.45
     boss_movement_duration = 25
     boss_hitpoints = 25
+    boss_damage = 20
     character_hitpoints = 100
     damage_received = 0
     enemy_finishes_damage = 30
@@ -192,6 +193,7 @@ class Level2(kivy.uix.screenmanager.Screen):
     boss_height = 0.45
     boss_movement_duration = 23
     boss_hitpoints = 30
+    boss_damage = 20
     character_hitpoints = 100
     damage_received = 0
     enemy_finishes_damage = 30
