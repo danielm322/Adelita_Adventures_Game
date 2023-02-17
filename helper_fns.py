@@ -48,7 +48,10 @@ def find_line_intersection_fast(line_slope: float, line_intercept: float, screen
 
 
 def _find_kiss_endpoint_fast(character_image_center, touch_point, screen_size, kiss_width, kiss_height, side_bar_width):
-    line_slope = (touch_point[1] - character_image_center[1])/(touch_point[0] - character_image_center[0])
+    divisor = (touch_point[0] - character_image_center[0])
+    if divisor == 0:
+        divisor = 1e-6
+    line_slope = (touch_point[1] - character_image_center[1]) / divisor
     line_intercept = character_image_center[1] - character_image_center[0] * line_slope
     # Check direction of shooting to decide which screen boundaries to assign
     # Check up and right

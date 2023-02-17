@@ -1,3 +1,4 @@
+import random
 from helper_fns import _find_kiss_endpoint_fast
 import kivy.uix.image
 import time
@@ -8,8 +9,6 @@ def shoot_kiss(self, screen_num, touch_point):
     curr_screen = self.root.screens[screen_num]
     screen_size = curr_screen.size  # List [size_x, size_y]
     character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
-    # line_slope = (touch_point[1] - character_image_center[1]) / (touch_point[0] - character_image_center[0])
-    # line_intercept = character_image_center[1] - character_image_center[0] * line_slope
     kiss_end_point = _find_kiss_endpoint_fast(character_image_center,
                                               touch_point,
                                               screen_size,
@@ -29,6 +28,7 @@ def shoot_kiss(self, screen_num, touch_point):
     kiss_anim.bind(on_progress=partial(self.check_kiss_collision, kiss, time_stamp, screen_num))
     kiss_anim.bind(on_complete=partial(self.kiss_animation_completed, kiss, time_stamp, screen_num))
     kiss_anim.start(kiss)
+    self.sound_kiss.play()
 
 
 def kiss_animation_completed(self, kiss, time_stamp, screen_num, *args):
@@ -59,8 +59,9 @@ def check_kiss_collision(self, kiss, time_stamp, screen_num, *args):
                 enemies_to_delete.append(enemy_key)
                 kivy.animation.Animation.cancel_all(enemy['image'])
                 curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])
-                # Spawn reward
-                self.spawn_reward(enemy_center, screen_num)
+                # Spawn reward with probability defined per level
+                if random.random() < curr_screen.enemy_spawn_reward_probability:
+                    self.spawn_reward(enemy_center, screen_num)
 
     if len(enemies_to_delete) > 0:
         for enemy_key in enemies_to_delete:
@@ -80,6 +81,8 @@ def check_kiss_collision(self, kiss, time_stamp, screen_num, *args):
                 curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
                 del curr_screen.kisses_ids['kiss_' + time_stamp]
                 if boss['hitpoints'] == 0:
+                    self.sound_level_play.stop()
+                    self.sound_level_finished.play()
                     bosses_to_delete.append(boss_key)
                     boss_center = boss['image'].center
                     kivy.animation.Animation.cancel_all(boss['image'])
@@ -90,6 +93,7 @@ def check_kiss_collision(self, kiss, time_stamp, screen_num, *args):
                     self.boss_defeat_animation_start(boss['image'], screen_num)
                     # Spawn boss reward
                     self.spawn_boss_reward(boss_center, screen_num)
+                    curr_screen.phase_1_completed = False
                     kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 6)
 
         if len(bosses_to_delete) > 0:

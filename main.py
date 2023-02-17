@@ -2,6 +2,7 @@ import time
 from kivy.config import Config
 Config.set('graphics', 'width', '800')
 Config.set('graphics', 'height', '400')
+from kivy.core.audio import SoundLoader
 import kivy.uix.image
 import kivy.app
 import kivy.uix.screenmanager
@@ -34,6 +35,31 @@ class GameApp(kivy.app.App):
     boss_reward_animation_duration = 6
     CHARACTER_HITPOINTS = 100
 
+    def on_start(self):
+        self.init_audio()
+        self.sound_main_menu.play()
+
+
+    def init_audio(self):
+        self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
+        self.sound_kiss = SoundLoader.load("audio/kiss_sound.wav")
+        self.sound_game_over = SoundLoader.load("audio/game_over.wav")
+        self.sound_level_play = SoundLoader.load("audio/superhero-intro-111393.ogg")
+        self.sound_level_finished = SoundLoader.load("audio/success-fanfare-trumpets-6185.ogg")
+        self.sound_reward_collected = SoundLoader.load("audio/short-success-sound-glockenspiel-treasure-video-game-6346.ogg")
+
+        self.sound_main_menu.loop = True
+        self.sound_level_play.loop = True
+        self.sound_main_menu.volume = 0.4
+        self.sound_level_play.volume = 0.4
+        self.sound_game_over.volume = 1
+        self.sound_kiss.volume = .5
+        self.sound_level_finished.volume = .6
+        self.sound_reward_collected.volume = 1.5
+
+    def play_game_over_voice_sound(self):
+        self.sound_game_over.play()
+
     def screen_on_leave(self, screen_num):
         curr_screen = self.root.screens[screen_num]
         # REMOVE
@@ -61,13 +87,25 @@ class GameApp(kivy.app.App):
         curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
         # Stop Schedule to spawn enemies
         # self.stop_enemy_spawn(screen_num)
-        Clock.unschedule(partial(self.spawn_enemy, screen_num))
-        self.clock_spawn_enemies_variable.cancel()
+        # Clock.unschedule(partial(self.spawn_enemy, screen_num))
+        # self.clock_spawn_enemies_variable.cancel()
         self.clock_spawn_enemies_variable = None
+
+    def screen_on_pre_enter(self, screen_num):
+        curr_screen = self.root.screens[screen_num]
+        curr_screen.character_killed = False
+        curr_screen.damage_received = 0
+        self.sound_main_menu.stop()
+        remaining_life_percent_lvl_widget = curr_screen.ids['remaining_life_percent_lvl' + str(screen_num)]
+        remaining_life_size_hint_y = remaining_life_percent_lvl_widget.remaining_life_size_hint_y
+        remaining_life_percent_lvl_widget.size_hint = \
+            (
+                remaining_life_percent_lvl_widget.size_hint[0],
+                remaining_life_size_hint_y
+            )
 
     def screen_on_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
-        curr_screen.character_killed = False
         if not curr_screen.phase_1_completed:
             curr_screen.rewards_gathered = 0
             # Clock.unschedule(partial(self.spawn_enemy, screen_num))
@@ -81,6 +119,7 @@ class GameApp(kivy.app.App):
                 boss['hitpoints'] = curr_screen.boss_hitpoints
         curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
             curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
+        self.sound_level_play.play()
 
     def touch_down_handler(self, screen_num, args):
         # print(args[1].is_double_tap)
@@ -99,6 +138,7 @@ class GameApp(kivy.app.App):
 
     def back_to_main_screen(self, screenManager, *args):
         screenManager.current = "main"
+        self.sound_main_menu.play()
 
 
 class MainScreen(kivy.uix.screenmanager.Screen):
@@ -110,6 +150,7 @@ class Level1(kivy.uix.screenmanager.Screen):
     shoot_state = False
     phase_1_completed = False
     level_completed = False
+    enemy_spawn_reward_probability = 1
     char_anim_duration = 0.7
     kisses_ids = {}
     rewards_ids = {}
@@ -120,13 +161,14 @@ class Level1(kivy.uix.screenmanager.Screen):
     enemy_anim_duration_max = 30.0
     enemy_spawn_interval = 4  # In seconds
     rewards_gathered = 0
-    rewards_to_win_ph_1 = 3
+    rewards_to_win_ph_1 = 4
     boss_width = 0.4
     boss_height = 0.45
     boss_movement_duration = 25
-    boss_hitpoints = 15
+    boss_hitpoints = 25
     character_hitpoints = 100
     damage_received = 0
+    enemy_finishes_damage = 30
 
 
 class Level2(kivy.uix.screenmanager.Screen):
@@ -134,6 +176,7 @@ class Level2(kivy.uix.screenmanager.Screen):
     shoot_state = False
     phase_1_completed = False
     level_completed = False
+    enemy_spawn_reward_probability = 0.15
     char_anim_duration = 0.7
     kisses_ids = {}
     rewards_ids = {}
@@ -142,7 +185,7 @@ class Level2(kivy.uix.screenmanager.Screen):
     bosses_rewards_ids = {}
     enemy_anim_duration_min = 20.0
     enemy_anim_duration_max = 30.0
-    enemy_spawn_interval = 2  # In seconds
+    enemy_spawn_interval = 3  # In seconds
     rewards_gathered = 0
     rewards_to_win_ph_1 = 6
     boss_width = 0.4
@@ -151,6 +194,7 @@ class Level2(kivy.uix.screenmanager.Screen):
     boss_hitpoints = 15
     character_hitpoints = 100
     damage_received = 0
+    enemy_finishes_damage = 30
 
 
 app = GameApp()

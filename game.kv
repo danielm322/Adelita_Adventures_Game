@@ -5,17 +5,33 @@ ScreenManager:
 
 <MainScreen>:
     name: "main"
-    BoxLayout:
+    canvas.before:
+        Rectangle:
+            size: self.size
+            source: 'graphics/Main_menu_bg.jpg'
+    RelativeLayout:
         Button:
-            text: "Go to Level 1"
+            font_size: dp(30)
+            font_name: 'graphics/fonts/pricedown bl.otf'
+            text: "Level 1"
             on_press: app.root.current="level1"
+            pos_hint: {"center_x": .5, "center_y": .5}
+            size_hint: .2, .15
+            background_color: 1, .3, .4, .85
+            opacity: 1 if self.state == 'normal' else .5
         Button:
-            text: "Go to Level 2"
+            font_size: dp(30)
+            font_name: 'graphics/fonts/pricedown bl.otf'
+            text: "Level 2"
             on_press: app.root.current="level2"
+            pos_hint: {"center_x": .5, "center_y": .3}
+            size_hint: .2, .15
+            background_color: 1, .3, .4, .85
+            opacity: 1 if self.state == 'normal' else .5
 
 <Level1>:
     name: "level1"
-    #on_pre_enter: app.screen_on_pre_enter(1)
+    on_pre_enter: app.screen_on_pre_enter(1)
     #on_pre_leave: app.screen_on_pre_leave(1)
     on_enter: app.screen_on_enter(1)
     on_leave: app.screen_on_leave(1)
@@ -63,7 +79,7 @@ ScreenManager:
 
 <Level2>:
     name: "level2"
-    #on_pre_enter: app.screen_on_pre_enter(2)
+    on_pre_enter: app.screen_on_pre_enter(2)
     #on_pre_leave: app.screen_on_pre_leave(2)
     on_enter: app.screen_on_enter(2)
     on_leave: app.screen_on_leave(2)
@@ -74,7 +90,7 @@ ScreenManager:
             spacing: 2
             size_hint: app.side_bar_width, 1
             RemainingLifePercent
-                id: remaining_life_percent_lvl1
+                id: remaining_life_percent_lvl2
             BoxLayout:
                 size_hint: 1, 0.03
                 Label:
@@ -84,12 +100,12 @@ ScreenManager:
                             size: self.size
                             source: "graphics/entities/star_small.png"
                 NumCollectedStars:
-                    id: num_stars_collected_lvl1
+                    id: num_stars_collected_lvl2
             ToggleButton:
-                id: kiss_button_lvl1
+                id: kiss_button_lvl2
                 size_hint: 1, 0.2
                 text: "Kiss"
-                on_state: app.on_toggle_button_state(self, 1)
+                on_state: app.on_toggle_button_state(self, 2)
                 #size_hint: 0.15, 0.15
                 #height: "90dp"
                 #width: "90dp"
@@ -101,9 +117,7 @@ ScreenManager:
                 Rectangle:
                     size: self.size
                     pos: self.pos
-                    source: "graphics/levels-bg/bg_lvl2.jpg"
-            NumCollectedStars:
-                id: num_stars_collected_lvl2
+                    source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
             Character:
                 id: character_image_lvl2
                 pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -141,7 +155,7 @@ ScreenManager:
     #end_im_num: 7
 
 <RemainingLifePercent@Label>:
-    #remaining_life_size_hint_y: 0.3
+    remaining_life_size_hint_y: 0.3
     size_hint: (1, 0.3)
     #pos_hint: {'x': 0.0, 'y': 0.4}
     #font_size: 20
