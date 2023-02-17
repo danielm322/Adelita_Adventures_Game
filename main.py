@@ -30,7 +30,7 @@ class GameApp(kivy.app.App):
     kiss_height = 0.04
     kiss_duration = 0.6  # In seconds to arrive to the endpoint
     reward_size = 0.1
-    reward_duration = 10  # In seconds to disappear
+    reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
     CHARACTER_HITPOINTS = 100
@@ -150,7 +150,7 @@ class Level1(kivy.uix.screenmanager.Screen):
     shoot_state = False
     phase_1_completed = False
     level_completed = False
-    enemy_spawn_reward_probability = 1
+    enemy_spawn_reward_probability = 0.15
     char_anim_duration = 0.7
     kisses_ids = {}
     rewards_ids = {}
@@ -176,7 +176,7 @@ class Level2(kivy.uix.screenmanager.Screen):
     shoot_state = False
     phase_1_completed = False
     level_completed = False
-    enemy_spawn_reward_probability = 0.15
+    enemy_spawn_reward_probability = 0.13
     char_anim_duration = 0.7
     kisses_ids = {}
     rewards_ids = {}
@@ -185,13 +185,13 @@ class Level2(kivy.uix.screenmanager.Screen):
     bosses_rewards_ids = {}
     enemy_anim_duration_min = 20.0
     enemy_anim_duration_max = 30.0
-    enemy_spawn_interval = 3  # In seconds
+    enemy_spawn_interval = 2.5  # In seconds
     rewards_gathered = 0
     rewards_to_win_ph_1 = 6
     boss_width = 0.4
     boss_height = 0.45
-    boss_movement_duration = 25
-    boss_hitpoints = 15
+    boss_movement_duration = 23
+    boss_hitpoints = 30
     character_hitpoints = 100
     damage_received = 0
     enemy_finishes_damage = 30

@@ -46,7 +46,7 @@ def check_kiss_collision(self, kiss, time_stamp, screen_num, *args):
     gap_y = curr_screen.height * self.enemy_height / 3
     enemies_to_delete = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
-        if kiss.collide_widget(enemy['image']) and \
+        if not kiss_already_hit and kiss.collide_widget(enemy['image']) and \
                 abs(enemy['image'].center[0] - kiss.center[0]) <= gap_x and \
                 abs(enemy['image'].center[1] - kiss.center[1]) <= gap_y:
             enemy['hitpoints'] = enemy['hitpoints'] - 1

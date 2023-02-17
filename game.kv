@@ -37,14 +37,13 @@ ScreenManager:
     on_leave: app.screen_on_leave(1)
     BoxLayout:
         orientation: "horizontal"
-        BoxLayout:
-            orientation: "vertical"
-            spacing: 2
+        RelativeLayout:
             size_hint: app.side_bar_width, 1
             RemainingLifePercent
                 id: remaining_life_percent_lvl1
             BoxLayout:
-                size_hint: 1, 0.03
+                size_hint: 1, 0.05
+                pos_hint: {"x": 0.0, "y": .19}
                 Label:
                     canvas:
                         Rectangle:
@@ -53,15 +52,9 @@ ScreenManager:
                             source: "graphics/entities/star_small.png"
                 NumCollectedStars:
                     id: num_stars_collected_lvl1
-            ToggleButton:
+            KissButton:
                 id: kiss_button_lvl1
-                size_hint: 1, 0.2
-                text: "Kiss"
                 on_state: app.on_toggle_button_state(self, 1)
-                #size_hint: 0.15, 0.15
-                #height: "90dp"
-                #width: "90dp"
-                #pos_hint: {'x': 0.45, 'y': 0.1}
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl1
@@ -85,14 +78,13 @@ ScreenManager:
     on_leave: app.screen_on_leave(2)
     BoxLayout:
         orientation: "horizontal"
-        BoxLayout:
-            orientation: "vertical"
-            spacing: 2
+        RelativeLayout:
             size_hint: app.side_bar_width, 1
             RemainingLifePercent
                 id: remaining_life_percent_lvl2
             BoxLayout:
-                size_hint: 1, 0.03
+                size_hint: 1, 0.05
+                pos_hint: {"x": 0.0, "y": .19}
                 Label:
                     canvas:
                         Rectangle:
@@ -101,15 +93,9 @@ ScreenManager:
                             source: "graphics/entities/star_small.png"
                 NumCollectedStars:
                     id: num_stars_collected_lvl2
-            ToggleButton:
+            KissButton:
                 id: kiss_button_lvl2
-                size_hint: 1, 0.2
-                text: "Kiss"
                 on_state: app.on_toggle_button_state(self, 2)
-                #size_hint: 0.15, 0.15
-                #height: "90dp"
-                #width: "90dp"
-                #pos_hint: {'x': 0.45, 'y': 0.1}
         FloatLayout:
             id: layout_lvl2
             on_touch_down: app.touch_down_handler(2, args)
@@ -126,21 +112,16 @@ ScreenManager:
     text: "0/0"
     font_size: 20
     #background_normal: ''
-    #id: num_stars_collected
     #size_hint: (1, 0.15)
     #pos_hint: {'x': 0.0, 'y': 0.20}
 
-
-
-#<Monster@Image>:
-#    id: monster_image
-#    size_hint: (0.15, 0.15)
-#    pos_hint: {'x': 0.8, 'y': 0.8}
-#    source: "graphics/entities/enemy.png"
-#    #im_num: 10
-#    allow_stretch: True
-#    #on_im_num: app.change_monst_im(self)
-#    #on_pos_hint: app.monst_pos_hint(self)
+<KissButton@ToggleButton>:
+    size_hint: 1, 0.18
+    text: "Kiss"
+    #size_hint: 0.15, 0.15
+    #height: "90dp"
+    #width: "90dp"
+    pos_hint: {'x': 0.0, 'y': 0.0}
 
 <Character@Image>:
     id: character_image
@@ -156,8 +137,8 @@ ScreenManager:
 
 <RemainingLifePercent@Label>:
     remaining_life_size_hint_y: 0.3
-    size_hint: (1, 0.3)
-    #pos_hint: {'x': 0.0, 'y': 0.4}
+    size_hint: (0.3, 0.3)
+    pos_hint: {'x': 0.02, 'y': 0.24}
     #font_size: 20
     canvas:
         Color:
