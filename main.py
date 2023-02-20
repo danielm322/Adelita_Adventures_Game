@@ -33,12 +33,11 @@ class GameApp(kivy.app.App):
     reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
-    CHARACTER_HITPOINTS = 100
+    # CHARACTER_HITPOINTS = 100
 
     def on_start(self):
         self.init_audio()
         self.sound_main_menu.play()
-
 
     def init_audio(self):
         self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
@@ -56,9 +55,6 @@ class GameApp(kivy.app.App):
         self.sound_kiss.volume = .5
         self.sound_level_finished.volume = .6
         self.sound_reward_collected.volume = 1.5
-
-    def play_game_over_voice_sound(self):
-        self.sound_game_over.play()
 
     def screen_on_leave(self, screen_num):
         curr_screen = self.root.screens[screen_num]
@@ -150,7 +146,7 @@ class Level1(kivy.uix.screenmanager.Screen):
     shoot_state = False
     phase_1_completed = False
     level_completed = False
-    enemy_spawn_reward_probability = 1
+    enemy_spawn_reward_probability = 0.15
     char_anim_duration = 0.7
     kisses_ids = {}
     rewards_ids = {}
