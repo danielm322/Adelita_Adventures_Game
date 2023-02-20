@@ -1,5 +1,8 @@
 import kivy.animation
 from functools import partial
+from kivy.clock import Clock
+
+
 def start_character_animation(self, screen_num, touch_pos):
     curr_screen = self.root.screens[screen_num]
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
@@ -28,11 +31,17 @@ def check_character_collision(self, character_image, screen_num, *args):
             kivy.animation.Animation.cancel_all(reward)
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(reward)
             curr_screen.rewards_gathered += 1
-            curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = "Stars " + str(
-                curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
+            self.sound_reward_collected.play()
             if curr_screen.rewards_gathered == curr_screen.rewards_to_win_ph_1:
+                # Stop spawning enemies
+                Clock.unschedule(partial(self.spawn_enemy, screen_num))
+                self.clock_spawn_enemies_variable.cancel()
                 curr_screen.phase_1_completed = True
                 self.spawn_boss(screen_num)
+            if curr_screen.rewards_gathered > curr_screen.rewards_to_win_ph_1:
+                curr_screen.rewards_gathered = curr_screen.rewards_to_win_ph_1
+            curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
+                curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
 
     if len(rewards_to_delete) > 0:
         for reward_key in rewards_to_delete:
