@@ -17,8 +17,8 @@ from kivy.clock import Clock
 
 class GameApp(kivy.app.App):
     from character import start_character_animation, check_character_collision
-    from kiss import shoot_kiss, check_kiss_collision, kiss_animation_completed
-    from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, stop_enemy_spawn
+    from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
+    from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies
     from reward import spawn_reward, reward_animation_completed
     from boss import spawn_boss, boss_wins_animation, boss_defeat_animation_start, boss_defeat_animation_finish, check_boss_collision
     from boss_reward import spawn_boss_reward, boss_reward_animation_completed
@@ -26,13 +26,16 @@ class GameApp(kivy.app.App):
     enemy_width = 0.15
     enemy_height = 0.18
     clock_spawn_enemies_variable = None
+    clock_update_fn_variable = None
     kiss_width = 0.04
     kiss_height = 0.04
-    kiss_duration = 0.6  # In seconds to arrive to the endpoint
+    kiss_speed = 20
     reward_size = 0.1
     reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
+    APP_TIME_FACTOR = 60  # In number of updates per second
+    SCREEN_UPDATE_RATE = 1/APP_TIME_FACTOR
     # CHARACTER_HITPOINTS = 100
 
     def on_start(self):
@@ -71,8 +74,8 @@ class GameApp(kivy.app.App):
         curr_screen.rewards_ids.clear()
         # Kisses
         for _, kiss in curr_screen.kisses_ids.items():
-            kivy.animation.Animation.cancel_all(kiss)
-            curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
+            kivy.animation.Animation.cancel_all(kiss['image'])
+            curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss['image'])
         curr_screen.kisses_ids.clear()
         # Bosses
         for _, boss in curr_screen.bosses_ids.items():
@@ -116,6 +119,14 @@ class GameApp(kivy.app.App):
         curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
             curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
         self.sound_level_play.play()
+        self.clock_update_fn_variable = Clock.schedule_interval(partial(self.update_screen, screen_num),
+                                                                self.SCREEN_UPDATE_RATE)
+
+    def update_screen(self, screen_num, *args):
+        # This factor standardizes the passage of time in one cycle, as is a proportion to the expected timestep
+        cycle_time_factor = args[0] * self.APP_TIME_FACTOR
+        self.update_enemies(screen_num, dt=cycle_time_factor)
+        self.update_kisses(screen_num, dt=cycle_time_factor)
 
     def touch_down_handler(self, screen_num, args):
         # print(args[1].is_double_tap)
@@ -153,8 +164,8 @@ class Level1(kivy.uix.screenmanager.Screen):
     enemies_ids = {}
     bosses_ids = {}
     bosses_rewards_ids = {}
-    enemy_anim_duration_min = 20.0
-    enemy_anim_duration_max = 30.0
+    enemy_speed_min = 3e-4
+    enemy_speed_max = 6e-4
     enemy_spawn_interval = 4  # In seconds
     rewards_gathered = 0
     rewards_to_win_ph_1 = 4
@@ -180,8 +191,8 @@ class Level2(kivy.uix.screenmanager.Screen):
     enemies_ids = {}
     bosses_ids = {}
     bosses_rewards_ids = {}
-    enemy_anim_duration_min = 20.0
-    enemy_anim_duration_max = 30.0
+    enemy_speed_min = 3e-4
+    enemy_speed_max = 6e-4
     enemy_spawn_interval = 2.5  # In seconds
     rewards_gathered = 0
     rewards_to_win_ph_1 = 6

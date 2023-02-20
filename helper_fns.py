@@ -83,8 +83,9 @@ def _find_kiss_endpoint_fast(character_image_center, touch_point, screen_size, k
             line_slope, line_intercept, screen_size, 'left'
         )
         if left_line_intersection_point[1] <= screen_size[1]:
-            side_bar_correction = side_bar_width * screen_size[0] - kiss_width * screen_size[0] / 2
-            return left_line_intersection_point[0] + side_bar_correction, left_line_intersection_point[1]
+            side_bar_correction_x = side_bar_width * screen_size[0] - kiss_width * screen_size[0] / 2
+            side_bar_correction_y = - kiss_height * screen_size[1] / 2
+            return left_line_intersection_point[0] + side_bar_correction_x, left_line_intersection_point[1] + side_bar_correction_y
         else:  # upper line intersection
             return find_line_intersection_fast(
                 line_slope, line_intercept, screen_size, 'up'
