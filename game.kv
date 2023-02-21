@@ -45,6 +45,7 @@ ScreenManager:
                 size_hint: 1, 0.05
                 pos_hint: {"x": 0.0, "y": .19}
                 Label:
+                    size_hint: 0.35, 1
                     canvas:
                         Rectangle:
                             pos: self.pos
@@ -86,6 +87,7 @@ ScreenManager:
                 size_hint: 1, 0.05
                 pos_hint: {"x": 0.0, "y": .19}
                 Label:
+                    size_hint: 0.35, 1
                     canvas:
                         Rectangle:
                             pos: self.pos
@@ -110,7 +112,7 @@ ScreenManager:
 
 <NumCollectedStars@Label>:
     text: "0/0"
-    font_size: 20
+    font_size: 25
     #background_normal: ''
     #size_hint: (1, 0.15)
     #pos_hint: {'x': 0.0, 'y': 0.20}
@@ -128,7 +130,7 @@ ScreenManager:
     size_hint: (0.25, 0.25)
     #pos_hint: {'x': 0.2, 'y': 0.6}
     source: "graphics/entities/Adelita_1.png"
-    im_num: 0
+    #im_num: 0
     allow_stretch: True
     #on_im_num: app.change_char_im(self)
     #on_pos_hint: app.char_pos_hint(self)

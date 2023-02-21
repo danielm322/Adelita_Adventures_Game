@@ -32,11 +32,6 @@ def shoot_kiss(self, screen_num, touch_point):
     curr_screen.kisses_ids['kiss_' + time_stamp] = {'image': kiss,
                                                     'finish_pos': finish_pos,
                                                     'direction_u_vector': kiss_direction_unit_vector}
-    # kiss_anim = kivy.animation.Animation(pos=kiss_end_point,
-    #                                      duration=self.kiss_duration)
-    # kiss_anim.bind(on_progress=partial(self.check_kiss_collision, kiss, time_stamp, screen_num))
-    # kiss_anim.bind(on_complete=partial(self.kiss_animation_completed, kiss, time_stamp, screen_num))
-    # kiss_anim.start(kiss)
     self.sound_kiss.play()
 
 
@@ -78,14 +73,6 @@ def update_kisses(self, screen_num, dt):
             del curr_screen.bosses_ids[boss_key]
 
 
-# def kiss_animation_completed(self, kiss, time_stamp, screen_num, *args):
-#     # enemy_image = args[1]
-#     curr_screen = kiss.parent.parent.parent
-#     # kivy.animation.Animation.cancel_all(kiss)
-#     curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
-#     del curr_screen.kisses_ids['kiss_' + time_stamp]
-
-
 def check_kiss_collision_with_enemies(self, kiss, screen_num, *args):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
@@ -97,14 +84,11 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num, *args):
                 abs(enemy['image'].center[0] - kiss.center[0]) <= gap_x and \
                 abs(enemy['image'].center[1] - kiss.center[1]) <= gap_y:
             enemy['hitpoints'] = enemy['hitpoints'] - 1
-            # kivy.animation.Animation.cancel_all(kiss)
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
-            # del curr_screen.kisses_ids['kiss_' + time_stamp]
             kiss_already_hit = True
             if enemy['hitpoints'] == 0:
                 enemy_center = enemy['image'].center
                 enemies_to_delete.append(enemy_key)
-                # kivy.animation.Animation.cancel_all(enemy['image'])
                 curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])
                 # Spawn reward with probability defined per level
                 if random.random() < curr_screen.enemy_spawn_reward_probability:
@@ -117,24 +101,21 @@ def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
     # Boss collision check
-    gap_x = curr_screen.width * curr_screen.boss_width / 3
-    gap_y = curr_screen.height * curr_screen.boss_height / 3
+    gap_x = curr_screen.width * curr_screen.boss_props['width'] / 5
+    gap_y = curr_screen.height * curr_screen.boss_props['height'] / 3
     bosses_to_delete = []
     for boss_key, boss in curr_screen.bosses_ids.items():
         if kiss.collide_widget(boss['image']) and \
                 abs(boss['image'].center[0] - kiss.center[0]) <= gap_x and \
                 abs(boss['image'].center[1] - kiss.center[1]) <= gap_y:
             kiss_already_hit = True
-            boss['hitpoints'] = boss['hitpoints'] - 1
-            # kivy.animation.Animation.cancel_all(kiss)
+            boss['hit_points'] = boss['hit_points'] - 1
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
-            # del curr_screen.kisses_ids['kiss_' + time_stamp]
-            if boss['hitpoints'] == 0:
+            if boss['hit_points'] == 0:
                 self.sound_level_play.stop()
                 self.sound_level_finished.play()
                 bosses_to_delete.append(boss_key)
                 boss_center = boss['image'].center
-                kivy.animation.Animation.cancel_all(boss['image'])
                 # Stop enemies animations if they exist
                 for _, enemy in curr_screen.enemies_ids.items():
                     enemy['speed_x'] = 0.
