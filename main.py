@@ -89,7 +89,8 @@ class GameApp(kivy.app.App):
         # Toggle kiss button
         curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
         # Stop Schedule to spawn enemies
-        self.clock_spawn_enemies_variable = None
+        if self.clock_spawn_enemies_variable is not None:
+            self.clock_spawn_enemies_variable = None
         # Unschedule the update function
         # Clock.unschedule(partial(self.update_screen, screen_num))
         self.clock_update_fn_variable.cancel()
@@ -101,7 +102,8 @@ class GameApp(kivy.app.App):
         curr_screen.character_dict['killed'] = False
         curr_screen.state_paused = False
         curr_screen.character_dict['damage_received'] = 0
-        self.sound_main_menu.stop()
+        if self.sound_main_menu.state == "play":
+            self.sound_main_menu.stop()
         self.adjust_character_life_bar(screen_num)
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 0.
@@ -148,8 +150,10 @@ class GameApp(kivy.app.App):
     def on_toggle_button_state(self, widget, screen_num):
         curr_screen = self.root.screens[screen_num]
         if widget.state == "normal":
+            widget.source = "graphics/entities/kiss1_bw.png"
             curr_screen.character_dict['shoot_state'] = False
         else:
+            widget.source = "graphics/entities/kiss1.png"
             curr_screen.character_dict['shoot_state'] = True
 
     def pause_game(self, screen_num):
@@ -183,7 +187,7 @@ class GameApp(kivy.app.App):
 
     def on_go_to_main_menu_button_pressed(self, *args):
         curr_screen = args[0]
-        screen_num = int(curr_screen.name[5:])
+        # screen_num = int(curr_screen.name[5:])
         self.sound_level_play.stop()
         self.back_to_main_screen(curr_screen.parent)
 
