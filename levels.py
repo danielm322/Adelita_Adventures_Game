@@ -3,8 +3,9 @@ import kivy.uix.screenmanager
 
 class Level1(kivy.uix.screenmanager.Screen):
     phase_1_completed = False
+    state_paused = False
     level_completed = False
-    enemy_spawn_reward_probability = 15
+    enemy_spawn_reward_probability = 0.15
     kisses_ids = {}
     rewards_ids = {}
     enemies_ids = {}
@@ -37,6 +38,7 @@ class Level1(kivy.uix.screenmanager.Screen):
 
 class Level2(kivy.uix.screenmanager.Screen):
     phase_1_completed = False
+    state_paused = False
     level_completed = False
     enemy_spawn_reward_probability = 0.13
     kisses_ids = {}

@@ -14,7 +14,9 @@ ScreenManager:
             font_size: dp(30)
             font_name: 'graphics/fonts/pricedown bl.otf'
             text: "Level 1"
-            on_press: app.root.current="level1"
+            on_press:
+                root.manager.transition.direction = 'left'
+                app.root.current="level1"
             pos_hint: {"center_x": .5, "center_y": .5}
             size_hint: .2, .15
             background_color: 1, .3, .4, .85
@@ -23,7 +25,9 @@ ScreenManager:
             font_size: dp(30)
             font_name: 'graphics/fonts/pricedown bl.otf'
             text: "Level 2"
-            on_press: app.root.current="level2"
+            on_press:
+                root.manager.transition.direction = 'left'
+                app.root.current="level2"
             pos_hint: {"center_x": .5, "center_y": .3}
             size_hint: .2, .15
             background_color: 1, .3, .4, .85
@@ -39,6 +43,9 @@ ScreenManager:
         orientation: "horizontal"
         RelativeLayout:
             size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl1
+                on_press: app.pause_game(1)
             RemainingLifePercent
                 id: remaining_life_percent_lvl1
             BoxLayout:
@@ -67,7 +74,9 @@ ScreenManager:
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
             Character:
                 id: character_image_lvl1
-                pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            PauseMenuWidget:
+                id: pause_menu_lvl1
 
 
 
@@ -81,6 +90,9 @@ ScreenManager:
         orientation: "horizontal"
         RelativeLayout:
             size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl2
+                on_press: app.pause_game(2)
             RemainingLifePercent
                 id: remaining_life_percent_lvl2
             BoxLayout:
@@ -108,7 +120,9 @@ ScreenManager:
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
             Character:
                 id: character_image_lvl2
-                pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            PauseMenuWidget:
+                id: pause_menu_lvl2
 
 <NumCollectedStars@Label>:
     text: "0/0"
@@ -119,15 +133,27 @@ ScreenManager:
 
 <KissButton@ToggleButton>:
     size_hint: 1, 0.18
-    text: "Kiss"
+    #text: "Kiss"
     #size_hint: 0.15, 0.15
     #height: "90dp"
     #width: "90dp"
     pos_hint: {'x': 0.0, 'y': 0.0}
+    #source: "graphics/entities/kiss1_bw.png"
+    #background_color: 0, 0, 0, .5
+    border: -8, -8, -8, -8
+    background_normal: "graphics/entities/kiss1_bw.png"
+    background_down: "graphics/entities/kiss1.png"
+    #color: (1, 0, .65, 0.5)
+    #canvas:
+    #    Rectangle:
+    #        pos: self.pos
+    #        size: self.size[0]*0.9, self.size[1]*0.9
+    #        source: "graphics/entities/kiss1_bw.png"
 
 <Character@Image>:
     id: character_image
     size_hint: (0.25, 0.25)
+    pos: self.parent.width/2-self.size[0]/2, self.parent.height/2-self.size[1]/2
     #pos_hint: {'x': 0.2, 'y': 0.6}
     source: "graphics/entities/Adelita_1.png"
     #im_num: 0
@@ -148,3 +174,52 @@ ScreenManager:
         Rectangle:
             pos: self.pos
             size: self.size
+
+<PauseButton@Button>:
+    pos_hint: {'x': 0.05, 'y': 0.9}
+    size_hint: (0.9, 0.1)
+    background_color: 0, 0, 0, 0
+    canvas:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: "graphics/pause_button.png"
+
+
+<PauseMenuWidget>:
+    #pos_hint: {'x': 0.0, 'y':0.}
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, .8
+        Rectangle:
+            size: root.size
+            pos: root.parent.width * app.side_bar_width, 0
+    Button:
+        font_size: dp(20)
+        font_name: 'graphics/fonts/pricedown bl.otf'
+        text: 'Continue'
+        pos_hint: {"center_x": .5 + app.side_bar_width/2, "center_y": .7}
+        size_hint: .2, .15
+        background_normal: ''
+        on_press: app.on_continue_button_pressed(root.parent.parent.parent)
+        background_color: 1, .3, .4, .85
+    Button:
+        font_size: dp(20)
+        font_name: 'graphics/fonts/pricedown bl.otf'
+        text: 'Restart'
+        pos_hint: {"center_x": .5 + app.side_bar_width/2, "center_y": .5}
+        size_hint: .2, .15
+        background_normal: ''
+        on_press: app.on_restart_button_pressed(root.parent.parent.parent)
+        background_color: 1, .3, .4, .85
+    Button:
+        font_size: dp(20)
+        font_name: 'graphics/fonts/pricedown bl.otf'
+        text: 'Main Menu'
+        pos_hint: {"center_x": .5 + app.side_bar_width/2, "center_y": .3}
+        size_hint: .2, .15
+        background_normal: ''
+        on_press:
+            root.parent.parent.parent.manager.transition.direction = 'right'
+            app.on_go_to_main_menu_button_pressed(root.parent.parent.parent)
+        background_color: 1, .3, .4, .85

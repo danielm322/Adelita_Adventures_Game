@@ -6,7 +6,7 @@ from math import sqrt, fabs
 
 def start_character_animation(self, screen_num, touch_pos):
     curr_screen = self.root.screens[screen_num]
-    screen_size = curr_screen.size  # List [size_x, size_y]
+    # screen_size = curr_screen.size  # List [size_x, size_y]
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
     # character_image.im_num = character_image.start_im_num
     character_image_center = character_image.center  # List: [c_x, c_y]
@@ -19,15 +19,6 @@ def start_character_animation(self, screen_num, touch_pos):
     )
     direction_unit_vector = ((finish_pos[0] - character_image_center[0]) / unit_vector_norm,
                              (finish_pos[1] - character_image_center[1]) / unit_vector_norm)
-    # char_anim = kivy.animation.Animation(
-    #     # pos_hint={'x': (touch_pos[0] - character_image.size_hint[0] / 2),
-    #     #           'y': touch_pos[1] - character_image.size_hint[1] / 2},
-    #     pos=(touch_pos[0] - character_image.size[0] / 2,
-    #          touch_pos[1] - character_image.size[1] / 2),
-    #     duration=curr_screen.char_anim_duration
-    # )
-    # char_anim.bind(on_progress=partial(self.check_character_collision, character_image, screen_num))
-    # char_anim.start(character_image)
     curr_screen.character_dict['is_moving'] = True
     curr_screen.character_dict['finish_point_pos'] = finish_pos
     curr_screen.character_dict['direction_unit_vector'] = direction_unit_vector
@@ -61,7 +52,6 @@ def check_character_collision(self, character_image, screen_num):
                 abs(character_image.center[0] - reward['image'].center[0]) <= gap_x and \
                 abs(character_image.center[1] - reward['image'].center[1]) <= gap_y:
             rewards_to_delete.append(reward_key)
-            # kivy.animation.Animation.cancel_all(reward)
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(reward['image'])
             curr_screen.rewards_gathered += 1
             self.sound_reward_collected.play()
@@ -89,9 +79,8 @@ def kill_character(self, screen_num):
     curr_screen.character_dict['is_moving'] = False
     if not curr_screen.phase_1_completed:
         # Stop enemy spawning
-        Clock.unschedule(partial(self.spawn_enemy, screen_num))
+        # Clock.unschedule(partial(self.spawn_enemy, screen_num))
         self.clock_spawn_enemies_variable.cancel()
-    # kivy.animation.Animation.cancel_all(character_image)
     # Stop enemies, and bosses
     for _, enemy in curr_screen.enemies_ids.items():
         enemy['speed_x'] = 0.
