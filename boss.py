@@ -72,3 +72,19 @@ def check_boss_collision(self, boss_image, screen_num):
             self.adjust_character_life_bar(screen_num)
         if curr_screen.character_dict['damage_received'] == curr_screen.character_dict['hit_points']:
             self.kill_character(screen_num)
+
+
+def kill_boss(self, boss, screen_num):
+    curr_screen = self.root.screens[screen_num]
+    self.sound_level_play.stop()
+    self.sound_level_finished.play()
+    boss_center = boss['image'].center
+    # Stop enemies animations if they exist
+    for _, enemy in curr_screen.enemies_ids.items():
+        enemy['speed_x'] = 0.
+    # Animate boss killing
+    self.boss_defeat_animation_start(boss['image'], screen_num)
+    # Spawn boss reward
+    self.spawn_boss_reward(boss_center, screen_num)
+    curr_screen.phase_1_completed = False
+    kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 6)

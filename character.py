@@ -1,7 +1,7 @@
 import kivy.animation
 from functools import partial
 from kivy.clock import Clock
-from math import sqrt, fabs
+from math import sqrt
 
 
 def start_character_animation(self, screen_num, touch_pos):
@@ -33,10 +33,10 @@ def update_character(self, screen_num, dt):
         character_image.x = new_x
         character_image.y = new_y
         self.check_character_collision(character_image, screen_num)
-        if fabs(
+        if abs(
             character_image.center_x - curr_screen.character_dict['finish_point_pos'][0]
             ) < self.MOVEMENT_PIXEL_TOLERANCE and \
-           fabs(
+           abs(
             character_image.center_y - curr_screen.character_dict['finish_point_pos'][1]
             ) < self.MOVEMENT_PIXEL_TOLERANCE:
             curr_screen.character_dict['is_moving'] = False

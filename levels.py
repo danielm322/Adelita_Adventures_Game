@@ -5,14 +5,16 @@ class Level1(kivy.uix.screenmanager.Screen):
     phase_1_completed = False
     state_paused = False
     level_completed = False
-    enemy_spawn_reward_probability = 0.15
+    enemy_spawn_reward_probability = 15
     kisses_ids = {}
     rewards_ids = {}
     enemies_ids = {}
     bosses_ids = {}
     bosses_rewards_ids = {}
+    specials_ids = {}
     character_dict = {
         'shoot_state': False,
+        'shoot_special_state': False,
         'killed': False,
         'speed': 5,
         'hit_points': 100,
@@ -46,8 +48,10 @@ class Level2(kivy.uix.screenmanager.Screen):
     enemies_ids = {}
     bosses_ids = {}
     bosses_rewards_ids = {}
+    specials_ids = {}
     character_dict = {
         'shoot_state': False,
+        'shoot_special_state': False,
         'killed': False,
         'speed': 5,
         'hit_points': 100,

@@ -73,7 +73,7 @@ def update_kisses(self, screen_num, dt):
             del curr_screen.bosses_ids[boss_key]
 
 
-def check_kiss_collision_with_enemies(self, kiss, screen_num, *args):
+def check_kiss_collision_with_enemies(self, kiss, screen_num):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
     gap_x = curr_screen.width * self.enemy_width / 3
@@ -111,20 +111,9 @@ def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
             kiss_already_hit = True
             boss['hit_points'] = boss['hit_points'] - 1
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
-            if boss['hit_points'] == 0:
-                self.sound_level_play.stop()
-                self.sound_level_finished.play()
+            if boss['hit_points'] <= 0:
+                self.kill_boss(boss, screen_num)
                 bosses_to_delete.append(boss_key)
-                boss_center = boss['image'].center
-                # Stop enemies animations if they exist
-                for _, enemy in curr_screen.enemies_ids.items():
-                    enemy['speed_x'] = 0.
-                # Animate boss killing
-                self.boss_defeat_animation_start(boss['image'], screen_num)
-                # Spawn boss reward
-                self.spawn_boss_reward(boss_center, screen_num)
-                curr_screen.phase_1_completed = False
-                kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 6)
 
     return kiss_already_hit, bosses_to_delete
 
