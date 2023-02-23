@@ -1,9 +1,9 @@
 # import time
-from kivy.config import Config
-from kivy.graphics import RoundedRectangle, Color, Quad
+# from kivy.config import Config
+from kivy.graphics import Color, Quad
 
-Config.set('graphics', 'width', '800')
-Config.set('graphics', 'height', '400')
+# Config.set('graphics', 'width', '800')
+# Config.set('graphics', 'height', '400')
 from kivy.core.audio import SoundLoader
 import kivy.uix.image
 import kivy.app
@@ -14,11 +14,10 @@ import kivy.animation
 import kivy.uix.label
 from functools import partial
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.properties import BooleanProperty
 
 from levels import Level1, Level2
 from pause_menu import PauseMenuWidget
-# import kivy.clock
 
 
 class GameApp(kivy.app.App):
@@ -68,7 +67,7 @@ class GameApp(kivy.app.App):
         self.sound_kiss = SoundLoader.load("audio/kiss_sound.wav")
         self.sound_enemy_dies = SoundLoader.load("audio/goblin_hurt.ogg")
         self.sound_enemy_laughs = SoundLoader.load("audio/goblin_laugh.ogg")
-        self.sound_baby_laughs = SoundLoader.load("audio/baby_laughs_special.mp3")
+        self.sound_baby_laughs = SoundLoader.load("audio/baby_laughs_special.ogg")
         self.sound_game_over = SoundLoader.load("audio/goblin_laugh_2.ogg")
         self.sound_level_play = SoundLoader.load("audio/superhero-intro-111393.ogg")
         self.sound_level_finished = SoundLoader.load("audio/success-fanfare-trumpets-6185.ogg")
