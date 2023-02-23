@@ -4,7 +4,6 @@ from math import sqrt
 from helper_fns import _find_kiss_endpoint_fast
 import kivy.uix.image
 import time
-from functools import partial
 
 
 def shoot_kiss(self, screen_num, touch_point):
@@ -87,6 +86,7 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
             kiss_already_hit = True
             if enemy['hitpoints'] == 0:
+                self.sound_enemy_dies.play()
                 enemy_center = enemy['image'].center
                 enemies_to_delete.append(enemy_key)
                 curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])

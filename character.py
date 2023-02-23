@@ -10,10 +10,7 @@ def start_character_animation(self, screen_num, touch_pos):
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
     # character_image.im_num = character_image.start_im_num
     character_image_center = character_image.center  # List: [c_x, c_y]
-    # finish_pos = (touch_pos[0] - character_image.size[0] / 2,
-    #               touch_pos[1] - character_image.size[1] / 2)
-    finish_pos = (touch_pos[0],
-                  touch_pos[1])
+    finish_pos = (touch_pos[0], touch_pos[1])
     unit_vector_norm = sqrt(
         (finish_pos[0] - character_image_center[0]) ** 2 + (finish_pos[1] - character_image_center[1]) ** 2
     )
@@ -32,7 +29,12 @@ def update_character(self, screen_num, dt):
         new_y = character_image.y + curr_screen.character_dict['direction_unit_vector'][1] * curr_screen.character_dict['speed'] * dt
         character_image.x = new_x
         character_image.y = new_y
+        # Update special attack radius quad
+        if curr_screen.character_dict['shoot_special_state']:
+            self.special_attack_quad.points = self.get_special_quad_coords(screen_num)
+        # Check collision
         self.check_character_collision(character_image, screen_num)
+        # Stop moving character if he arrived to the final point
         if abs(
             character_image.center_x - curr_screen.character_dict['finish_point_pos'][0]
             ) < self.MOVEMENT_PIXEL_TOLERANCE and \
@@ -86,4 +88,4 @@ def kill_character(self, screen_num):
         enemy['speed_x'] = 0.
     for _, boss in curr_screen.bosses_ids.items():
         boss['speed_x'] = 0.
-    kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 3)
+    kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 4)
