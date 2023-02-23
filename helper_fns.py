@@ -176,3 +176,17 @@ def adjust_character_life_bar(self, screen_num):
             remaining_life_percent_lvl_widget.size_hint[0],
             remaining_life_size_hint_y - remaining_life_size_hint_y * damage_percent
         )
+
+
+def calc_parabola_vertex(p1, p2, p3):
+    '''
+    Adapted and modifed to get the unknowns for defining a parabola:
+    http://stackoverflow.com/questions/717762/how-to-calculate-the-vertex-of-a-parabola-given-three-points
+    '''
+    x1, y1, x2, y2, x3, y3 = p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]
+    denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+    A = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+    B = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
+    C = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
+
+    return A, B, C

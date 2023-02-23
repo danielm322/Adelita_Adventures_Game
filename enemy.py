@@ -1,8 +1,6 @@
 import random
 import time
 import kivy.uix.image
-from kivy.clock import Clock
-from functools import partial
 from helper_fns import _get_enemy_start_end_positions
 
 enemy_hit_points = 6
@@ -82,5 +80,6 @@ def enemy_animation_completed(self, enemy, screen_num):
         self.kill_character(screen_num)
 
     self.adjust_character_life_bar(screen_num)
+    self.sound_enemy_laughs.play()
 
 

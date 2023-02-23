@@ -50,7 +50,7 @@ ScreenManager:
                 id: remaining_life_percent_lvl1
             BoxLayout:
                 size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .19}
+                pos_hint: {"x": 0.0, "y": .36}
                 Label:
                     size_hint: 0.35, 1
                     canvas:
@@ -63,6 +63,9 @@ ScreenManager:
             KissButton:
                 id: kiss_button_lvl1
                 on_state: app.on_toggle_button_state(self, 1)
+            #SpecialButton:
+            #    id: special_button_lvl1
+            #    on_state: app.on_special_button_state(self, 1)
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl1
@@ -97,7 +100,7 @@ ScreenManager:
                 id: remaining_life_percent_lvl2
             BoxLayout:
                 size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .19}
+                pos_hint: {"x": 0.0, "y": .36}
                 Label:
                     size_hint: 0.35, 1
                     canvas:
@@ -110,6 +113,9 @@ ScreenManager:
             KissButton:
                 id: kiss_button_lvl2
                 on_state: app.on_toggle_button_state(self, 2)
+            SpecialButton:
+                id: special_button_lvl2
+                on_state: app.on_special_button_state(self, 2)
         FloatLayout:
             id: layout_lvl2
             on_touch_down: app.touch_down_handler(2, args)
@@ -132,23 +138,22 @@ ScreenManager:
     #pos_hint: {'x': 0.0, 'y': 0.20}
 
 <KissButton@ToggleButton>:
-    size_hint: 1, 0.18
+    size_hint: 1, 0.17
     #text: "Kiss"
-    #size_hint: 0.15, 0.15
-    #height: "90dp"
-    #width: "90dp"
     pos_hint: {'x': 0.0, 'y': 0.0}
-    #source: "graphics/entities/kiss1_bw.png"
-    #background_color: 0, 0, 0, .5
     border: -8, -8, -8, -8
     background_normal: "graphics/entities/kiss1_bw.png"
     background_down: "graphics/entities/kiss1.png"
-    #color: (1, 0, .65, 0.5)
-    #canvas:
-    #    Rectangle:
-    #        pos: self.pos
-    #        size: self.size[0]*0.9, self.size[1]*0.9
-    #        source: "graphics/entities/kiss1_bw.png"
+
+<SpecialButton@ToggleButton>:
+    size_hint: 1, 0.17
+    #text: "Diaper"
+    pos_hint: {'x': 0.0, 'y': 0.18}
+    border: 8, 8, 8, 8
+    background_normal: "graphics/entities/diaper.png"
+    background_down: "graphics/entities/diaper_orange.png"
+    background_disabled_normal: "graphics/entities/diaper_bw.png"
+    disabled: not app.special_button_enabled
 
 <Character@Image>:
     id: character_image
@@ -166,7 +171,7 @@ ScreenManager:
 <RemainingLifePercent@Label>:
     remaining_life_size_hint_y: 0.3
     size_hint: (0.3, 0.3)
-    pos_hint: {'x': 0.02, 'y': 0.24}
+    pos_hint: {'x': 0.02, 'y': 0.42}
     #font_size: 20
     canvas:
         Color:

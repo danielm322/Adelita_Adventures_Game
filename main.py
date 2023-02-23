@@ -1,5 +1,7 @@
 # import time
 # from kivy.config import Config
+from kivy.graphics import Color, Quad
+
 # Config.set('graphics', 'width', '800')
 # Config.set('graphics', 'height', '400')
 from kivy.core.audio import SoundLoader
@@ -12,11 +14,10 @@ import kivy.animation
 import kivy.uix.label
 from functools import partial
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty
+from kivy.properties import BooleanProperty
 
 from levels import Level1, Level2
 from pause_menu import PauseMenuWidget
-# import kivy.clock
 
 
 class GameApp(kivy.app.App):
@@ -24,9 +25,10 @@ class GameApp(kivy.app.App):
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies
     from reward import spawn_reward, update_rewards
-    from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, boss_defeat_animation_finish, check_boss_collision
+    from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, boss_defeat_animation_finish, check_boss_collision, kill_boss
     from boss_reward import spawn_boss_reward, boss_reward_animation_completed
     from helper_fns import adjust_character_life_bar
+    from special_attack_char import shoot_special, update_specials, check_special_collision, enable_special_attack, get_special_quad_coords
     # pause_menu_widget = ObjectProperty()
     side_bar_width = 0.08  # In screen percentage
     enemy_width = 0.15
@@ -36,6 +38,17 @@ class GameApp(kivy.app.App):
     kiss_width = 0.04
     kiss_height = 0.04
     kiss_speed = 20
+    special_attack_init_width = 0.04
+    special_attack_init_height = 0.04
+    special_extra_height = 0.35  # Extra height of parabola in screen proportion
+    special_attack_speed_x = 5
+    special_attack_radius = 0.18  # In screen proportion
+    special_attack_quad = None
+    special_attack_damage = 10
+    special_attack_reload_time = 8
+    special_button_enabled = BooleanProperty(True)
+    special_grow_size_factor = 400
+    special_min_dist_x = 0.15  # In screen proportion
     reward_size = 0.1
     reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
@@ -52,7 +65,10 @@ class GameApp(kivy.app.App):
     def init_audio(self):
         self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
         self.sound_kiss = SoundLoader.load("audio/kiss_sound.wav")
-        self.sound_game_over = SoundLoader.load("audio/game_over.wav")
+        self.sound_enemy_dies = SoundLoader.load("audio/goblin_hurt.ogg")
+        self.sound_enemy_laughs = SoundLoader.load("audio/goblin_laugh.ogg")
+        self.sound_baby_laughs = SoundLoader.load("audio/baby_laughs_special.ogg")
+        self.sound_game_over = SoundLoader.load("audio/goblin_laugh_2.ogg")
         self.sound_level_play = SoundLoader.load("audio/superhero-intro-111393.ogg")
         self.sound_level_finished = SoundLoader.load("audio/success-fanfare-trumpets-6185.ogg")
         self.sound_reward_collected = SoundLoader.load("audio/short-success-sound-glockenspiel-treasure-video-game-6346.ogg")
@@ -65,6 +81,9 @@ class GameApp(kivy.app.App):
         self.sound_kiss.volume = .5
         self.sound_level_finished.volume = .6
         self.sound_reward_collected.volume = 1.5
+        self.sound_enemy_dies.volume = 0.2
+        self.sound_enemy_laughs.volume = 0.6
+        self.sound_baby_laughs.volume = 0.5
 
     def screen_on_leave(self, screen_num):
         curr_screen = self.root.screens[screen_num]
@@ -87,15 +106,20 @@ class GameApp(kivy.app.App):
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(boss['image'])
         curr_screen.bosses_ids.clear()
         # Toggle kiss button
+        if screen_num > 1:
+            curr_screen.ids['special_button_lvl' + str(screen_num)].state = "normal"
         curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
         # Stop Schedule to spawn enemies
         if self.clock_spawn_enemies_variable is not None:
             self.clock_spawn_enemies_variable = None
         # Unschedule the update function
         # Clock.unschedule(partial(self.update_screen, screen_num))
-        self.clock_update_fn_variable.cancel()
         if self.clock_update_fn_variable is not None:
+            self.clock_update_fn_variable.cancel()
             self.clock_update_fn_variable = None
+        # Delete special attack quad
+        if self.special_attack_quad is not None:
+            self.special_attack_quad = None
 
     def screen_on_pre_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
@@ -134,6 +158,7 @@ class GameApp(kivy.app.App):
             cycle_time_factor = args[0] * self.APP_TIME_FACTOR
             self.update_enemies(screen_num, dt=cycle_time_factor)
             self.update_kisses(screen_num, dt=cycle_time_factor)
+            self.update_specials(screen_num, dt=cycle_time_factor)
             self.update_character(screen_num, dt=cycle_time_factor)
             self.update_rewards(screen_num, dt=args[0])  # We pass actual seconds
             if self.root.screens[screen_num].phase_1_completed:
@@ -142,10 +167,40 @@ class GameApp(kivy.app.App):
     def touch_down_handler(self, screen_num, args):
         # print(args[1].is_double_tap)
         curr_screen = self.root.screens[screen_num]
-        if not curr_screen.character_dict['killed'] and args[1].psx > self.side_bar_width and not curr_screen.character_dict['shoot_state'] and not curr_screen.state_paused:
+        if not curr_screen.character_dict['killed'] \
+                and args[1].psx > self.side_bar_width \
+                and not curr_screen.character_dict['shoot_state'] \
+                and not curr_screen.character_dict['shoot_special_state'] \
+                and not curr_screen.state_paused:
             self.start_character_animation(screen_num, args[1].ppos)
-        if not curr_screen.character_dict['killed'] and args[1].psx > self.side_bar_width and curr_screen.character_dict['shoot_state'] and not curr_screen.state_paused:
+        if not curr_screen.character_dict['killed'] \
+                and args[1].psx > self.side_bar_width \
+                and not curr_screen.character_dict['shoot_special_state'] \
+                and curr_screen.character_dict['shoot_state']\
+                and not curr_screen.state_paused:
             self.shoot_kiss(screen_num, args[1].ppos)
+        if not curr_screen.character_dict['killed']\
+                and args[1].psx > self.side_bar_width \
+                and not curr_screen.character_dict['shoot_state'] \
+                and curr_screen.character_dict['shoot_special_state']\
+                and not curr_screen.state_paused:
+            self.shoot_special(screen_num, args[1].ppos)
+
+    def on_special_button_state(self, widget, screen_num):
+        curr_screen = self.root.screens[screen_num]
+        if widget.state == "normal":
+            curr_screen.character_dict['shoot_special_state'] = False
+            curr_screen.canvas.remove_group(u"special_radius")
+        else:
+            if curr_screen.ids['kiss_button_lvl' + str(screen_num)].state == "down":
+                curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
+
+            curr_screen.character_dict['shoot_special_state'] = True
+            # Draw rectangle with the minimum distance to fire special
+            quad_coords = self.get_special_quad_coords(screen_num)
+            with curr_screen.canvas:
+                Color(0, 0, 0, 0.2)
+                self.special_attack_quad = Quad(points=quad_coords, group=u"special_radius")
 
     def on_toggle_button_state(self, widget, screen_num):
         curr_screen = self.root.screens[screen_num]
@@ -153,6 +208,8 @@ class GameApp(kivy.app.App):
             widget.source = "graphics/entities/kiss1_bw.png"
             curr_screen.character_dict['shoot_state'] = False
         else:
+            if screen_num > 1 and curr_screen.ids['special_button_lvl' + str(screen_num)].state == "down":
+                curr_screen.ids['special_button_lvl' + str(screen_num)].state = "normal"
             widget.source = "graphics/entities/kiss1.png"
             curr_screen.character_dict['shoot_state'] = True
 

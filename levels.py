@@ -11,8 +11,10 @@ class Level1(kivy.uix.screenmanager.Screen):
     enemies_ids = {}
     bosses_ids = {}
     bosses_rewards_ids = {}
+    specials_ids = {}
     character_dict = {
         'shoot_state': False,
+        'shoot_special_state': False,
         'killed': False,
         'speed': 5,
         'hit_points': 100,
@@ -46,8 +48,10 @@ class Level2(kivy.uix.screenmanager.Screen):
     enemies_ids = {}
     bosses_ids = {}
     bosses_rewards_ids = {}
+    specials_ids = {}
     character_dict = {
         'shoot_state': False,
+        'shoot_special_state': False,
         'killed': False,
         'speed': 5,
         'hit_points': 100,
