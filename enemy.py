@@ -9,7 +9,7 @@ enemy_hit_points = 6
 def spawn_enemy(self, screen_num, *args):
     # Updating an enemy will need the save of an endpoint, line parameters, and enemy speed
     curr_screen = self.root.screens[screen_num]
-    if not curr_screen.character_dict['killed'] and not curr_screen.phase_1_completed:
+    if not curr_screen.character_dict['killed']:
         r_speed_x = random.uniform(curr_screen.enemy_speed_min,
                                    curr_screen.enemy_speed_max)
         spawn_pos, finish_pos = _get_enemy_start_end_positions(self.side_bar_width,
@@ -58,7 +58,7 @@ def check_enemy_collision(self, enemy, screen_num):
     curr_screen = self.root.screens[screen_num]
     character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
     gap_x = curr_screen.width * self.enemy_width / 3
-    gap_y = curr_screen.height * self.enemy_height / 2
+    gap_y = curr_screen.height * self.enemy_height / 1
     if enemy.collide_widget(character_image) and \
             abs(enemy.center[0] - character_image.center[0]) <= gap_x and \
             abs(enemy.center[1] - character_image.center[1]) <= gap_y:

@@ -17,6 +17,27 @@ def _get_enemy_start_end_positions(side_bar_width: float, enemy_width: float, en
     return spawn_pos, finish_pos
 
 
+def _get_red_enemy_start_end_positions(side_bar_width: float,
+                                       red_enemy_spawn_point: float,
+                                       red_enemy_end_point: float,
+                                       red_enemy_trajectory_variance: float,
+                                       enemy_width: float,
+                                       enemy_height: float):
+    """
+    Enemies start always from the right, and finish always on the left, this function
+    chooses randomly start and end points
+    :param side_bar_width:
+    :param enemy_width:
+    :param enemy_height:
+    :return:
+    """
+    r_start = random.gauss(red_enemy_spawn_point, red_enemy_trajectory_variance)
+    r_finish = random.gauss(red_enemy_end_point, red_enemy_trajectory_variance)
+    spawn_pos = {'x': 1.0, 'y': r_start*(1-enemy_height)}
+    finish_pos = {'x': side_bar_width - enemy_width, 'y': r_finish*(1-enemy_height)}
+    return spawn_pos, finish_pos
+
+
 # def find_line_intersection(line1, line2):
 #     xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
 #     ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])

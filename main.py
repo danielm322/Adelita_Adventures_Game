@@ -1,5 +1,6 @@
 # import time
 # from kivy.config import Config
+import random
 from kivy.graphics import Color, Quad
 
 # Config.set('graphics', 'width', '800')
@@ -24,15 +25,20 @@ class GameApp(kivy.app.App):
     from character import start_character_animation, check_character_collision, update_character, kill_character
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies
+    from enemy_red import spawn_enemy_red
     from reward import spawn_reward, update_rewards
-    from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, boss_defeat_animation_finish, check_boss_collision, kill_boss
+    from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
+        boss_defeat_animation_finish, check_boss_collision, kill_boss
     from boss_reward import spawn_boss_reward, boss_reward_animation_completed
     from helper_fns import adjust_character_life_bar
-    from special_attack_char import shoot_special, update_specials, check_special_collision, enable_special_attack, get_special_quad_coords
+    from special_attack_char import shoot_special, update_specials, check_special_collision, enable_special_attack, \
+        get_special_quad_coords
     # pause_menu_widget = ObjectProperty()
     side_bar_width = 0.08  # In screen percentage
     enemy_width = 0.15
     enemy_height = 0.18
+    red_enemy_width = 0.2
+    red_enemy_height = 0.23
     clock_spawn_enemies_variable = None
     clock_update_fn_variable = None
     kiss_width = 0.04
@@ -41,7 +47,7 @@ class GameApp(kivy.app.App):
     special_attack_init_width = 0.04
     special_attack_init_height = 0.04
     special_extra_height = 0.35  # Extra height of parabola in screen proportion
-    special_attack_speed_x = 5
+    special_attack_speed_x = 7
     special_attack_radius = 0.18  # In screen proportion
     special_attack_quad = None
     special_attack_damage = 10
@@ -53,8 +59,8 @@ class GameApp(kivy.app.App):
     reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
-    APP_TIME_FACTOR = 60  # In number of updates per second
-    SCREEN_UPDATE_RATE = 1/APP_TIME_FACTOR
+    APP_TIME_FACTOR = 40  # In number of updates per second
+    SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
     # CHARACTER_HITPOINTS = 100
     MOVEMENT_PIXEL_TOLERANCE = 4  # Number of pixels of tolerance to accept a widget is in a given position
 
@@ -71,7 +77,8 @@ class GameApp(kivy.app.App):
         self.sound_game_over = SoundLoader.load("audio/goblin_laugh_2.ogg")
         self.sound_level_play = SoundLoader.load("audio/superhero-intro-111393.ogg")
         self.sound_level_finished = SoundLoader.load("audio/success-fanfare-trumpets-6185.ogg")
-        self.sound_reward_collected = SoundLoader.load("audio/short-success-sound-glockenspiel-treasure-video-game-6346.ogg")
+        self.sound_reward_collected = SoundLoader.load(
+            "audio/short-success-sound-glockenspiel-treasure-video-game-6346.ogg")
 
         self.sound_main_menu.loop = True
         self.sound_level_play.loop = True
@@ -111,6 +118,7 @@ class GameApp(kivy.app.App):
         curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
         # Stop Schedule to spawn enemies
         if self.clock_spawn_enemies_variable is not None:
+            self.clock_spawn_enemies_variable.cancel()
             self.clock_spawn_enemies_variable = None
         # Unschedule the update function
         # Clock.unschedule(partial(self.update_screen, screen_num))
@@ -125,28 +133,28 @@ class GameApp(kivy.app.App):
         curr_screen = self.root.screens[screen_num]
         curr_screen.character_dict['killed'] = False
         curr_screen.state_paused = False
+        curr_screen.phase_1_completed = False
+        curr_screen.rewards_gathered = 0
+        curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
+            curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
         curr_screen.character_dict['damage_received'] = 0
+        self.adjust_character_life_bar(screen_num)
         if self.sound_main_menu.state == "play":
             self.sound_main_menu.stop()
-        self.adjust_character_life_bar(screen_num)
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 0.
+        if screen_num == 2:
+            curr_screen.red_enemy_spawn_point = random.random()
+            curr_screen.red_enemy_end_point = random.random()
 
     def screen_on_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
-        if not curr_screen.phase_1_completed:
-            curr_screen.rewards_gathered = 0
-            # Clock.unschedule(partial(self.spawn_enemy, screen_num))
-            if self.clock_spawn_enemies_variable is None:
-                self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                    partial(self.spawn_enemy, screen_num), curr_screen.enemy_spawn_interval
-                )
-        else:
-            self.spawn_boss(screen_num)
-            for _, boss in curr_screen.bosses_ids.items():
-                boss['hit_points'] = curr_screen.boss_props['hit_points']
-        curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
-            curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
+        # Always begin now in the first phase
+        if self.clock_spawn_enemies_variable is None:
+            self.clock_spawn_enemies_variable = Clock.schedule_interval(
+                # partial(self.spawn_enemy, screen_num), curr_screen.enemy_spawn_interval
+                partial(eval(curr_screen.phases_spawn_fns['phase_1']), screen_num), curr_screen.enemy_spawn_interval
+            )
         self.sound_level_play.play()
         # Start update screen function
         self.clock_update_fn_variable = Clock.schedule_interval(partial(self.update_screen, screen_num),
@@ -176,13 +184,13 @@ class GameApp(kivy.app.App):
         if not curr_screen.character_dict['killed'] \
                 and args[1].psx > self.side_bar_width \
                 and not curr_screen.character_dict['shoot_special_state'] \
-                and curr_screen.character_dict['shoot_state']\
+                and curr_screen.character_dict['shoot_state'] \
                 and not curr_screen.state_paused:
             self.shoot_kiss(screen_num, args[1].ppos)
-        if not curr_screen.character_dict['killed']\
+        if not curr_screen.character_dict['killed'] \
                 and args[1].psx > self.side_bar_width \
                 and not curr_screen.character_dict['shoot_state'] \
-                and curr_screen.character_dict['shoot_special_state']\
+                and curr_screen.character_dict['shoot_special_state'] \
                 and not curr_screen.state_paused:
             self.shoot_special(screen_num, args[1].ppos)
 
@@ -232,7 +240,7 @@ class GameApp(kivy.app.App):
         if not curr_screen.phase_1_completed:
             # Restart enemy spawning
             self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                partial(self.spawn_enemy, screen_num), curr_screen.enemy_spawn_interval
+                partial(eval(curr_screen.phases_spawn_fns['phase_1']), screen_num), curr_screen.enemy_spawn_interval
             )
 
     def on_restart_button_pressed(self, *args):

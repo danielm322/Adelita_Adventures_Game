@@ -46,8 +46,8 @@ def update_character(self, screen_num, dt):
 
 def check_character_collision(self, character_image, screen_num):
     curr_screen = self.root.screens[screen_num]
-    gap_x = curr_screen.width * self.reward_size / 1
-    gap_y = curr_screen.height * self.reward_size / 1
+    gap_x = curr_screen.width * self.reward_size / 3
+    gap_y = curr_screen.height * self.reward_size / 1.5
     rewards_to_delete = []
     for reward_key, reward in curr_screen.rewards_ids.items():
         if character_image.collide_widget(reward['image']) and \
@@ -59,10 +59,12 @@ def check_character_collision(self, character_image, screen_num):
             self.sound_reward_collected.play()
             if curr_screen.rewards_gathered == curr_screen.rewards_to_win_ph_1:
                 # Stop spawning enemies
-                Clock.unschedule(partial(self.spawn_enemy, screen_num))
+                # Clock.unschedule(partial(self.spawn_enemy, screen_num))
                 self.clock_spawn_enemies_variable.cancel()
+                self.clock_spawn_enemies_variable = None
                 curr_screen.phase_1_completed = True
-                self.spawn_boss(screen_num)
+                # self.spawn_boss(screen_num)
+                eval(curr_screen.phases_spawn_fns['phase_2'])(screen_num)
             if curr_screen.rewards_gathered > curr_screen.rewards_to_win_ph_1:
                 curr_screen.rewards_gathered = curr_screen.rewards_to_win_ph_1
             curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
