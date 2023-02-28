@@ -1,9 +1,10 @@
 import random
 from math import sqrt
-
-from helper_fns import _find_kiss_endpoint_fast
+from kivy.utils import platform
+from helper_fns import _find_kiss_endpoint_fast, write_level_passed
 import kivy.uix.image
 import time
+from enemies_dict import enemies_dict
 
 
 def shoot_kiss(self, screen_num, touch_point):
@@ -55,7 +56,8 @@ def update_kisses(self, screen_num, dt):
                 kisses_to_delete.append(kiss_key)
                 if boss_to_eliminate:
                     bosses_to_delete.extend(boss_to_eliminate)
-        elif kiss['image'].x > curr_screen.width or kiss['image'].x < 0. - self.kiss_width * curr_screen.width or kiss['image'].y > curr_screen.height or kiss['image'].y < 0 - self.kiss_width * curr_screen.height:
+        elif kiss['image'].x > curr_screen.width or kiss['image'].x < 0. - self.kiss_width * curr_screen.width or kiss[
+            'image'].y > curr_screen.height or kiss['image'].y < 0 - self.kiss_width * curr_screen.height:
             kisses_to_delete.append(kiss_key)
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss['image'])
 
@@ -75,24 +77,47 @@ def update_kisses(self, screen_num, dt):
 def check_kiss_collision_with_enemies(self, kiss, screen_num):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
-    gap_x = curr_screen.width * self.enemy_width / 3
-    gap_y = curr_screen.height * self.enemy_height / 3
+    if not curr_screen.phase_1_completed or curr_screen.number_of_phases == 2:
+        gap_x = curr_screen.width * \
+                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['width'] / 3
+        gap_y = curr_screen.height * \
+                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['height'] / 3
+    elif curr_screen.phase_1_completed and curr_screen.number_of_phases == 3:
+        gap_x = curr_screen.width * \
+                enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['width'] / 3
+        gap_y = curr_screen.height * \
+                enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['height'] / 3
+
     enemies_to_delete = []
+    enemies_to_spawn_fire = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         if not kiss_already_hit and kiss.collide_widget(enemy['image']) and \
                 abs(enemy['image'].center[0] - kiss.center[0]) <= gap_x and \
-                abs(enemy['image'].center[1] - kiss.center[1]) <= gap_y:
-            enemy['hitpoints'] = enemy['hitpoints'] - 1
+                abs(enemy['image'].center[1] - kiss.center[1]) <= gap_y and not \
+                enemy['type'] == 'fire':
+            enemy['hit_points'] = enemy['hit_points'] - 1
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
             kiss_already_hit = True
-            if enemy['hitpoints'] == 0:
+            if enemy['fires_back']:
+                enemies_to_spawn_fire.append(enemy['image'].center)
+
+            if enemy['hit_points'] == 0:
                 self.sound_enemy_dies.play()
                 enemy_center = enemy['image'].center
                 enemies_to_delete.append(enemy_key)
                 curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])
                 # Spawn reward with probability defined per level
-                if random.random() < curr_screen.enemy_spawn_reward_probability:
+                if random.random() < \
+                        enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
+                            'spawn_reward_probability']:
                     self.spawn_reward(enemy_center, screen_num)
+
+    if len(enemies_to_spawn_fire) > 0:
+        for enemy_center in enemies_to_spawn_fire:
+            self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
+                                                           enemy_center,
+                                                           'fire',
+                                                           'level_1')
 
     return kiss_already_hit, enemies_to_delete
 
@@ -114,6 +139,7 @@ def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
             if boss['hit_points'] <= 0:
                 self.kill_boss(boss, screen_num)
                 bosses_to_delete.append(boss_key)
+                # Write level pass to file
+                write_level_passed(platform, screen_num)
 
     return kiss_already_hit, bosses_to_delete
-

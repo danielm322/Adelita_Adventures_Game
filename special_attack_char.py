@@ -3,8 +3,10 @@ import time
 
 import kivy.uix.image
 from kivy.clock import Clock
+from kivy.utils import platform
 
-from helper_fns import calc_parabola_vertex
+from enemies_dict import enemies_dict
+from helper_fns import calc_parabola_vertex, write_level_passed
 
 
 def shoot_special(self, screen_num, touch_point):
@@ -85,19 +87,23 @@ def update_specials(self, screen_num, dt):
 def check_special_collision(self, special, screen_num):
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
+    enemies_to_spawn_fire = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         if abs(special['image'].center[0] - enemy['image'].center[0]) <= self.special_attack_radius * curr_screen.size[
             0] and \
                 abs(special['image'].center[1] - enemy['image'].center[1]) <= self.special_attack_radius * \
                 curr_screen.size[1]:
-            enemy['hitpoints'] = enemy['hitpoints'] - self.special_attack_damage
-            if enemy['hitpoints'] <= 0:
+            enemy['hit_points'] = enemy['hit_points'] - self.special_attack_damage
+            if enemy['fires_back']:
+                enemies_to_spawn_fire.append(enemy['image'].center)
+
+            if enemy['hit_points'] <= 0:
                 self.sound_enemy_dies.play()
                 enemy_center = enemy['image'].center
                 enemies_to_delete.append(enemy_key)
                 curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])
                 # Spawn reward with probability defined per level
-                if random.random() < curr_screen.enemy_spawn_reward_probability:
+                if random.random() < enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_reward_probability']:
                     self.spawn_reward(enemy_center, screen_num)
 
     bosses_to_delete = []
@@ -110,6 +116,14 @@ def check_special_collision(self, special, screen_num):
             if boss['hit_points'] <= 0:
                 self.kill_boss(boss, screen_num)
                 bosses_to_delete.append(boss_key)
+                write_level_passed(platform, screen_num)
+
+    if len(enemies_to_spawn_fire) > 0:
+        for enemy_center in enemies_to_spawn_fire:
+            self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
+                                                           enemy_center,
+                                                           'fire',
+                                                           'level_1')
 
     # Remove special widget
     curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(special['image'])

@@ -2,36 +2,50 @@ ScreenManager:
     MainScreen:
     Level1:
     Level2:
+    Level3:
+    Level4:
+    Level5:
 
 <MainScreen>:
     name: "main"
+    on_enter: app.main_screen_on_enter()
+    on_leave: app.main_screen_on_leave()
     canvas.before:
         Rectangle:
             size: self.size
             source: 'graphics/Main_menu_bg.jpg'
     RelativeLayout:
-        Button:
-            font_size: dp(30)
-            font_name: 'graphics/fonts/pricedown bl.otf'
+        id: lvls_imagebuttons
+        LevelButton:
             text: "Level 1"
             on_press:
                 root.manager.transition.direction = 'left'
                 app.root.current="level1"
-            pos_hint: {"center_x": .5, "center_y": .5}
-            size_hint: .2, .15
-            background_color: 1, .3, .4, .85
-            opacity: 1 if self.state == 'normal' else .5
-        Button:
-            font_size: dp(30)
-            font_name: 'graphics/fonts/pricedown bl.otf'
+            pos_hint: {"center_x": .5, "center_y": .55}
+        LevelButton:
             text: "Level 2"
             on_press:
                 root.manager.transition.direction = 'left'
                 app.root.current="level2"
-            pos_hint: {"center_x": .5, "center_y": .3}
-            size_hint: .2, .15
-            background_color: 1, .3, .4, .85
-            opacity: 1 if self.state == 'normal' else .5
+            pos_hint: {"center_x": .5, "center_y": .45}
+        LevelButton:
+            text: "Level 3"
+            on_press:
+                root.manager.transition.direction = 'left'
+                app.root.current="level3"
+            pos_hint: {"center_x": .5, "center_y": .35}
+        LevelButton:
+            text: "Level 4"
+            on_press:
+                root.manager.transition.direction = 'left'
+                app.root.current="level4"
+            pos_hint: {"center_x": .5, "center_y": .25}
+        LevelButton:
+            text: "Level 5"
+            on_press:
+                root.manager.transition.direction = 'left'
+                app.root.current="level5"
+            pos_hint: {"center_x": .5, "center_y": .15}
 
 <Level1>:
     name: "level1"
@@ -130,6 +144,148 @@ ScreenManager:
             PauseMenuWidget:
                 id: pause_menu_lvl2
 
+<Level3>:
+    name: "level3"
+    on_pre_enter: app.screen_on_pre_enter(3)
+    #on_pre_leave: app.screen_on_pre_leave(3)
+    on_enter: app.screen_on_enter(3)
+    on_leave: app.screen_on_leave(3)
+    BoxLayout:
+        orientation: "horizontal"
+        RelativeLayout:
+            size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl3
+                on_press: app.pause_game(3)
+            RemainingLifePercent
+                id: remaining_life_percent_lvl3
+            BoxLayout:
+                size_hint: 1, 0.05
+                pos_hint: {"x": 0.0, "y": .36}
+                Label:
+                    size_hint: 0.35, 1
+                    canvas:
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                            source: "graphics/entities/star_small.png"
+                NumCollectedStars:
+                    id: num_stars_collected_lvl3
+            KissButton:
+                id: kiss_button_lvl3
+                on_state: app.on_toggle_button_state(self, 3)
+            SpecialButton:
+                id: special_button_lvl3
+                on_state: app.on_special_button_state(self, 3)
+        FloatLayout:
+            id: layout_lvl3
+            on_touch_down: app.touch_down_handler(3, args)
+            canvas.before:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            Character:
+                id: character_image_lvl3
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            PauseMenuWidget:
+                id: pause_menu_lvl3
+
+<Level4>:
+    name: "level4"
+    on_pre_enter: app.screen_on_pre_enter(4)
+    #on_pre_leave: app.screen_on_pre_leave(4)
+    on_enter: app.screen_on_enter(4)
+    on_leave: app.screen_on_leave(4)
+    BoxLayout:
+        orientation: "horizontal"
+        RelativeLayout:
+            size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl4
+                on_press: app.pause_game(4)
+            RemainingLifePercent
+                id: remaining_life_percent_lvl4
+            BoxLayout:
+                size_hint: 1, 0.05
+                pos_hint: {"x": 0.0, "y": .36}
+                Label:
+                    size_hint: 0.35, 1
+                    canvas:
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                            source: "graphics/entities/star_small.png"
+                NumCollectedStars:
+                    id: num_stars_collected_lvl4
+            KissButton:
+                id: kiss_button_lvl4
+                on_state: app.on_toggle_button_state(self, 4)
+            SpecialButton:
+                id: special_button_lvl4
+                on_state: app.on_special_button_state(self, 4)
+        FloatLayout:
+            id: layout_lvl4
+            on_touch_down: app.touch_down_handler(4, args)
+            canvas.before:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            Character:
+                id: character_image_lvl4
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            PauseMenuWidget:
+                id: pause_menu_lvl4
+
+<Level5>:
+    name: "level5"
+    on_pre_enter: app.screen_on_pre_enter(5)
+    #on_pre_leave: app.screen_on_pre_leave(5)
+    on_enter: app.screen_on_enter(5)
+    on_leave: app.screen_on_leave(5)
+    BoxLayout:
+        orientation: "horizontal"
+        RelativeLayout:
+            size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl5
+                on_press: app.pause_game(5)
+            RemainingLifePercent
+                id: remaining_life_percent_lvl5
+            BoxLayout:
+                size_hint: 1, 0.05
+                pos_hint: {"x": 0.0, "y": .36}
+                Label:
+                    size_hint: 0.35, 1
+                    canvas:
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                            source: "graphics/entities/star_small.png"
+                NumCollectedStars:
+                    id: num_stars_collected_lvl5
+            KissButton:
+                id: kiss_button_lvl5
+                on_state: app.on_toggle_button_state(self, 5)
+            SpecialButton:
+                id: special_button_lvl5
+                on_state: app.on_special_button_state(self, 5)
+        FloatLayout:
+            id: layout_lvl5
+            on_touch_down: app.touch_down_handler(5, args)
+            canvas.before:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            Character:
+                id: character_image_lvl5
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            PauseMenuWidget:
+                id: pause_menu_lvl5
+
+
 <NumCollectedStars@Label>:
     text: "0/0"
     font_size: 25
@@ -190,6 +346,12 @@ ScreenManager:
             size: self.size
             source: "graphics/pause_button.png"
 
+<LevelButton@Button>:
+    font_size: dp(20)
+    font_name: 'graphics/fonts/pricedown bl.otf'
+    size_hint: .15, .09
+    background_color: 1, .3, .4, .85
+    opacity: 1 if self.state == 'normal' else .5
 
 <PauseMenuWidget>:
     #pos_hint: {'x': 0.0, 'y':0.}

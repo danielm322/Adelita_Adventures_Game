@@ -1,5 +1,6 @@
 # import time
 # from kivy.config import Config
+# import os
 import random
 from kivy.graphics import Color, Quad
 
@@ -11,21 +12,25 @@ import kivy.app
 import kivy.uix.screenmanager
 import kivy.animation
 # import kivy.core.audio
-# from os import getcwd
+# from os import getcwd  #PC
+
 import kivy.uix.label
 from functools import partial
 from kivy.clock import Clock
 from kivy.properties import BooleanProperty
-
+from kivy.utils import platform
 from levels import Level1, Level2
 from pause_menu import PauseMenuWidget
+from helper_fns import read_game_info
+from enemies_dict import enemies_dict
 
 
 class GameApp(kivy.app.App):
     from character import start_character_animation, check_character_collision, update_character, kill_character
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
-    from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies
-    from enemy_red import spawn_enemy_red
+    from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, spawn_rocket_at_enemy_center_to_ch_center
+    # from enemy_red import spawn_enemy_red
+    # from enemy_yellow import spawn_enemy_yellow
     from reward import spawn_reward, update_rewards
     from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
         boss_defeat_animation_finish, check_boss_collision, kill_boss
@@ -35,20 +40,17 @@ class GameApp(kivy.app.App):
         get_special_quad_coords
     # pause_menu_widget = ObjectProperty()
     side_bar_width = 0.08  # In screen percentage
-    enemy_width = 0.15
-    enemy_height = 0.18
-    red_enemy_width = 0.2
-    red_enemy_height = 0.23
+    next_level = 1  # Default first level to be played (Activate just one level)
     clock_spawn_enemies_variable = None
     clock_update_fn_variable = None
     kiss_width = 0.04
     kiss_height = 0.04
-    kiss_speed = 20
+    kiss_speed = 25
     special_attack_init_width = 0.04
     special_attack_init_height = 0.04
     special_extra_height = 0.35  # Extra height of parabola in screen proportion
     special_attack_speed_x = 7
-    special_attack_radius = 0.18  # In screen proportion
+    special_attack_radius = 0.15  # In screen proportion
     special_attack_quad = None
     special_attack_damage = 10
     special_attack_reload_time = 8
@@ -67,6 +69,8 @@ class GameApp(kivy.app.App):
     def on_start(self):
         self.init_audio()
         self.sound_main_menu.play()
+        self.next_level = read_game_info(platform)
+        self.activate_levels(self.next_level)
 
     def init_audio(self):
         self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
@@ -92,6 +96,18 @@ class GameApp(kivy.app.App):
         self.sound_enemy_laughs.volume = 0.6
         self.sound_baby_laughs.volume = 0.5
 
+    def activate_levels(self, next_level_num):
+        num_levels = len(self.root.screens[0].ids['lvls_imagebuttons'].children)
+
+        levels_imagebuttons = self.root.screens[0].ids['lvls_imagebuttons'].children
+        for i in range(num_levels - next_level_num, num_levels):
+            levels_imagebuttons[i].disabled = False
+            # levels_imagebuttons[i].color = [1, 1, 1, 1]
+
+        for i in range(0, num_levels - next_level_num):
+            levels_imagebuttons[i].disabled = True
+            # levels_imagebuttons[i].color = [1, 1, 1, 0.5]
+
     def screen_on_leave(self, screen_num):
         curr_screen = self.root.screens[screen_num]
         # REMOVE
@@ -116,6 +132,9 @@ class GameApp(kivy.app.App):
         if screen_num > 1:
             curr_screen.ids['special_button_lvl' + str(screen_num)].state = "normal"
         curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
+        # Stop level music
+        if self.sound_level_play.state == 'play':
+            self.sound_level_play.stop()
         # Stop Schedule to spawn enemies
         if self.clock_spawn_enemies_variable is not None:
             self.clock_spawn_enemies_variable.cancel()
@@ -134,18 +153,23 @@ class GameApp(kivy.app.App):
         curr_screen.character_dict['killed'] = False
         curr_screen.state_paused = False
         curr_screen.phase_1_completed = False
+        if curr_screen.number_of_phases == 3:
+            curr_screen.phase_2_completed = False
         curr_screen.rewards_gathered = 0
         curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
             curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
         curr_screen.character_dict['damage_received'] = 0
         self.adjust_character_life_bar(screen_num)
-        if self.sound_main_menu.state == "play":
-            self.sound_main_menu.stop()
+        # if self.sound_main_menu.state == "play":
+        #     self.sound_main_menu.stop()
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 0.
-        if screen_num == 2:
-            curr_screen.red_enemy_spawn_point = random.random()
-            curr_screen.red_enemy_end_point = random.random()
+        if enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_function'] == 'gaussian':
+            enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_point'] = random.random()
+            enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['end_point'] = random.random()
+            if curr_screen.enemy_phase_1['type'] == 'yellow':
+                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_point'] *= 0.9
+                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['end_point'] *= 0.9
 
     def screen_on_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
@@ -153,7 +177,12 @@ class GameApp(kivy.app.App):
         if self.clock_spawn_enemies_variable is None:
             self.clock_spawn_enemies_variable = Clock.schedule_interval(
                 # partial(self.spawn_enemy, screen_num), curr_screen.enemy_spawn_interval
-                partial(eval(curr_screen.phases_spawn_fns['phase_1']), screen_num), curr_screen.enemy_spawn_interval
+                # partial(eval(curr_screen.phases_spawn_fns['phase_1']), screen_num),
+                partial(self.spawn_enemy,
+                        screen_num,
+                        curr_screen.enemy_phase_1['type'],
+                        curr_screen.enemy_phase_1['level']),
+                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
             )
         self.sound_level_play.play()
         # Start update screen function
@@ -226,10 +255,12 @@ class GameApp(kivy.app.App):
         curr_screen.state_paused = True
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 1.
-        if not curr_screen.phase_1_completed:
+        if not curr_screen.phase_1_completed \
+                or (curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed):
             # Stop enemy spawning
             if self.clock_spawn_enemies_variable is not None:
                 self.clock_spawn_enemies_variable.cancel()
+
 
     def on_continue_button_pressed(self, *args):
         curr_screen = args[0]
@@ -240,7 +271,20 @@ class GameApp(kivy.app.App):
         if not curr_screen.phase_1_completed:
             # Restart enemy spawning
             self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                partial(eval(curr_screen.phases_spawn_fns['phase_1']), screen_num), curr_screen.enemy_spawn_interval
+                partial(self.spawn_enemy,
+                        screen_num,
+                        curr_screen.enemy_phase_1['type'],
+                        curr_screen.enemy_phase_1['level']),
+                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
+            )
+        elif curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed:
+            # Restart enemy spawning
+            self.clock_spawn_enemies_variable = Clock.schedule_interval(
+                partial(self.spawn_enemy,
+                        screen_num,
+                        curr_screen.enemy_phase_2['type'],
+                        curr_screen.enemy_phase_2['level']),
+                enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['spawn_interval']
             )
 
     def on_restart_button_pressed(self, *args):
@@ -253,12 +297,20 @@ class GameApp(kivy.app.App):
     def on_go_to_main_menu_button_pressed(self, *args):
         curr_screen = args[0]
         # screen_num = int(curr_screen.name[5:])
-        self.sound_level_play.stop()
+        # self.sound_level_play.stop()
         self.back_to_main_screen(curr_screen.parent)
 
     def back_to_main_screen(self, screenManager, *args):
         screenManager.current = "main"
+        # self.sound_main_menu.play()
+
+    def main_screen_on_enter(self):
         self.sound_main_menu.play()
+        self.next_level = read_game_info(platform)
+        self.activate_levels(self.next_level)
+
+    def main_screen_on_leave(self):
+        self.sound_main_menu.stop()
 
 
 class MainScreen(kivy.uix.screenmanager.Screen):

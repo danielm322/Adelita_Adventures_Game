@@ -10,7 +10,7 @@ def spawn_boss(self, screen_num):
                  curr_screen.size[1] * (0.5 - curr_screen.boss_props['height'] / 2))
     finish_pos = (0,
                   curr_screen.size[1] * (0.5 - curr_screen.boss_props['height'] / 2))
-    boss = kivy.uix.image.Image(source=f"graphics/entities/boss_{screen_num}.png",
+    boss = kivy.uix.image.Image(source=curr_screen.boss_props['source'],
                                 size_hint=(curr_screen.boss_props['width'], curr_screen.boss_props['height']),
                                 pos=spawn_pos, allow_stretch=True)
     curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(boss, index=-1)

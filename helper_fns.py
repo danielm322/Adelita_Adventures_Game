@@ -1,7 +1,33 @@
 import random
+from os import path, getcwd
+from os.path import join
+from enemies_dict import enemies_dict
+
+from kivy.utils import platform
+if platform == "android":
+    # from android.storage import primary_external_storage_path
+    from android.storage import app_storage_path
 
 
-def _get_enemy_start_end_positions(side_bar_width: float, enemy_width: float, enemy_height: float):
+def _get_enemy_start_end_positions(side_bar_width, enemy_type, enemy_level):
+    spawn_function = enemies_dict[enemy_type][enemy_level]['spawn_function']
+    if spawn_function == 'uniform':
+        return _get_uniform_enemy_start_end_positions(
+            side_bar_width,
+            enemies_dict[enemy_type][enemy_level]['width'],
+            enemies_dict[enemy_type][enemy_level]['height']
+        )
+    elif spawn_function == 'gaussian':
+        return _get_gaussian_enemy_start_end_positions(
+            side_bar_width,
+            enemies_dict[enemy_type][enemy_level]['spawn_point'],
+            enemies_dict[enemy_type][enemy_level]['end_point'],
+            enemies_dict[enemy_type][enemy_level]['trajectory_variance'],
+            enemies_dict[enemy_type][enemy_level]['width'],
+            enemies_dict[enemy_type][enemy_level]['height']
+        )
+
+def _get_uniform_enemy_start_end_positions(side_bar_width: float, enemy_width: float, enemy_height: float):
     """
     Enemies start always from the right, and finish always on the left, this function
     chooses randomly start and end points
@@ -12,17 +38,17 @@ def _get_enemy_start_end_positions(side_bar_width: float, enemy_width: float, en
     """
     r_start = random.random()
     r_finish = random.random()
-    spawn_pos = {'x': 1.0, 'y': r_start*(1-enemy_height)}
-    finish_pos = {'x': side_bar_width - enemy_width, 'y': r_finish*(1-enemy_height)}
+    spawn_pos = {'x': 1.0, 'y': r_start * (1 - enemy_height)}
+    finish_pos = {'x': side_bar_width - enemy_width, 'y': r_finish * (1 - enemy_height)}
     return spawn_pos, finish_pos
 
 
-def _get_red_enemy_start_end_positions(side_bar_width: float,
-                                       red_enemy_spawn_point: float,
-                                       red_enemy_end_point: float,
-                                       red_enemy_trajectory_variance: float,
-                                       enemy_width: float,
-                                       enemy_height: float):
+def _get_gaussian_enemy_start_end_positions(side_bar_width: float,
+                                            gaussian_enemy_spawn_point: float,
+                                            gaussian_enemy_end_point: float,
+                                            gaussian_enemy_trajectory_variance: float,
+                                            enemy_width: float,
+                                            enemy_height: float):
     """
     Enemies start always from the right, and finish always on the left, this function
     chooses randomly start and end points
@@ -31,11 +57,20 @@ def _get_red_enemy_start_end_positions(side_bar_width: float,
     :param enemy_height:
     :return:
     """
-    r_start = random.gauss(red_enemy_spawn_point, red_enemy_trajectory_variance)
-    r_finish = random.gauss(red_enemy_end_point, red_enemy_trajectory_variance)
-    spawn_pos = {'x': 1.0, 'y': r_start*(1-enemy_height)}
-    finish_pos = {'x': side_bar_width - enemy_width, 'y': r_finish*(1-enemy_height)}
+    r_start = random.gauss(gaussian_enemy_spawn_point, gaussian_enemy_trajectory_variance)
+    r_finish = random.gauss(gaussian_enemy_end_point, gaussian_enemy_trajectory_variance)
+    spawn_pos = {'x': 1.0, 'y': r_start * (1 - enemy_height)}
+    finish_pos = {'x': side_bar_width - enemy_width, 'y': r_finish * (1 - enemy_height)}
     return spawn_pos, finish_pos
+
+
+def _get_line_slope_intercept(spawn_pos, finish_pos):
+    divisor = (finish_pos['x'] - spawn_pos['x'])
+    if divisor == 0:
+        divisor = 1e-6
+    line_slope = (finish_pos['y'] - spawn_pos['y']) / divisor
+    line_intercept = spawn_pos['y'] - spawn_pos['x'] * line_slope
+    return line_slope, line_intercept
 
 
 # def find_line_intersection(line1, line2):
@@ -106,7 +141,8 @@ def _find_kiss_endpoint_fast(character_image_center, touch_point, screen_size, k
         if left_line_intersection_point[1] <= screen_size[1]:
             side_bar_correction_x = side_bar_width * screen_size[0] - kiss_width * screen_size[0] / 2
             side_bar_correction_y = - kiss_height * screen_size[1] / 2
-            return left_line_intersection_point[0] + side_bar_correction_x, left_line_intersection_point[1] + side_bar_correction_y
+            return left_line_intersection_point[0] + side_bar_correction_x, left_line_intersection_point[
+                1] + side_bar_correction_y
         else:  # upper line intersection
             return find_line_intersection_fast(
                 line_slope, line_intercept, screen_size, 'up'
@@ -211,3 +247,37 @@ def calc_parabola_vertex(p1, p2, p3):
     C = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
     return A, B, C
+
+
+def read_game_info(platform):
+    if platform == 'android':
+        base_path = app_storage_path()  # Android
+    elif platform in ('linux', 'win', 'macosx'):
+        base_path = getcwd()  # PC
+    file_path = join(base_path, 'levels.txt')
+
+    if not path.exists(file_path):
+        file = open(file_path, "w")
+        file.write('1')
+        file.close()
+        return 1
+    else:
+        file = open(file_path, "r")
+        next_level = int(file.read())
+        file.close()
+        return next_level
+
+
+def write_level_passed(platform, screen_num):
+    if platform == 'android':
+        base_path = app_storage_path()  # Android
+    elif platform in ('linux', 'win', 'macosx'):
+        base_path = getcwd()  # PC
+    file_path = join(base_path, 'levels.txt')
+    with open(file_path, "r") as file:
+        next_level_file = int(file.read())
+    # Prevent regressing if level is already passed
+    if next_level_file == screen_num:
+        with open(file_path, "w") as file:
+            file.write(str(screen_num + 1))
+
