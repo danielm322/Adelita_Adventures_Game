@@ -5,7 +5,7 @@ from functools import partial
 
 def spawn_boss_reward(self, boss_center, screen_num):
     curr_screen = self.root.screens[screen_num]
-    boss_reward = kivy.uix.image.Image(source=f"graphics/entities/boss_reward_{screen_num}.png",
+    boss_reward = kivy.uix.image.Image(source=curr_screen.boss_props['boss_reward_image_source'],
                                        size_hint=self.boss_reward_initial_size_hint,
                                        pos=boss_center, allow_stretch=True)
     curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(boss_reward, index=-1)
