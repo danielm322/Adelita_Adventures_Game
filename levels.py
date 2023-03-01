@@ -29,7 +29,7 @@ class Level1(kivy.uix.screenmanager.Screen):
         'height': 0.45,
         'hit_points': 25,
         'damage': 20,
-        'speed_x': -1,
+        'speed_x': -2,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/diaper.png"
     }
@@ -69,7 +69,7 @@ class Level2(kivy.uix.screenmanager.Screen):
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -1.5,
+        'speed_x': -2,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
@@ -109,7 +109,7 @@ class Level3(kivy.uix.screenmanager.Screen):
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -1.5,
+        'speed_x': -2.5,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
@@ -149,7 +149,7 @@ class Level4(kivy.uix.screenmanager.Screen):
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -1.5,
+        'speed_x': -3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
@@ -195,7 +195,7 @@ class Level5(kivy.uix.screenmanager.Screen):
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -1.5,
+        'speed_x': -3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
