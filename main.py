@@ -11,9 +11,6 @@ import kivy.uix.image
 import kivy.app
 import kivy.uix.screenmanager
 import kivy.animation
-# import kivy.core.audio
-# from os import getcwd  #PC
-
 import kivy.uix.label
 from functools import partial
 from kivy.clock import Clock
@@ -46,17 +43,34 @@ class GameApp(kivy.app.App):
     kiss_width = 0.04
     kiss_height = 0.04
     kiss_speed = 25
-    special_attack_init_width = 0.04
-    special_attack_init_height = 0.04
-    special_extra_height = 0.35  # Extra height of parabola in screen proportion
-    special_attack_speed_x = 7
-    special_attack_radius = 0.15  # In screen proportion
-    special_attack_quad = None
-    special_attack_damage = 10
-    special_attack_reload_time = 8
+    special_attack_properties = {
+        'init_width': 0.04,
+        'init_height': 0.04,
+        'max_width': 0.32,
+        'max_height': 0.32,
+        'extra_height_parabola': 0.35,  # Extra height of parabola in screen proportion
+        'time_to_land': 2.0,
+        'attack_radius': 0.16,  # In screen proportion
+        'quad': None,
+        'damage': 10,
+        'reload_time': 8,
+        # 'button_enabled': BooleanProperty(True),
+        # 'grow_size_factor': 400,
+        'grow_size_factor': 10,
+        'min_dist_x': 0.15,  # In screen proportion
+        'source_img': "graphics/entities/diaper.png",
+    }
+    # special_attack_init_width = 0.04
+    # special_attack_init_height = 0.04
+    # special_extra_height = 0.35  # Extra height of parabola in screen proportion
+    # special_attack_speed_x = 7
+    # special_attack_radius = 0.15  # In screen proportion
+    # special_attack_quad = None
+    # special_attack_damage = 10
+    # special_attack_reload_time = 8
     special_button_enabled = BooleanProperty(True)
-    special_grow_size_factor = 400
-    special_min_dist_x = 0.15  # In screen proportion
+    # special_grow_size_factor = 400
+    # special_min_dist_x = 0.15  # In screen proportion
     reward_size = 0.1
     reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
@@ -195,7 +209,7 @@ class GameApp(kivy.app.App):
             cycle_time_factor = args[0] * self.APP_TIME_FACTOR
             self.update_enemies(screen_num, dt=cycle_time_factor)
             self.update_kisses(screen_num, dt=cycle_time_factor)
-            self.update_specials(screen_num, dt=cycle_time_factor)
+            self.update_specials(screen_num, dt=args[0])  # We pass actual seconds
             self.update_character(screen_num, dt=cycle_time_factor)
             self.update_rewards(screen_num, dt=args[0])  # We pass actual seconds
             if self.root.screens[screen_num].phase_1_completed:
@@ -237,7 +251,7 @@ class GameApp(kivy.app.App):
             quad_coords = self.get_special_quad_coords(screen_num)
             with curr_screen.canvas:
                 Color(0, 0, 0, 0.2)
-                self.special_attack_quad = Quad(points=quad_coords, group=u"special_radius")
+                self.special_attack_properties['quad'] = Quad(points=quad_coords, group=u"special_radius")
 
     def on_toggle_button_state(self, widget, screen_num):
         curr_screen = self.root.screens[screen_num]

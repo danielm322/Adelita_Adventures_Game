@@ -14,7 +14,10 @@ def shoot_special(self, screen_num, touch_point):
     screen_size = curr_screen.size  # List [size_x, size_y]
     character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     # Check minimum radius for shooting special
-    if check_minimum_radius_to_shoot_special(screen_size, character_image_center, self.special_min_dist_x, touch_point):
+    if check_minimum_radius_to_shoot_special(screen_size,
+                                             character_image_center,
+                                             self.special_attack_properties['min_dist_x'],
+                                             touch_point):
         char_height = curr_screen.ids['character_image_lvl' + str(screen_num)].height
         char_width = curr_screen.ids['character_image_lvl' + str(screen_num)].width
         start_point = (character_image_center[0] + char_width / 5,
@@ -25,21 +28,25 @@ def shoot_special(self, screen_num, touch_point):
                      touch_point[1])
         # Special has a parabolic trajectory, so we need to calculate a third point to uniquely define a parabola
         if start_point[1] > end_point[1]:
-            height_mid_point = start_point[1] + self.special_extra_height * screen_size[1]
+            height_mid_point = start_point[1] + self.special_attack_properties['extra_height_parabola'] * screen_size[1]
         else:
-            height_mid_point = end_point[1] + self.special_extra_height * screen_size[1]
+            height_mid_point = end_point[1] + self.special_attack_properties['extra_height_parabola'] * screen_size[1]
         mid_point = ((end_point[0] + start_point[0]) / 2.,
                      height_mid_point)
         parabola_params = calc_parabola_vertex(start_point, mid_point, end_point)
+        # Calculate x velocity
+        # speed_x = (end_point[0] - start_point[0]) / (self.special_attack_properties['time_to_land'] * screen_size[0])
+        speed_x = (end_point[0] - start_point[0]) / (self.special_attack_properties['time_to_land'] * 1)
         # We need to know the direction of the parabola
-        if start_point[0] < end_point[0]:
-            direction = 1  # Right
-        else:
-            direction = -1  # Left
+        # if start_point[0] < end_point[0]:
+        #     direction = 1  # Right
+        # else:
+        #     direction = -1  # Left
 
-        special_attack = kivy.uix.image.Image(source="graphics/entities/diaper.png",
+        special_attack = kivy.uix.image.Image(source=self.special_attack_properties['source_img'],
                                               size_hint=(
-                                                self.special_attack_init_width, self.special_attack_init_height
+                                                self.special_attack_properties['init_width'],
+                                                self.special_attack_properties['init_height']
                                               ),
                                               center_x=start_point[0],
                                               center_y=start_point[1],
@@ -52,30 +59,31 @@ def shoot_special(self, screen_num, touch_point):
                                                              'a': parabola_params[0],
                                                              'b': parabola_params[1],
                                                              'c': parabola_params[2],
-                                                             'direction': direction}
+                                                             'speed_x': speed_x}
 
         curr_screen.ids['special_button_lvl' + str(screen_num)].state = "normal"
         self.special_button_enabled = False
         curr_screen.canvas.remove_group(u"special_radius")
         self.sound_baby_laughs.play()
-        Clock.schedule_once(self.enable_special_attack, self.special_attack_reload_time)
+        Clock.schedule_once(self.enable_special_attack, self.special_attack_properties['reload_time'] )
 
 
 def update_specials(self, screen_num, dt):
     curr_screen = self.root.screens[screen_num]
     specials_to_delete = []
     for special_key, special in curr_screen.specials_ids.items():
-        new_center_x = special['image'].center_x + self.special_attack_speed_x * special['direction'] * dt
+        new_center_x = special['image'].center_x + special['speed_x'] * dt
         special['image'].center_x = new_center_x
         special['image'].center_y = special['a'] * new_center_x ** 2 + special['b'] * new_center_x + special['c']
         # Make special image grow
-        special['image'].size_hint = [special['image'].size_hint[0] + dt / self.special_grow_size_factor,
-                                      special['image'].size_hint[1] + dt / self.special_grow_size_factor]
+        if special['image'].size_hint[0] < self.special_attack_properties['max_width']:
+            special['image'].size_hint = [special['image'].size_hint[0] + dt / self.special_attack_properties['grow_size_factor'],
+                                          special['image'].size_hint[1] + dt / self.special_attack_properties['grow_size_factor']]
         # Stop special movement
-        if special['direction'] == 1 and new_center_x > special['finish_pos'][0]:
+        if special['speed_x'] > 0 and new_center_x > special['finish_pos'][0]:
             specials_to_delete.append(special_key)
             self.check_special_collision(special, screen_num)
-        elif special['direction'] == -1 and new_center_x < special['finish_pos'][0]:
+        elif special['speed_x'] < 0 and new_center_x < special['finish_pos'][0]:
             specials_to_delete.append(special_key)
             self.check_special_collision(special, screen_num)
 
@@ -89,11 +97,11 @@ def check_special_collision(self, special, screen_num):
     enemies_to_delete = []
     enemies_to_spawn_fire = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
-        if abs(special['image'].center[0] - enemy['image'].center[0]) <= self.special_attack_radius * curr_screen.size[
-            0] and \
-                abs(special['image'].center[1] - enemy['image'].center[1]) <= self.special_attack_radius * \
-                curr_screen.size[1]:
-            enemy['hit_points'] = enemy['hit_points'] - self.special_attack_damage
+        if abs(special['image'].center[0] - enemy['image'].center[0]) <=\
+                self.special_attack_properties['attack_radius'] * curr_screen.size[0] \
+                and abs(special['image'].center[1] - enemy['image'].center[1]) <=\
+                self.special_attack_properties['attack_radius'] * curr_screen.size[1]:
+            enemy['hit_points'] = enemy['hit_points'] - self.special_attack_properties['damage']
             if enemy['fires_back']:
                 enemies_to_spawn_fire.append(enemy['image'].center)
 
@@ -108,11 +116,11 @@ def check_special_collision(self, special, screen_num):
 
     bosses_to_delete = []
     for boss_key, boss in curr_screen.bosses_ids.items():
-        if abs(special['image'].center[0] - boss['image'].center[0]) <= self.special_attack_radius * curr_screen.size[
-            0] and \
-                abs(special['image'].center[1] - boss['image'].center[1]) <= self.special_attack_radius * \
-                curr_screen.size[1]:
-            boss['hit_points'] = boss['hit_points'] - self.special_attack_damage
+        if abs(special['image'].center[0] - boss['image'].center[0]) <=\
+                self.special_attack_properties['attack_radius'] * curr_screen.size[0]\
+                and abs(special['image'].center[1] - boss['image'].center[1]) <= \
+                self.special_attack_properties['attack_radius'] * curr_screen.size[1]:
+            boss['hit_points'] = boss['hit_points'] - self.special_attack_properties['damage']
             if boss['hit_points'] <= 0:
                 self.kill_boss(boss, screen_num)
                 bosses_to_delete.append(boss_key)
@@ -143,13 +151,13 @@ def enable_special_attack(self, dt):
 def get_special_quad_coords(self, screen_num):
     curr_screen = self.root.screens[screen_num]
     character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center
-    x1 = character_image_center[0] - self.special_min_dist_x * curr_screen.size[0]
+    x1 = character_image_center[0] - self.special_attack_properties['min_dist_x'] * curr_screen.size[0]
     y1 = 0
-    x2 = character_image_center[0] - self.special_min_dist_x * curr_screen.size[0]
+    x2 = character_image_center[0] - self.special_attack_properties['min_dist_x'] * curr_screen.size[0]
     y2 = curr_screen.size[1]
-    x3 = character_image_center[0] + self.special_min_dist_x * curr_screen.size[0]
+    x3 = character_image_center[0] + self.special_attack_properties['min_dist_x'] * curr_screen.size[0]
     y3 = curr_screen.size[1]
-    x4 = character_image_center[0] + self.special_min_dist_x * curr_screen.size[0]
+    x4 = character_image_center[0] + self.special_attack_properties['min_dist_x'] * curr_screen.size[0]
     y4 = 0
     return [x1, y1, x2, y2, x3, y3, x4, y4]
 

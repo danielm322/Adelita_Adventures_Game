@@ -37,7 +37,7 @@ def update_character(self, screen_num, dt):
         character_image.y = new_y
         # Update special attack radius quad
         if curr_screen.character_dict['shoot_special_state']:
-            self.special_attack_quad.points = self.get_special_quad_coords(screen_num)
+            self.special_attack_properties['quad'].points = self.get_special_quad_coords(screen_num)
         # Check collision
         self.check_character_collision(character_image, screen_num)
         # Stop moving character if he arrived to the final point
