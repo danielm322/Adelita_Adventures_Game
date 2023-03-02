@@ -1,7 +1,7 @@
 import random
 from math import sqrt
 from kivy.utils import platform
-from helper_fns import _find_kiss_endpoint_fast, write_level_passed
+from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector
 import kivy.uix.image
 import time
 from enemies_dict import enemies_dict
@@ -11,21 +11,18 @@ def shoot_kiss(self, screen_num, touch_point):
     curr_screen = self.root.screens[screen_num]
     screen_size = curr_screen.size  # List [size_x, size_y]
     character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
-    finish_pos = _find_kiss_endpoint_fast(character_image_center,
+    start_pos = [character_image_center[0] - self.kiss_width * screen_size[0] / 2,
+                 character_image_center[1]]
+    finish_pos = _find_kiss_endpoint_fast(start_pos,
                                           touch_point,
                                           screen_size,
                                           self.kiss_width,
                                           self.kiss_height,
                                           self.side_bar_width)
-    kiss_unit_vector_norm = sqrt(
-        (finish_pos[0] - character_image_center[0]) ** 2 + (finish_pos[1] - character_image_center[1]) ** 2
-    )
-    kiss_direction_unit_vector = ((finish_pos[0] - character_image_center[0]) / kiss_unit_vector_norm,
-                                  (finish_pos[1] - character_image_center[1]) / kiss_unit_vector_norm)
+    kiss_direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
     kiss = kivy.uix.image.Image(source="graphics/entities/kiss1.png",
                                 size_hint=(self.kiss_width, self.kiss_height),
-                                pos=[character_image_center[0] - self.kiss_width * screen_size[0] / 2,
-                                     character_image_center[1]], allow_stretch=True)
+                                pos=start_pos, allow_stretch=True)
     curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(kiss, index=2)
     # create a unique identifier for each enemy
     time_stamp = str(time.time())
@@ -56,8 +53,10 @@ def update_kisses(self, screen_num, dt):
                 kisses_to_delete.append(kiss_key)
                 if boss_to_eliminate:
                     bosses_to_delete.extend(boss_to_eliminate)
-        elif kiss['image'].x > curr_screen.width or kiss['image'].x < 0. - self.kiss_width * curr_screen.width or kiss[
-            'image'].y > curr_screen.height or kiss['image'].y < 0 - self.kiss_width * curr_screen.height:
+        elif kiss['image'].center_x > curr_screen.width \
+                or (kiss['direction_u_vector'][0] < 0 and kiss['image'].center_x < kiss['finish_pos'][0]) \
+                or kiss['image'].y > curr_screen.height \
+                or kiss['image'].y < 0 - self.kiss_width * curr_screen.height:
             kisses_to_delete.append(kiss_key)
             curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss['image'])
 

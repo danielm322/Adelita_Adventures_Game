@@ -109,9 +109,9 @@ def check_character_collision(self, character_image, screen_num):
                     curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
                         curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_2)
 
-            elif curr_screen.number_of_phases == 3\
-                    and not curr_screen.phase_2_completed\
-                    and curr_screen.phase_1_completed\
+            elif curr_screen.number_of_phases == 3 \
+                    and not curr_screen.phase_2_completed \
+                    and curr_screen.phase_1_completed \
                     and curr_screen.rewards_gathered == curr_screen.rewards_to_win_ph_2:
                 # Stop spawning enemies phase 2
                 self.clock_spawn_enemies_variable.cancel()
@@ -136,7 +136,7 @@ def kill_character(self, screen_num):
         self.clock_spawn_enemies_variable.cancel()
     # Stop enemies, and bosses
     for _, enemy in curr_screen.enemies_ids.items():
-        enemy['speed_x'] = 0.
+        enemy['speed'] = 0.
     for _, boss in curr_screen.bosses_ids.items():
         boss['speed_x'] = 0.
     kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 4)

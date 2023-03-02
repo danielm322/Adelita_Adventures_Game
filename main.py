@@ -51,7 +51,7 @@ class GameApp(kivy.app.App):
         'extra_height_parabola': 0.35,  # Extra height of parabola in screen proportion
         'time_to_land': 2.0,
         'attack_radius': 0.16,  # In screen proportion
-        'quad': None,
+        'quad': None,  # Square that limits special ability shoot
         'damage': 10,
         'reload_time': 8,
         # 'button_enabled': BooleanProperty(True),
@@ -159,8 +159,8 @@ class GameApp(kivy.app.App):
             self.clock_update_fn_variable.cancel()
             self.clock_update_fn_variable = None
         # Delete special attack quad
-        if self.special_attack_quad is not None:
-            self.special_attack_quad = None
+        if self.special_attack_properties['quad'] is not None:
+            self.special_attack_properties['quad'] = None
 
     def screen_on_pre_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
