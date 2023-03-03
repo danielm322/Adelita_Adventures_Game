@@ -312,17 +312,19 @@ ScreenManager:
     disabled: not app.special_button_enabled
 
 <Character@Image>:
-    id: character_image
-    size_hint: (0.25, 0.25)
+    #id: character_image
+    size_hint: (0.07, 0.25)
     pos: self.parent.width/2-self.size[0]/2, self.parent.height/2-self.size[1]/2
-    #pos_hint: {'x': 0.2, 'y': 0.6}
+    #pos_hint: {'center_x': app.character_center_x, 'center_y': app.character_center_y}
     source: "graphics/entities/Adelita_1.png"
     #im_num: 0
     allow_stretch: True
+    keep_ratio: False
     #on_im_num: app.change_char_im(self)
     #on_pos_hint: app.char_pos_hint(self)
     #start_im_num: 0
     #end_im_num: 7
+    mipmap: True
 
 <RemainingLifePercent@Label>:
     remaining_life_size_hint_y: 0.3
@@ -355,6 +357,7 @@ ScreenManager:
 
 <PauseMenuWidget>:
     #pos_hint: {'x': 0.0, 'y':0.}
+    index: 0
     canvas.before:
         Color:
             rgba: 0, 0, 0, .8

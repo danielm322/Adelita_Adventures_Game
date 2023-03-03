@@ -1,11 +1,11 @@
 # import time
-# from kivy.config import Config
+from kivy.config import Config
 # import os
 import random
 from kivy.graphics import Color, Quad
 
-# Config.set('graphics', 'width', '800')
-# Config.set('graphics', 'height', '400')
+Config.set('graphics', 'width', '800')
+Config.set('graphics', 'height', '400')
 from kivy.core.audio import SoundLoader
 import kivy.uix.image
 import kivy.app
@@ -14,7 +14,7 @@ import kivy.animation
 import kivy.uix.label
 from functools import partial
 from kivy.clock import Clock
-from kivy.properties import BooleanProperty
+from kivy.properties import BooleanProperty, NumericProperty
 from kivy.utils import platform
 from levels import Level1, Level2
 from pause_menu import PauseMenuWidget
@@ -23,7 +23,7 @@ from enemies_dict import enemies_dict
 
 
 class GameApp(kivy.app.App):
-    from character import start_character_animation, check_character_collision, update_character, kill_character
+    from character import start_character_animation, check_character_collision, update_character, kill_character, get_character_bbox
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, spawn_rocket_at_enemy_center_to_ch_center
     # from enemy_red import spawn_enemy_red
@@ -40,45 +40,36 @@ class GameApp(kivy.app.App):
     next_level = 1  # Default first level to be played (Activate just one level)
     clock_spawn_enemies_variable = None
     clock_update_fn_variable = None
-    kiss_width = 0.04
+    kiss_width = 0.03
     kiss_height = 0.04
     kiss_speed = 25
     special_attack_properties = {
-        'init_width': 0.04,
+        'init_width': 0.02,
         'init_height': 0.04,
-        'max_width': 0.32,
+        'max_width': 0.30,
         'max_height': 0.32,
         'extra_height_parabola': 0.35,  # Extra height of parabola in screen proportion
         'time_to_land': 2.0,
-        'attack_radius': 0.16,  # In screen proportion
-        'quad': None,
+        'attack_radius': 0.15,  # In screen proportion
+        'quad': None,  # Square that limits special ability shoot
         'damage': 10,
         'reload_time': 8,
-        # 'button_enabled': BooleanProperty(True),
-        # 'grow_size_factor': 400,
-        'grow_size_factor': 10,
+        'grow_size_factor': 3,
         'min_dist_x': 0.15,  # In screen proportion
         'source_img': "graphics/entities/diaper.png",
     }
-    # special_attack_init_width = 0.04
-    # special_attack_init_height = 0.04
-    # special_extra_height = 0.35  # Extra height of parabola in screen proportion
-    # special_attack_speed_x = 7
-    # special_attack_radius = 0.15  # In screen proportion
-    # special_attack_quad = None
-    # special_attack_damage = 10
-    # special_attack_reload_time = 8
+    # char_bounding_box = None  # Debugging purposes
     special_button_enabled = BooleanProperty(True)
-    # special_grow_size_factor = 400
-    # special_min_dist_x = 0.15  # In screen proportion
-    reward_size = 0.1
+    reward_width = 0.05
+    reward_height = 0.1
     reward_duration = 12  # In seconds to disappear
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
+    # Character properties
+    character_speed_factor = 1/300  # Percentage of screen covered by each character update  1/300 seems fine
     APP_TIME_FACTOR = 40  # In number of updates per second
     SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
-    # CHARACTER_HITPOINTS = 100
-    MOVEMENT_PIXEL_TOLERANCE = 4  # Number of pixels of tolerance to accept a widget is in a given position
+    MOVEMENT_PIXEL_TOLERANCE = 8  # Number of pixels of tolerance to accept a widget is in a given position
 
     def on_start(self):
         self.init_audio()
@@ -116,31 +107,29 @@ class GameApp(kivy.app.App):
         levels_imagebuttons = self.root.screens[0].ids['lvls_imagebuttons'].children
         for i in range(num_levels - next_level_num, num_levels):
             levels_imagebuttons[i].disabled = False
-            # levels_imagebuttons[i].color = [1, 1, 1, 1]
 
         for i in range(0, num_levels - next_level_num):
             levels_imagebuttons[i].disabled = True
-            # levels_imagebuttons[i].color = [1, 1, 1, 0.5]
 
     def screen_on_leave(self, screen_num):
         curr_screen = self.root.screens[screen_num]
         # REMOVE
         # Enemies
         for _, enemy in curr_screen.enemies_ids.items():
-            curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])
+            curr_screen.remove_widget(enemy['image'])
         curr_screen.enemies_ids.clear()
         # Rewards
         for _, reward in curr_screen.rewards_ids.items():
-            curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(reward['image'])
+            curr_screen.remove_widget(reward['image'])
         curr_screen.rewards_ids.clear()
         # Kisses
         for _, kiss in curr_screen.kisses_ids.items():
-            curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss['image'])
+            curr_screen.remove_widget(kiss['image'])
         curr_screen.kisses_ids.clear()
         # Bosses
         for _, boss in curr_screen.bosses_ids.items():
             kivy.animation.Animation.cancel_all(boss['image'])
-            curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(boss['image'])
+            curr_screen.remove_widget(boss['image'])
         curr_screen.bosses_ids.clear()
         # Toggle kiss button
         if screen_num > 1:
@@ -159,8 +148,8 @@ class GameApp(kivy.app.App):
             self.clock_update_fn_variable.cancel()
             self.clock_update_fn_variable = None
         # Delete special attack quad
-        if self.special_attack_quad is not None:
-            self.special_attack_quad = None
+        if self.special_attack_properties['quad'] is not None:
+            self.special_attack_properties['quad'] = None
 
     def screen_on_pre_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
@@ -187,11 +176,11 @@ class GameApp(kivy.app.App):
 
     def screen_on_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
+        # Strangely, this works well here, but no on pre enter:
+        curr_screen.character_dict['speed'] = (curr_screen.size[0] + curr_screen.size[1]) * self.character_speed_factor
         # Always begin now in the first phase
         if self.clock_spawn_enemies_variable is None:
             self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                # partial(self.spawn_enemy, screen_num), curr_screen.enemy_spawn_interval
-                # partial(eval(curr_screen.phases_spawn_fns['phase_1']), screen_num),
                 partial(self.spawn_enemy,
                         screen_num,
                         curr_screen.enemy_phase_1['type'],
@@ -202,6 +191,9 @@ class GameApp(kivy.app.App):
         # Start update screen function
         self.clock_update_fn_variable = Clock.schedule_interval(partial(self.update_screen, screen_num),
                                                                 self.SCREEN_UPDATE_RATE)
+        # with curr_screen.canvas:
+        #     Color(1, 0, 0, 0.2)
+        #     self.char_bounding_box = Quad(points=self.get_character_bbox(screen_num))
 
     def update_screen(self, screen_num, *args):
         if not self.root.screens[screen_num].state_paused:
@@ -274,7 +266,13 @@ class GameApp(kivy.app.App):
             # Stop enemy spawning
             if self.clock_spawn_enemies_variable is not None:
                 self.clock_spawn_enemies_variable.cancel()
-
+        # Make enemies opaque on pause since I couldn't find a way to make the pause menu to be above the enemies
+        for _, enemy in curr_screen.enemies_ids.items():
+            enemy['image'].opacity = 0.1
+        for _, special in curr_screen.specials_ids.items():
+            special['image'].opacity = 0.1
+        for _, boss in curr_screen.bosses_ids.items():
+            boss['image'].opacity = 0.1
 
     def on_continue_button_pressed(self, *args):
         curr_screen = args[0]
@@ -300,6 +298,13 @@ class GameApp(kivy.app.App):
                         curr_screen.enemy_phase_2['level']),
                 enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['spawn_interval']
             )
+        # Reestablish opacity to one on un-pause
+        for _, enemy in curr_screen.enemies_ids.items():
+            enemy['image'].opacity = 1
+        for _, special in curr_screen.specials_ids.items():
+            special['image'].opacity = 1
+        for _, boss in curr_screen.bosses_ids.items():
+            boss['image'].opacity = 1
 
     def on_restart_button_pressed(self, *args):
         curr_screen = args[0]
@@ -331,5 +336,6 @@ class MainScreen(kivy.uix.screenmanager.Screen):
     pass
 
 
-app = GameApp()
-app.run()
+if __name__ == "__main__":
+    app = GameApp()
+    app.run()

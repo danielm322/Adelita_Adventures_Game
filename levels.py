@@ -17,7 +17,8 @@ class Level1(kivy.uix.screenmanager.Screen):
         'shoot_state': False,
         'shoot_special_state': False,
         'killed': False,
-        'speed': 7,
+        'speed': None,  # Is calculated on screen enter, by taking into account the screen size
+        # 'speed': 6e-3,
         'hit_points': 100,
         'damage_received': 0,
         'is_moving': False,
@@ -25,11 +26,11 @@ class Level1(kivy.uix.screenmanager.Screen):
         'direction_unit_vector': (0., 0.)
     }
     boss_props = {
-        'width': 0.4,
+        'width': 0.391,
         'height': 0.45,
         'hit_points': 25,
         'damage': 20,
-        'speed_x': -2,
+        'speed': 1.5e-3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/diaper.png"
     }
@@ -48,7 +49,7 @@ class Level2(kivy.uix.screenmanager.Screen):
     state_paused = False
     # level_completed = False
     rewards_gathered = 0
-    rewards_to_win_ph_1 = 6
+    rewards_to_win_ph_1 = 5
     enemy_phase_1 = {
         'type': 'green',
         'level': 'level_2'
@@ -57,7 +58,7 @@ class Level2(kivy.uix.screenmanager.Screen):
         'shoot_state': False,
         'shoot_special_state': False,
         'killed': False,
-        'speed': 7,
+        'speed': None,
         'hit_points': 100,
         'damage_received': 0,
         'is_moving': False,
@@ -65,11 +66,11 @@ class Level2(kivy.uix.screenmanager.Screen):
         'direction_unit_vector': (0., 0.)
     }
     boss_props = {
-        'width': 0.4,
+        'width': 0.391,
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -2,
+        'speed': 1.7e-3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
@@ -88,7 +89,7 @@ class Level3(kivy.uix.screenmanager.Screen):
     state_paused = False
     # level_completed = False
     rewards_gathered = 0
-    rewards_to_win_ph_1 = 6
+    rewards_to_win_ph_1 = 5
     enemy_phase_1 = {
         'type': 'red',
         'level': 'level_1'
@@ -97,7 +98,7 @@ class Level3(kivy.uix.screenmanager.Screen):
         'shoot_state': False,
         'shoot_special_state': False,
         'killed': False,
-        'speed': 7,
+        'speed': None,
         'hit_points': 100,
         'damage_received': 0,
         'is_moving': False,
@@ -105,11 +106,11 @@ class Level3(kivy.uix.screenmanager.Screen):
         'direction_unit_vector': (0., 0.)
     }
     boss_props = {
-        'width': 0.4,
+        'width': 0.391,
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -2.5,
+        'speed': 1.8e-3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
@@ -128,7 +129,7 @@ class Level4(kivy.uix.screenmanager.Screen):
     state_paused = False
     # level_completed = False
     rewards_gathered = 0
-    rewards_to_win_ph_1 = 6
+    rewards_to_win_ph_1 = 5
     enemy_phase_1 = {
         'type': 'yellow',
         'level': 'level_1'
@@ -137,7 +138,7 @@ class Level4(kivy.uix.screenmanager.Screen):
         'shoot_state': False,
         'shoot_special_state': False,
         'killed': False,
-        'speed': 7,
+        'speed': None,
         'hit_points': 100,
         'damage_received': 0,
         'is_moving': False,
@@ -145,11 +146,11 @@ class Level4(kivy.uix.screenmanager.Screen):
         'direction_unit_vector': (0., 0.)
     }
     boss_props = {
-        'width': 0.4,
+        'width': 0.391,
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -3,
+        'speed': 1.9e-3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
@@ -183,7 +184,7 @@ class Level5(kivy.uix.screenmanager.Screen):
         'shoot_state': False,
         'shoot_special_state': False,
         'killed': False,
-        'speed': 7,
+        'speed': None,
         'hit_points': 100,
         'damage_received': 0,
         'is_moving': False,
@@ -195,7 +196,7 @@ class Level5(kivy.uix.screenmanager.Screen):
         'height': 0.45,
         'hit_points': 30,
         'damage': 20,
-        'speed_x': -3,
+        'speed': 1.9e-3,
         'source': "graphics/entities/boss_1.png",
         'boss_reward_image_source': "graphics/entities/boss_reward_key.png"
     }
