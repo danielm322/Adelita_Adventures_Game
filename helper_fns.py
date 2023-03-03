@@ -45,15 +45,9 @@ def _get_uniform_enemy_start_end_positions(side_bar_width: float,
     """
     r_start = random.random()
     r_finish = random.random()
-    start_pos_hint = {'x': 1.0, 'y': r_start * (1 - enemy_height)}
-    finish_pos_hint = {'x': side_bar_width - enemy_width / 2, 'y': r_finish * (1 - enemy_height)}
-    start_pos = [0, 0]
-    finish_pos = [0, 0]
-    start_pos[0], start_pos[1] = start_pos_hint['x'] * screen_size[0], start_pos_hint['y'] * screen_size[1]
-    finish_pos[0], finish_pos[1] = finish_pos_hint['x'] * screen_size[0], \
-                                   finish_pos_hint['y'] * screen_size[1]
-    return start_pos, finish_pos
-    # return start_pos_hint, finish_pos_hint
+    start_pos_hint = {'center_x': 1.0 + enemy_width / 2, 'center_y': r_start * (1 - enemy_height)}
+    finish_pos_hint = {'center_x': side_bar_width, 'center_y': r_finish * (1 - enemy_height)}
+    return start_pos_hint, finish_pos_hint
 
 
 def _get_gaussian_enemy_start_end_positions(side_bar_width: float,
@@ -65,7 +59,7 @@ def _get_gaussian_enemy_start_end_positions(side_bar_width: float,
                                             screen_size: tuple) -> tuple:
     """
     Enemies start always from the right, and finish always on the left, this function
-    chooses randomly start and end points
+    chooses randomly start and end points based on a gaussian distribution
     :param side_bar_width:
     :param enemy_width:
     :param enemy_height:
@@ -73,14 +67,9 @@ def _get_gaussian_enemy_start_end_positions(side_bar_width: float,
     """
     r_start = random.gauss(gaussian_enemy_spawn_point, gaussian_enemy_trajectory_variance)
     r_finish = random.gauss(gaussian_enemy_end_point, gaussian_enemy_trajectory_variance)
-    start_pos_hint = {'x': 1.0, 'y': r_start * (1 - enemy_height)}
-    finish_pos_hint = {'x': side_bar_width - enemy_width / 2, 'y': r_finish * (1 - enemy_height)}
-    start_pos = [0, 0]
-    finish_pos = [0, 0]
-    start_pos[0], start_pos[1] = start_pos_hint['x'] * screen_size[0], start_pos_hint['y'] * screen_size[1]
-    finish_pos[0], finish_pos[1] = finish_pos_hint['x'] * screen_size[0], \
-                                   finish_pos_hint['y'] * screen_size[1]
-    return start_pos, finish_pos
+    start_pos_hint = {'center_x': 1.0 + enemy_width / 2, 'center_y': r_start * (1 - enemy_height)}
+    finish_pos_hint = {'center_x': side_bar_width, 'center_y': r_finish * (1 - 2 * enemy_height) + enemy_height}
+    return start_pos_hint, finish_pos_hint
 
 
 def _get_line_slope_intercept(spawn_pos, finish_pos):
@@ -90,23 +79,6 @@ def _get_line_slope_intercept(spawn_pos, finish_pos):
     line_slope = (finish_pos['y'] - spawn_pos['y']) / divisor
     line_intercept = spawn_pos['y'] - spawn_pos['x'] * line_slope
     return line_slope, line_intercept
-
-
-# def find_line_intersection(line1, line2):
-#     xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
-#     ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
-#
-#     def det(a, b):
-#         return a[0] * b[1] - a[1] * b[0]
-#
-#     div = det(xdiff, ydiff)
-#     if div == 0:
-#         raise Exception('lines do not intersect')
-#
-#     d = (det(*line1), det(*line2))
-#     x = det(d, xdiff) / div
-#     y = det(d, ydiff) / div
-#     return x, y
 
 
 def find_line_intersection_fast(line_slope: float,
@@ -209,66 +181,6 @@ def _find_kiss_endpoint_fast(character_image_center, touch_point, screen_size, k
             return lower_line_intersection_point[0], lower_line_intersection_point[1] - kiss_height * screen_size[1]
 
 
-# def find_kiss_endpoint(character_image_center, touch_point, screen_size, kiss_width, kiss_height, side_bar_width):
-#     # Check direction of shooting to decide which screen boundaries to assign
-#     # Check up and right
-#     if touch_point[0] > character_image_center[0] and touch_point[1] > character_image_center[1]:
-#         right_line_intersection_point = find_line_intersection(
-#             (character_image_center, touch_point),
-#             ((screen_size[0], 0), (screen_size[0], screen_size[1]))
-#         )
-#         if right_line_intersection_point[1] <= screen_size[1]:
-#             return right_line_intersection_point
-#         else:  # upper line intersection
-#             return find_line_intersection(
-#                 (character_image_center, touch_point),
-#                 ((0, screen_size[1]), (screen_size[0], screen_size[1]))
-#             )
-#     # Check down and right
-#     elif touch_point[0] > character_image_center[0] and touch_point[1] < character_image_center[1]:
-#         right_line_intersection_point = find_line_intersection(
-#             (character_image_center, touch_point),
-#             ((screen_size[0], 0), (screen_size[0], screen_size[1]))
-#         )
-#         if right_line_intersection_point[1] >= 0:
-#             return right_line_intersection_point
-#         else:  # lower line intersection
-#             lower_line_intersection_point = find_line_intersection(
-#                 (character_image_center, touch_point),
-#                 ((0, 0), (screen_size[0], 0))
-#             )
-#             return lower_line_intersection_point[0], lower_line_intersection_point[1]-kiss_height*screen_size[1]
-#     # Check up and left
-#     elif touch_point[0] < character_image_center[0] and touch_point[1] > character_image_center[1]:
-#         left_line_intersection_point = find_line_intersection(
-#             (character_image_center, touch_point),
-#             ((0, 0), (0, screen_size[1]))
-#         )
-#         if left_line_intersection_point[1] <= screen_size[1]:
-#             side_bar_correction = side_bar_width*screen_size[0]-kiss_width*screen_size[0]/2
-#             return left_line_intersection_point[0] + side_bar_correction, left_line_intersection_point[1]
-#         else:  # upper line intersection
-#             return find_line_intersection(
-#                 (character_image_center, touch_point),
-#                 ((0, screen_size[1]), (screen_size[0], screen_size[1]))
-#             )
-#     # Check down and left
-#     else:
-#         left_line_intersection_point = find_line_intersection(
-#             (character_image_center, touch_point),
-#             ((0, 0), (0, screen_size[1]))
-#         )
-#         if left_line_intersection_point[1] >= 0:
-#             side_bar_correction = side_bar_width * screen_size[0] - kiss_width * screen_size[0] / 2
-#             return left_line_intersection_point[0] + side_bar_correction, left_line_intersection_point[1]
-#         else:  # lower line intersection
-#             lower_line_intersection_point = find_line_intersection(
-#                 (character_image_center, touch_point),
-#                 ((0, 0), (screen_size[0], 0))
-#             )
-#             return lower_line_intersection_point[0], lower_line_intersection_point[1] - kiss_height * screen_size[1]
-
-
 def adjust_character_life_bar(self, screen_num):
     curr_screen = self.root.screens[screen_num]
     damage_percent = float(curr_screen.character_dict['damage_received']) / float(
@@ -299,17 +211,25 @@ def calc_parabola_vertex(p1, p2, p3):
 def get_direction_unit_vector(start_pos, finish_pos):
     # Check if we are getting a dictionary of pos_hints, and if that's the case,
     # convert them to lists
-    if isinstance(start_pos, dict) and isinstance(finish_pos, dict):
-        temp_start_pos, temp_finish_pos = [0, 0], [0, 0]
-        temp_start_pos[0], temp_start_pos[1] = start_pos['x'], start_pos['y']
-        temp_finish_pos[0], temp_finish_pos[1] = finish_pos['x'], finish_pos['y']
-        start_pos, finish_pos = temp_start_pos, temp_finish_pos
+    if isinstance(start_pos, dict):
+        temp_start_pos = []
+        for value in start_pos.values():
+            temp_start_pos.append(value)
 
-    enemy_unit_vector_norm = sqrt(
+        start_pos = temp_start_pos
+
+    if isinstance(finish_pos, dict):
+        temp_finish_pos = []
+        for value in finish_pos.values():
+            temp_finish_pos.append(value)
+
+        finish_pos = temp_finish_pos
+
+    unit_vector_norm = sqrt(
         (finish_pos[0] - start_pos[0]) ** 2 + (finish_pos[1] - start_pos[1]) ** 2
     )
-    return ((finish_pos[0] - start_pos[0]) / enemy_unit_vector_norm,
-            (finish_pos[1] - start_pos[1]) / enemy_unit_vector_norm)
+    return ((finish_pos[0] - start_pos[0]) / unit_vector_norm,
+            (finish_pos[1] - start_pos[1]) / unit_vector_norm)
 
 
 def read_game_info(platform):
@@ -344,3 +264,14 @@ def write_level_passed(platform, screen_num):
         with open(file_path, "w") as file:
             file.write(str(screen_num + 1))
 
+
+# def check_collision_rect(first, other):
+#     # code `... and ...` gives `True` or `False`
+#     # and it doesn't need `if ...: return True else: return False`
+#
+#     return (
+#             (other.x <= first.x + first.norm_image_size[0] / 2) and
+#             (first.x <= other.x + other.norm_image_size[0] / 2) and
+#             (other.y <= first.y + first.norm_image_size[1] / 2) and
+#             (first.y <= other.y + other.norm_image_size[1] / 2)
+#     )

@@ -3,6 +3,7 @@ import time
 
 import kivy.uix.image
 from kivy.clock import Clock
+from kivy.graphics import Line
 from kivy.utils import platform
 
 from enemies_dict import enemies_dict
@@ -20,10 +21,10 @@ def shoot_special(self, screen_num, touch_point):
                                              touch_point):
         char_height = curr_screen.ids['character_image_lvl' + str(screen_num)].height
         char_width = curr_screen.ids['character_image_lvl' + str(screen_num)].width
-        start_point = (character_image_center[0] + char_width / 5,
-                       character_image_center[1] + char_height / 2)
-        # end_point = (touch_point[0] - screen_size[0] * self.special_attack_init_width / 2,
-        #              touch_point[1] - screen_size[1] * self.special_attack_init_height / 2)
+        # Strangely, the start point looks well on the telephone being centered on the character, but not on the PC,
+        # so the next line is fine
+        start_point = (character_image_center[0],
+                       character_image_center[1])
         end_point = (touch_point[0],
                      touch_point[1])
         # Special has a parabolic trajectory, so we need to calculate a third point to uniquely define a parabola
@@ -31,17 +32,10 @@ def shoot_special(self, screen_num, touch_point):
             height_mid_point = start_point[1] + self.special_attack_properties['extra_height_parabola'] * screen_size[1]
         else:
             height_mid_point = end_point[1] + self.special_attack_properties['extra_height_parabola'] * screen_size[1]
-        mid_point = ((end_point[0] + start_point[0]) / 2.,
-                     height_mid_point)
+        mid_point = ((end_point[0] + start_point[0]) / 2., height_mid_point)
         parabola_params = calc_parabola_vertex(start_point, mid_point, end_point)
         # Calculate x velocity
-        # speed_x = (end_point[0] - start_point[0]) / (self.special_attack_properties['time_to_land'] * screen_size[0])
-        speed_x = (end_point[0] - start_point[0]) / (self.special_attack_properties['time_to_land'] * 1)
-        # We need to know the direction of the parabola
-        # if start_point[0] < end_point[0]:
-        #     direction = 1  # Right
-        # else:
-        #     direction = -1  # Left
+        speed_x = (end_point[0] - start_point[0]) / self.special_attack_properties['time_to_land']
 
         special_attack = kivy.uix.image.Image(source=self.special_attack_properties['source_img'],
                                               size_hint=(
@@ -50,8 +44,9 @@ def shoot_special(self, screen_num, touch_point):
                                               ),
                                               center_x=start_point[0],
                                               center_y=start_point[1],
-                                              allow_stretch=True)
-        curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(special_attack, index=2)
+                                              allow_stretch=True,
+                                              keep_ratio=False)
+        curr_screen.add_widget(special_attack, index=-1)
         # create a unique identifier for each enemy
         time_stamp = str(time.time())
         curr_screen.specials_ids['special_' + time_stamp] = {'image': special_attack,
@@ -70,6 +65,7 @@ def shoot_special(self, screen_num, touch_point):
 
 def update_specials(self, screen_num, dt):
     curr_screen = self.root.screens[screen_num]
+    screen_size_ratio = curr_screen.size[1] / curr_screen.size[0]
     specials_to_delete = []
     for special_key, special in curr_screen.specials_ids.items():
         new_center_x = special['image'].center_x + special['speed_x'] * dt
@@ -77,8 +73,10 @@ def update_specials(self, screen_num, dt):
         special['image'].center_y = special['a'] * new_center_x ** 2 + special['b'] * new_center_x + special['c']
         # Make special image grow
         if special['image'].size_hint[0] < self.special_attack_properties['max_width']:
-            special['image'].size_hint = [special['image'].size_hint[0] + dt / self.special_attack_properties['grow_size_factor'],
-                                          special['image'].size_hint[1] + dt / self.special_attack_properties['grow_size_factor']]
+            special['image'].size_hint = [
+                special['image'].size_hint[0] + dt * screen_size_ratio / self.special_attack_properties['grow_size_factor'],
+                special['image'].size_hint[1] + dt / self.special_attack_properties['grow_size_factor']
+            ]
         # Stop special movement
         if special['speed_x'] > 0 and new_center_x > special['finish_pos'][0]:
             specials_to_delete.append(special_key)
@@ -109,7 +107,7 @@ def check_special_collision(self, special, screen_num):
                 self.sound_enemy_dies.play()
                 enemy_center = enemy['image'].center
                 enemies_to_delete.append(enemy_key)
-                curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(enemy['image'])
+                curr_screen.remove_widget(enemy['image'])
                 # Spawn reward with probability defined per level
                 if random.random() < enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_reward_probability']:
                     self.spawn_reward(enemy_center, screen_num)
@@ -134,7 +132,7 @@ def check_special_collision(self, special, screen_num):
                                                            'level_1')
 
     # Remove special widget
-    curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(special['image'])
+    curr_screen.remove_widget(special['image'])
     if len(bosses_to_delete) > 0:
         for boss_key in bosses_to_delete:
             del curr_screen.bosses_ids[boss_key]
