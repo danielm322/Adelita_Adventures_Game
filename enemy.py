@@ -1,5 +1,7 @@
 import random
 import time
+from typing import Tuple
+
 import kivy.uix.image
 # from kivy.graphics import Line
 
@@ -43,6 +45,7 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                           enemies_dict[enemy_type][enemy_level][
                                                               'hit_points'],
                                                       'direction_u_vector': enemy_direction_unit_vector,
+                                                      'is_fighting': False,
                                                       'speed': r_speed}
 
 
@@ -92,59 +95,94 @@ def update_enemies(self, screen_num, dt):
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
-        new_x = enemy['image'].pos_hint['center_x'] + enemy['direction_u_vector'][0] * enemy['speed'] * dt
-        new_y = enemy['image'].pos_hint['center_y'] + enemy['direction_u_vector'][1] * enemy['speed'] * dt
-        enemy['image'].pos_hint['center_x'] = new_x
-        enemy['image'].pos_hint['center_y'] = new_y
-        enemy['image'].center_x = new_x * curr_screen.size[0]
-        enemy['image'].center_y = new_y * curr_screen.size[1]
+        enemy['is_fighting'], to_eliminate_flag = self.check_enemy_collision(enemy, screen_num)
+        if (enemy['type'] == 'fire' or not enemy['is_fighting']) and not to_eliminate_flag:
+            new_x = enemy['image'].pos_hint['center_x'] + enemy['direction_u_vector'][0] * enemy['speed'] * dt
+            new_y = enemy['image'].pos_hint['center_y'] + enemy['direction_u_vector'][1] * enemy['speed'] * dt
+            enemy['image'].pos_hint['center_x'] = new_x
+            enemy['image'].pos_hint['center_y'] = new_y
+            enemy['image'].center_x = new_x * curr_screen.size[0]
+            enemy['image'].center_y = new_y * curr_screen.size[1]
+
         # with curr_screen.canvas:
         #     Line(circle=(enemy['image'].center_x, enemy['image'].center_y, 20))
-        self.check_enemy_collision(enemy, screen_num)
-        if enemy['type'] == 'fire' and enemy['direction_u_vector'][0] > 0 and new_x >= enemy['finish_pos']['center_x']:
+
+        if enemy['type'] == 'fire' \
+                and (
+                   (enemy['direction_u_vector'][0] < 0 and new_x <= enemy['finish_pos']['center_x'])
+                or (enemy['direction_u_vector'][0] > 0 and new_x >= enemy['finish_pos']['center_x'])
+                or (enemy['direction_u_vector'][1] > 0 and new_y >= enemy['finish_pos']['center_y'])
+                or (enemy['direction_u_vector'][1] < 0 and new_y <= enemy['finish_pos']['center_y'])
+        ):
             enemies_to_delete.append(enemy_key)
             self.enemy_animation_completed(enemy, screen_num)
-        elif enemy['type'] == 'fire' and enemy['direction_u_vector'][0] < 0 and new_x <= enemy['finish_pos']['center_x']:
+        elif enemy['type'] != 'fire' and enemy['image'].pos_hint['center_x'] <= enemy['finish_pos']['center_x']:
             enemies_to_delete.append(enemy_key)
             self.enemy_animation_completed(enemy, screen_num)
-        elif enemy['type'] != 'fire' and new_x <= enemy['finish_pos']['center_x']:
+        if to_eliminate_flag:
             enemies_to_delete.append(enemy_key)
-            self.enemy_animation_completed(enemy, screen_num)
 
     if len(enemies_to_delete) > 0:
         for enemy_key in enemies_to_delete:
             del curr_screen.enemies_ids[enemy_key]
 
 
-def check_enemy_collision(self, enemy, screen_num):
+def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
+    # Flag to check if an enemy is colliding with a character, it stops its movement to deal damage (fight)
+    is_fighting = False
+    to_eliminate_flag = False
     curr_screen = self.root.screens[screen_num]
-    character_image = curr_screen.ids['character_image_lvl' + str(screen_num)]
     if enemy['type'] != 'fire':
         gap_x = curr_screen.width * enemies_dict[enemy['type']][enemy['level']]['width'] / 4
         gap_y = curr_screen.height * enemies_dict[enemy['type']][enemy['level']]['height'] / 1.5
     else:
         gap_x = curr_screen.width * enemies_dict[enemy['type']][enemy['level']]['width'] / 1.2
         gap_y = curr_screen.height * enemies_dict[enemy['type']][enemy['level']]['height'] / 0.8
-    if enemy['image'].collide_widget(character_image) and \
-            abs(enemy['image'].center[0] - character_image.center[0]) <= gap_x and \
-            abs(enemy['image'].center[1] - character_image.center[1]) <= gap_y:
-        curr_screen.character_dict['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['damage']
-        if curr_screen.character_dict['damage_received'] >= curr_screen.character_dict['hit_points']:
-            curr_screen.character_dict['damage_received'] = curr_screen.character_dict['hit_points']
+    for character in curr_screen.characters_dict.values():
+        character_image = curr_screen.ids[character['name'] + str(screen_num)]
+        if enemy['image'].collide_widget(character_image) and \
+                abs(enemy['image'].center[0] - character_image.center[0]) <= gap_x and \
+                abs(enemy['image'].center[1] - character_image.center[1]) <= gap_y:
+            is_fighting = True
+            # Enemy deals damage to character
+            character['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['damage']
+            # If character deals melee damage, character deals damage to enemy
+            if character['melee_attacks']:
+                enemy['hit_points'] = enemy['hit_points'] - character['melee_damage']
+                if enemy['hit_points'] <= 0:
+                    to_eliminate_flag = True
+                    self.kill_enemy(enemy['image'], screen_num)
+            if character['damage_received'] >= character['hit_points']:
+                character['damage_received'] = character['hit_points']
 
-        self.adjust_character_life_bar(screen_num)
-        if curr_screen.character_dict['damage_received'] >= curr_screen.character_dict['hit_points']:
-            self.kill_character(screen_num)
+            self.adjust_character_life_bar(screen_num, character)
+            if character['damage_received'] >= character['hit_points']:
+                self.kill_character(screen_num, character)
+
+    return is_fighting, to_eliminate_flag
 
 
 def enemy_animation_completed(self, enemy, screen_num):
     curr_screen = self.root.screens[screen_num]
     curr_screen.remove_widget(enemy['image'])
-    curr_screen.character_dict['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['finishes_damage']
-    if curr_screen.character_dict['damage_received'] >= curr_screen.character_dict['hit_points']:
-        curr_screen.character_dict['damage_received'] = curr_screen.character_dict['hit_points']
-        self.kill_character(screen_num)
+    for character in curr_screen.characters_dict.values():
+        character['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['finishes_damage']
+        if character['damage_received'] >= character['hit_points']:
+            character['damage_received'] = character['hit_points']
+            self.kill_character(screen_num, character)
+        
+        self.adjust_character_life_bar(screen_num, character)
+        if enemy['type'] != 'fire':
+            self.sound_enemy_laughs.play()
 
-    self.adjust_character_life_bar(screen_num)
-    if enemy['type'] != 'fire':
-        self.sound_enemy_laughs.play()
+
+def kill_enemy(self, enemy_image, screen_num):
+    curr_screen = self.root.screens[screen_num]
+    self.sound_enemy_dies.play()
+    enemy_center = enemy_image.center
+    curr_screen.remove_widget(enemy_image)
+    # Spawn reward with probability defined per level and per enemy
+    if random.random() < \
+            enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
+                'spawn_reward_probability']:
+        self.spawn_reward(enemy_center, screen_num)

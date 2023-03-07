@@ -181,17 +181,28 @@ def _find_kiss_endpoint_fast(character_image_center, touch_point, screen_size, k
             return lower_line_intersection_point[0], lower_line_intersection_point[1] - kiss_height * screen_size[1]
 
 
-def adjust_character_life_bar(self, screen_num):
+def adjust_character_life_bar(self, screen_num, character_dict):
     curr_screen = self.root.screens[screen_num]
-    damage_percent = float(curr_screen.character_dict['damage_received']) / float(
-        curr_screen.character_dict['hit_points'])
-    remaining_life_percent_lvl_widget = curr_screen.ids['remaining_life_percent_lvl' + str(screen_num)]
-    remaining_life_size_hint_y = remaining_life_percent_lvl_widget.remaining_life_size_hint_y
+    damage_percent = float(character_dict['damage_received']) / float(
+        character_dict['hit_points'])
+    remaining_life_percent_lvl_widget = curr_screen.ids[character_dict['life_bar_id'] + str(screen_num)]
+
+    remaining_life_size_hint_x = remaining_life_percent_lvl_widget.remaining_life_size_hint_x
     remaining_life_percent_lvl_widget.size_hint = \
         (
-            remaining_life_percent_lvl_widget.size_hint[0],
-            remaining_life_size_hint_y - remaining_life_size_hint_y * damage_percent
+            remaining_life_size_hint_x - remaining_life_size_hint_x * damage_percent,
+            remaining_life_percent_lvl_widget.size_hint[1],
         )
+    # damage_percent = float(curr_screen.characters_dict['character']['damage_received']) / float(
+    #         curr_screen.characters_dict['character']['hit_points'])
+    #     remaining_life_percent_lvl_widget = curr_screen.ids['remaining_life_percent_lvl' + str(screen_num)]
+    #
+    #     remaining_life_size_hint_x = remaining_life_percent_lvl_widget.remaining_life_size_hint_x
+    #     remaining_life_percent_lvl_widget.size_hint = \
+    #         (
+    #             remaining_life_size_hint_x - remaining_life_size_hint_x * damage_percent,
+    #             remaining_life_percent_lvl_widget.size_hint[1],
+    #         )
 
 
 def calc_parabola_vertex(p1, p2, p3):
@@ -275,3 +286,16 @@ def write_level_passed(platform, screen_num):
 #             (other.y <= first.y + first.norm_image_size[1] / 2) and
 #             (first.y <= other.y + other.norm_image_size[1] / 2)
 #     )
+
+def get_entity_bbox(entity_image):
+    # curr_screen = self.root.screens[screen_num]
+
+    x1 = entity_image.x
+    y1 = entity_image.y
+    x2 = entity_image.x
+    y2 = entity_image.top
+    x3 = entity_image.right
+    y3 = entity_image.top
+    x4 = entity_image.right
+    y4 = entity_image.y
+    return [x1, y1, x2, y2, x3, y3, x4, y4]

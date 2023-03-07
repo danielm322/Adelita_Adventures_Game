@@ -68,7 +68,7 @@ enemies_dict = {
             'speed_max': 2.3e-3,
             'spawn_point': None,
             'end_point': None,
-            'trajectory_variance': 0.15,
+            'trajectory_variance': 0.08,
             'spawn_interval': 2,  # In seconds
             'finishes_damage': 20,
             'spawn_reward_probability': 0.11,
@@ -113,6 +113,21 @@ enemies_dict = {
             'finishes_damage': 0,
             'width': 0.02,
             'height': 0.05,
+            'spawn_function': 'enemy_center',
+            'source': "graphics/entities/fire.png"
+        },
+        'level_2': {
+            'hit_points': 100,
+            'shield': 0,
+            'damage': 1,
+            'fires_back': False,
+            'speed_min': 3.9e-3,
+            'speed_max': 4.2e-3,
+            'spawn_point': None,
+            'end_point': None,
+            'finishes_damage': 0,
+            'width': 0.04,
+            'height': 0.08,
             'spawn_function': 'enemy_center',
             'source': "graphics/entities/fire.png"
         }
