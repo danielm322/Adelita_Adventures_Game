@@ -1,5 +1,5 @@
 import random
-from math import sqrt
+# from math import sqrt
 
 # from kivy.graphics import Line
 # from kivy.graphics import Line
@@ -48,10 +48,6 @@ def update_kisses(self, screen_num, dt):
     enemies_to_delete = []
     bosses_to_delete = []
     for kiss_key, kiss in curr_screen.kisses_ids.items():
-        # new_x/ = kiss['image'].x + kiss['direction_u_vector'][0] * self.kiss_speed * dt
-        # new_y = kiss['image'].y + kiss['direction_u_vector'][1] * self.kiss_speed * dt
-        # kiss['image'].x = new_x
-        # kiss['image'].y = new_y
         new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * self.kiss_speed * dt
         new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * self.kiss_speed * dt
         kiss['image'].center_x = new_x
@@ -62,7 +58,9 @@ def update_kisses(self, screen_num, dt):
         if kiss_used:
             kisses_to_delete.append(kiss_key)
             if enemies_to_eliminate:
-                enemies_to_delete.extend(enemies_to_eliminate)
+                for enemy_to_eliminate in enemies_to_eliminate:
+                    if enemy_to_eliminate not in enemies_to_delete:
+                        enemies_to_delete.append(enemy_to_eliminate)
         elif curr_screen.phase_1_completed:
             kiss_used, boss_to_eliminate = self.check_kiss_collision_with_bosses(kiss['image'], screen_num)
             if kiss_used:
@@ -74,7 +72,6 @@ def update_kisses(self, screen_num, dt):
                 or kiss['image'].y > curr_screen.height \
                 or kiss['image'].y < 0 - self.kiss_width * curr_screen.height:
             kisses_to_delete.append(kiss_key)
-            # curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss['image'])
             curr_screen.remove_widget(kiss['image'])
 
     if len(kisses_to_delete) > 0:
@@ -114,22 +111,14 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
                 and abs(enemy['image'].center[0] - kiss.center[0]) <= gap_x \
                 and abs(enemy['image'].center[1] - kiss.center[1]) <= gap_y:
             enemy['hit_points'] = enemy['hit_points'] - 1
-            # curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(kiss)
             curr_screen.remove_widget(kiss)
             kiss_already_hit = True
             if enemy['fires_back']:
                 enemies_to_spawn_fire.append(enemy['image'].center)
 
-            if enemy['hit_points'] == 0:
-                self.sound_enemy_dies.play()
-                enemy_center = enemy['image'].center
+            if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
-                curr_screen.remove_widget(enemy['image'])
-                # Spawn reward with probability defined per level
-                if random.random() < \
-                        enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
-                            'spawn_reward_probability']:
-                    self.spawn_reward(enemy_center, screen_num)
+                self.kill_enemy(enemy['image'], screen_num)
 
     if len(enemies_to_spawn_fire) > 0:
         for enemy_center in enemies_to_spawn_fire:
@@ -148,6 +137,7 @@ def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
     gap_x = curr_screen.width * curr_screen.boss_props['width'] / 5
     gap_y = curr_screen.height * curr_screen.boss_props['height'] / 3
     bosses_to_delete = []
+    bosses_to_spawn_fire = []
     for boss_key, boss in curr_screen.bosses_ids.items():
         if kiss.collide_widget(boss['image']) and \
                 abs(boss['image'].center[0] - kiss.center[0]) <= gap_x and \
@@ -160,5 +150,14 @@ def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
                 bosses_to_delete.append(boss_key)
                 # Write level pass to file
                 write_level_passed(platform, screen_num)
+            if curr_screen.boss_props['fires_back'] and not boss['hit_points'] <= 0:
+                bosses_to_spawn_fire.append(boss['image'].center)
+
+    if len(bosses_to_spawn_fire) > 0:
+        for boss_center in bosses_to_spawn_fire:
+            self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
+                                                           boss_center,
+                                                           curr_screen.boss_props['fire_type'],
+                                                           curr_screen.boss_props['fire_level'])
 
     return kiss_already_hit, bosses_to_delete

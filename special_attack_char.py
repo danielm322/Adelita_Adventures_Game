@@ -104,15 +104,11 @@ def check_special_collision(self, special, screen_num):
                 enemies_to_spawn_fire.append(enemy['image'].center)
 
             if enemy['hit_points'] <= 0:
-                self.sound_enemy_dies.play()
-                enemy_center = enemy['image'].center
                 enemies_to_delete.append(enemy_key)
-                curr_screen.remove_widget(enemy['image'])
-                # Spawn reward with probability defined per level
-                if random.random() < enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_reward_probability']:
-                    self.spawn_reward(enemy_center, screen_num)
+                self.kill_enemy(enemy['image'], screen_num)
 
     bosses_to_delete = []
+    bosses_to_spawn_fire = []
     for boss_key, boss in curr_screen.bosses_ids.items():
         if abs(special['image'].center[0] - boss['image'].center[0]) <=\
                 self.special_attack_properties['attack_radius'] * curr_screen.size[0]\
@@ -123,6 +119,8 @@ def check_special_collision(self, special, screen_num):
                 self.kill_boss(boss, screen_num)
                 bosses_to_delete.append(boss_key)
                 write_level_passed(platform, screen_num)
+            if curr_screen.boss_props['fires_back'] and not boss['hit_points'] <= 0:
+                bosses_to_spawn_fire.append(boss['image'].center)
 
     if len(enemies_to_spawn_fire) > 0:
         for enemy_center in enemies_to_spawn_fire:
@@ -130,6 +128,12 @@ def check_special_collision(self, special, screen_num):
                                                            enemy_center,
                                                            'fire',
                                                            'level_1')
+    if len(bosses_to_spawn_fire) > 0:
+        for boss_center in bosses_to_spawn_fire:
+            self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
+                                                           boss_center,
+                                                           curr_screen.boss_props['fire_type'],
+                                                           curr_screen.boss_props['fire_level'])
 
     # Remove special widget
     curr_screen.remove_widget(special['image'])
