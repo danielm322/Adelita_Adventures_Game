@@ -105,7 +105,7 @@ def check_special_collision(self, special, screen_num):
 
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
-                self.kill_enemy(enemy['image'], screen_num)
+                self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
 
     bosses_to_delete = []
     bosses_to_spawn_fire = []

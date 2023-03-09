@@ -61,7 +61,7 @@ def update_kisses(self, screen_num, dt):
                 for enemy_to_eliminate in enemies_to_eliminate:
                     if enemy_to_eliminate not in enemies_to_delete:
                         enemies_to_delete.append(enemy_to_eliminate)
-        elif curr_screen.phase_1_completed:
+        elif curr_screen.current_phase == curr_screen.number_of_phases:
             kiss_used, boss_to_eliminate = self.check_kiss_collision_with_bosses(kiss['image'], screen_num)
             if kiss_used:
                 kisses_to_delete.append(kiss_key)
@@ -90,20 +90,11 @@ def update_kisses(self, screen_num, dt):
 def check_kiss_collision_with_enemies(self, kiss, screen_num):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
-    if not curr_screen.phase_1_completed or curr_screen.number_of_phases == 2:
-        gap_x = curr_screen.width * \
-                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['width'] / 3
-        gap_y = curr_screen.height * \
-                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['height'] / 3
-    elif curr_screen.phase_1_completed and curr_screen.number_of_phases == 3:
-        gap_x = curr_screen.width * \
-                enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['width'] / 3
-        gap_y = curr_screen.height * \
-                enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['height'] / 3
-
     enemies_to_delete = []
     enemies_to_spawn_fire = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
+        gap_x = curr_screen.width * enemy['image'].width / 3
+        gap_y = curr_screen.height * enemy['image'].height / 3
         # if not kiss_already_hit and check_collision_rect(kiss, enemy['image']) and not enemy['type'] == 'fire':
         if not kiss_already_hit \
                 and not enemy['type'] == 'fire' \
@@ -118,7 +109,7 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
 
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
-                self.kill_enemy(enemy['image'], screen_num)
+                self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
 
     if len(enemies_to_spawn_fire) > 0:
         for enemy_center in enemies_to_spawn_fire:

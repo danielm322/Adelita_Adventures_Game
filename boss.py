@@ -10,12 +10,9 @@ from helper_fns import get_direction_unit_vector, get_entity_bbox
 
 def spawn_boss(self, screen_num):
     curr_screen = self.root.screens[screen_num]
-    # spawn_pos = (curr_screen.size[0],
-    #              curr_screen.size[1] * (0.5 - curr_screen.boss_props['height'] / 2))
     screen_size_ratio = curr_screen.size[1] / curr_screen.size[0]
     start_pos = {
         'center_x': 1.0 + curr_screen.boss_props['width'] / 2,
-        # 'center_y': 0.5 - curr_screen.boss_props['height'] / 2
         'center_y': 0.5
     }
     # finish_pos = (0,
@@ -23,14 +20,11 @@ def spawn_boss(self, screen_num):
     finish_pos = {
         'center_x': 0. + self.side_bar_width,
         'center_y': 0.5
-        # 'x': 0. + self.side_bar_width - curr_screen.boss_props['width'] / 2,
-        # 'y': 0.5 - curr_screen.boss_props['height'] / 2
     }
     direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
     boss = kivy.uix.image.Image(source=curr_screen.boss_props['source'],
                                 size_hint=(curr_screen.boss_props['width'] * screen_size_ratio,
                                            curr_screen.boss_props['height']),
-                                # pos=spawn_pos,
                                 pos_hint=start_pos,
                                 allow_stretch=True,
                                 keep_ratio=False)
@@ -41,6 +35,7 @@ def spawn_boss(self, screen_num):
                                                     # 'finish_pos': finish_pos,
                                                     'speed': curr_screen.boss_props['speed'],
                                                     'direction_u_vector': direction_unit_vector,
+                                                    'is_fighting': False
                                                     }
     # with curr_screen.canvas:
     #     Color(1, 0, 0, 0.2)
@@ -50,20 +45,19 @@ def spawn_boss(self, screen_num):
 def update_bosses(self, screen_num, dt):
     curr_screen = self.root.screens[screen_num]
     for boss_key, boss in curr_screen.bosses_ids.items():
-        # new_x = boss['image'].pos_hint['x'] + boss['direction_u_vector'][0] * boss['speed'] * dt
-        new_x = boss['image'].pos_hint['center_x'] + boss['direction_u_vector'][0] * boss['speed'] * dt
-        if curr_screen.boss_props['trajectory_type'] == 'linear':
-            new_y = boss['image'].pos_hint['center_y'] + boss['direction_u_vector'][1] * boss['speed'] * dt
-        else:
-            if curr_screen.boss_props['trajectory_function'] == 'sine':
-                new_y = 0.5 + curr_screen.boss_props['amplitude'] * sin(curr_screen.boss_props['period'] * new_x)**2
-        boss['image'].pos_hint['center_x'] = new_x
-        boss['image'].pos_hint['center_y'] = new_y
-        boss['image'].center_x = new_x * curr_screen.size[0]
-        boss['image'].center_y = new_y * curr_screen.size[1]
+        boss['is_fighting'] = self.check_boss_collision(boss['image'], screen_num)
+        if not boss['is_fighting']:
+            new_x = boss['image'].pos_hint['center_x'] + boss['direction_u_vector'][0] * boss['speed'] * dt
+            if curr_screen.boss_props['trajectory_type'] == 'linear':
+                new_y = boss['image'].pos_hint['center_y'] + boss['direction_u_vector'][1] * boss['speed'] * dt
+            else:
+                if curr_screen.boss_props['trajectory_function'] == 'sine':
+                    new_y = 0.5 + curr_screen.boss_props['amplitude'] * sin(curr_screen.boss_props['period'] * new_x)**2
+            boss['image'].pos_hint['center_x'] = new_x
+            boss['image'].pos_hint['center_y'] = new_y
+            boss['image'].center_x = new_x * curr_screen.size[0]
+            boss['image'].center_y = new_y * curr_screen.size[1]
         # self.entity_bounding_box.points = get_entity_bbox(boss['image'])
-        # boss['image'].x = boss['image'].x + boss['speed_x'] * dt
-        self.check_boss_collision(boss['image'], screen_num)
 
         # if boss['image'].x <= boss['finish_pos']['x'] * curr_screen.size[0]:
         if boss['image'].center_x <= self.side_bar_width * curr_screen.size[0]:
@@ -102,7 +96,8 @@ def boss_defeat_animation_finish(self, screen_num, *args):
     curr_screen.remove_widget(boss)
 
 
-def check_boss_collision(self, boss_image, screen_num):
+def check_boss_collision(self, boss_image, screen_num) -> bool:
+    is_fighting_flag = False
     curr_screen = self.root.screens[screen_num]
 
     gap_x = curr_screen.width * curr_screen.boss_props['width'] / 4
@@ -112,12 +107,14 @@ def check_boss_collision(self, boss_image, screen_num):
         if boss_image.collide_widget(character_image) and \
                 abs(boss_image.center[0] - character_image.center[0]) <= gap_x and \
                 abs(boss_image.center[1] - character_image.center[1]) <= gap_y:
+            is_fighting_flag = True
             character['damage_received'] += curr_screen.boss_props['damage']
             if character['damage_received'] > character['hit_points']:
                 character['damage_received'] = character['hit_points']
-                self.adjust_character_life_bar(screen_num, character)
+            self.adjust_character_life_bar(screen_num, character)
             if character['damage_received'] == character['hit_points']:
                 self.kill_character(screen_num, character)
+    return is_fighting_flag
 
 
 def kill_boss(self, boss, screen_num):

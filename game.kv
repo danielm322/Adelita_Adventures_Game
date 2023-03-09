@@ -7,6 +7,7 @@ ScreenManager:
     Level5:
     Level6:
     Level7:
+    Level8:
 
 <MainScreen>:
     name: "main"
@@ -60,6 +61,12 @@ ScreenManager:
                 root.manager.transition.direction = 'left'
                 app.root.current="level7"
             pos_hint: {"center_x": .7, "center_y": .45}
+        LevelButton:
+            text: "Level 8"
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current="level8"
+            pos_hint: {"center_x": .7, "center_y": .35}
 
 <Level1>:
     name: "level1"
@@ -451,6 +458,68 @@ ScreenManager:
                 id: aux_char_2_image_lvl7
             PauseMenuWidget:
                 id: pause_menu_lvl7
+
+<Level8>:
+    name: "level8"
+    on_pre_enter: app.screen_on_pre_enter(8)
+    #on_pre_leave: app.screen_on_pre_leave(8)
+    on_enter: app.screen_on_enter(8)
+    on_leave: app.screen_on_leave(8)
+    BoxLayout:
+        orientation: "horizontal"
+        RelativeLayout:
+            size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl8
+                on_press: app.pause_game(8)
+            RemainingLifePercent
+                id: remaining_life_percent_lvl8
+            RemainingLifePercentAuxChar1
+                id: remaining_life_percent_aux_char_1_lvl8
+            RemainingLifePercentAuxChar2
+                id: remaining_life_percent_aux_char_2_lvl8
+            BoxLayout:
+                size_hint: 1, 0.05
+                pos_hint: {"x": 0.0, "y": .36}
+                Label:
+                    size_hint: 0.35, 1
+                    canvas:
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                            source: "graphics/entities/star_small.png"
+                NumCollectedStars:
+                    id: num_stars_collected_lvl8
+            KissButton:
+                id: kiss_button_lvl8
+                on_state: app.on_toggle_button_state(self, 8)
+            SpecialButton:
+                id: special_button_lvl8
+                on_state: app.on_special_button_state(self, 8)
+            MoveAuxChar1:
+                id: move_aux_char_1_lvl8
+                on_state: app.on_move_aux_char_1_button(self, 8)
+            MoveAuxChar2:
+                id: move_aux_char_2_lvl8
+                on_state: app.on_move_aux_char_2_button(self, 8)
+        FloatLayout:
+            #size_hint: 0, 0.9
+            id: layout_lvl8
+            on_touch_down: app.touch_down_handler(8, args)
+            canvas.before:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            Character:
+                id: character_image_lvl8
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            AuxChar1:
+                id: aux_char_1_image_lvl8
+            AuxChar2:
+                id: aux_char_2_image_lvl8
+            PauseMenuWidget:
+                id: pause_menu_lvl8
 
 
 <NumCollectedStars@Label>:
