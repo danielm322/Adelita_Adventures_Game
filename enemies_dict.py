@@ -5,7 +5,7 @@ enemies_dict = {
         'level_1': {
             'hit_points': 6,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.3,
             'fires_back': False,
             'speed_min': 1e-3,
             'speed_max': 1.5e-3,
@@ -22,7 +22,7 @@ enemies_dict = {
         'level_2': {
             'hit_points': 6,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.3,
             'fires_back': False,
             'speed_min': 1.3e-3,
             'speed_max': 1.8e-3,
@@ -41,7 +41,7 @@ enemies_dict = {
         'level_1': {
             'hit_points': 10,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.5,
             'fires_back': False,
             'speed_min': 0.7e-3,
             'speed_max': 0.9e-3,
@@ -62,7 +62,7 @@ enemies_dict = {
         'level_1': {
             'hit_points': 3,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.2,
             'fires_back': False,
             'speed_min': 2e-3,
             'speed_max': 2.3e-3,
@@ -83,7 +83,7 @@ enemies_dict = {
         'level_1': {
             'hit_points': 8,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.3,
             'fires_back': True,
             'speed_min': 0.7e-3,
             'speed_max': 1.2e-3,
@@ -104,7 +104,7 @@ enemies_dict = {
         'level_1': {
             'hit_points': 100,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.3,
             'fires_back': False,
             'speed_min': 2.5e-3,
             'speed_max': 2.7e-3,
@@ -119,7 +119,7 @@ enemies_dict = {
         'level_2': {
             'hit_points': 100,
             'shield': 0,
-            'damage': 1,
+            'damage': 0.6,
             'fires_back': False,
             'speed_min': 3.9e-3,
             'speed_max': 4.2e-3,

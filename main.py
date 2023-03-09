@@ -28,8 +28,6 @@ class GameApp(kivy.app.App):
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, \
         spawn_rocket_at_enemy_center_to_ch_center, kill_enemy
-    # from enemy_red import spawn_enemy_red
-    # from enemy_yellow import spawn_enemy_yellow
     from reward import spawn_reward, update_rewards
     from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
         boss_defeat_animation_finish, check_boss_collision, kill_boss
@@ -42,7 +40,7 @@ class GameApp(kivy.app.App):
     side_bar_width = 0.08  # In screen percentage
     next_level = 1  # Default first level to be played (Activate just one level)
 
-    clock_spawn_enemies_variable = None
+    # clock_spawn_enemies_variable = None
     clock_update_fn_variable = None
     clock_banana_throw_variable = None
 
@@ -75,15 +73,19 @@ class GameApp(kivy.app.App):
     aux_char_1_range = 0.3  # In screen proportion (same range in width and height, is a rectangle)
     aux_char_1_quad = None  # Quad to see the aux char 1 range
 
+    # Rewards properties
     reward_width = 0.05
     reward_height = 0.1
     reward_duration = 12  # In seconds to disappear
 
+    # Boss rewards properties
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
 
     # Character properties
     character_speed_factor = 1 / 300  # Percentage of screen covered by each character update  1/300 seems fine
+
+    # App properties
     APP_TIME_FACTOR = 40  # In number of updates per second
     SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
     MOVEMENT_PIXEL_TOLERANCE = 8  # Number of pixels of tolerance to accept a widget is in a given position
@@ -159,23 +161,28 @@ class GameApp(kivy.app.App):
         if self.sound_level_play.state == 'play':
             self.sound_level_play.stop()
         # Stop Schedule to spawn enemies
-        if self.clock_spawn_enemies_variable is not None:
-            self.clock_spawn_enemies_variable.cancel()
-            self.clock_spawn_enemies_variable = None
+        if len(curr_screen.spawn_enemies_clock_variables) > 0:
+            for i in range(len(curr_screen.spawn_enemies_clock_variables)):
+                curr_screen.spawn_enemies_clock_variables[i].cancel()
+                curr_screen.spawn_enemies_clock_variables[i] = None
+
+            curr_screen.spawn_enemies_clock_variables.clear()
+            assert len(curr_screen.spawn_enemies_clock_variables) == 0
         # Unschedule the update function
-        # Clock.unschedule(partial(self.update_screen, screen_num))
         if self.clock_update_fn_variable is not None:
             self.clock_update_fn_variable.cancel()
             self.clock_update_fn_variable = None
         # Delete special attack quad
         if self.special_attack_properties['quad'] is not None:
             self.special_attack_properties['quad'] = None
+        # Stop auto shoot of aux char 1
         if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS and self.clock_banana_throw_variable is not None:
             self.clock_banana_throw_variable.cancel()
             self.clock_banana_throw_variable = None
 
     def screen_on_pre_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
+        curr_screen.current_phase = 1
         for character in curr_screen.characters_dict.values():
             character['is_killed'] = False
             character['damage_received'] = 0
@@ -183,57 +190,62 @@ class GameApp(kivy.app.App):
         self.move_aux_char_1_button_enabled = False
         self.move_aux_char_2_button_enabled = False
 
-        # In case Mathis was dead (& opaque):
+        # In case Aux Char 1 was dead (& opaque):
         if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS:
             curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].opacity = 1
-            curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center_x = 0.25*curr_screen.size[0]
+            curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center_x = 0.25 * curr_screen.size[0]
             curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center_y = 0.25 * curr_screen.size[1]
             curr_screen.ids['move_aux_char_1_lvl' + str(screen_num)].state = "normal"
             self.move_aux_char_1_button_enabled = True
+        # In case Aux Char 2 was dead (& opaque):
         if screen_num >= self.LEVEL_WHEN_AUX_CHAR_2_ENTERS:
             curr_screen.ids['aux_char_2_image_lvl' + str(screen_num)].opacity = 1
             curr_screen.ids['aux_char_2_image_lvl' + str(screen_num)].center_x = 0.25 * curr_screen.size[0]
             curr_screen.ids['aux_char_2_image_lvl' + str(screen_num)].center_y = 0.75 * curr_screen.size[1]
             curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
             self.move_aux_char_2_button_enabled = True
-        # curr_screen.character_dict['killed'] = False
-        # curr_screen.character_dict['damage_received'] = 0
         curr_screen.state_paused = False
-        curr_screen.phase_1_completed = False
-        if curr_screen.number_of_phases == 3:
-            curr_screen.phase_2_completed = False
         curr_screen.rewards_gathered = 0
         curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
-            curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
+            curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_phases[0])
+        # Make Pause menu widget invisible
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 0.
-        if enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
-            'spawn_function'] == 'gaussian':
-            enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
-                'spawn_point'] = random.random()
-            enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
-                'end_point'] = random.random()
-            if curr_screen.enemy_phase_1['type'] == 'yellow':
-                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
-                    'spawn_point'] *= 0.9
-                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['end_point'] *= 0.9
+        # If new enemies have gaussian distribution of spawn and end points, initialize those values:
+        for enemy in curr_screen.enemies_phases[curr_screen.current_phase - 1].values():
+            if enemies_dict[enemy['type']][enemy['level']]['spawn_function'] == 'gaussian':
+                enemies_dict[enemy['type']][enemy['level']]['spawn_point'] = random.random()
+                enemies_dict[enemy['type']][enemy['level']]['end_point'] = random.random()
+                if enemy['type'] == 'yellow':
+                    enemies_dict[enemy['type']][enemy['level']]['spawn_point'] *= 0.9
+                    enemies_dict[enemy['type']][enemy['level']]['end_point'] *= 0.9
 
     def screen_on_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
-        # Strangely, this works well here, but no on pre enter:
+        # Strangely, adjusting character speed works well here, but not on pre enter:
         for character in curr_screen.characters_dict.values():
             character['speed'] = (curr_screen.size[0] + curr_screen.size[1]) * self.character_speed_factor
         # Each character's speed can be modified to have different speeds for each character,
         # adding a speed factor to each character
         # Always begin in the first phase
-        if self.clock_spawn_enemies_variable is None:
-            self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                partial(self.spawn_enemy,
-                        screen_num,
-                        curr_screen.enemy_phase_1['type'],
-                        curr_screen.enemy_phase_1['level']),
-                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
+        for enemy in curr_screen.enemies_phases[0].values():
+            curr_screen.spawn_enemies_clock_variables.append(
+                Clock.schedule_interval(
+                    partial(self.spawn_enemy,
+                            screen_num,
+                            enemy['type'],
+                            enemy['level']),
+                    enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
+                )
             )
+        # if self.clock_spawn_enemies_variable is None:
+        #     self.clock_spawn_enemies_variable = Clock.schedule_interval(
+        #         partial(self.spawn_enemy,
+        #                 screen_num,
+        #                 curr_screen.enemy_phase_1['type'],
+        #                 curr_screen.enemy_phase_1['level']),
+        #         enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
+        #     )
         self.sound_level_play.play()
         # Start update screen function
         self.clock_update_fn_variable = Clock.schedule_interval(partial(self.update_screen, screen_num),
@@ -253,36 +265,34 @@ class GameApp(kivy.app.App):
             cycle_time_factor = args[0] * self.APP_TIME_FACTOR
             self.update_enemies(screen_num, dt=cycle_time_factor)
             self.update_specials(screen_num, dt=args[0])  # We pass actual seconds
-            # self.update_character(screen_num, dt=cycle_time_factor)
             self.update_characters_from_dict(screen_num, dt=cycle_time_factor)
             self.update_kisses(screen_num, dt=cycle_time_factor)
             self.update_rewards(screen_num, dt=args[0])  # We pass actual seconds
-            if self.root.screens[screen_num].phase_1_completed:
+            if self.root.screens[screen_num].current_phase == self.root.screens[screen_num].number_of_phases:
                 self.update_bosses(screen_num, dt=cycle_time_factor)
 
     def touch_down_handler(self, screen_num, args):
         # print(args[1].is_double_tap)
         curr_screen = self.root.screens[screen_num]
-        if args[1].psx > self.side_bar_width and not curr_screen.state_paused:
+        if args[1].psx > self.side_bar_width \
+                and not curr_screen.state_paused \
+                and not curr_screen.characters_dict['character']['is_killed']:
             if not curr_screen.characters_dict['character']['shoot_state'] \
                     and not curr_screen.characters_dict['character']['shoot_special_state'] \
-                    and not curr_screen.move_aux_char_1_state\
+                    and not curr_screen.move_aux_char_1_state \
                     and not curr_screen.move_aux_char_2_state:
-                # self.start_character_animation(screen_num, args[1].ppos)
                 self.start_character_animation_from_dict(screen_num, args[1].ppos,
                                                          curr_screen.characters_dict['character'])
             if not curr_screen.characters_dict['character']['shoot_state'] \
                     and not curr_screen.characters_dict['character']['shoot_special_state'] \
                     and not curr_screen.move_aux_char_2_state \
                     and curr_screen.move_aux_char_1_state:
-                # self.start_moving_mathis(screen_num, args[1].ppos)
                 self.start_character_animation_from_dict(screen_num, args[1].ppos,
                                                          curr_screen.characters_dict['aux_char_1'])
             if not curr_screen.characters_dict['character']['shoot_state'] \
                     and not curr_screen.characters_dict['character']['shoot_special_state'] \
                     and not curr_screen.move_aux_char_1_state \
                     and curr_screen.move_aux_char_2_state:
-                # self.start_moving_mathis(screen_num, args[1].ppos)
                 self.start_character_animation_from_dict(screen_num, args[1].ppos,
                                                          curr_screen.characters_dict['aux_char_2'])
             if not curr_screen.characters_dict['character']['shoot_special_state'] \
@@ -302,9 +312,11 @@ class GameApp(kivy.app.App):
         else:
             if curr_screen.ids['kiss_button_lvl' + str(screen_num)].state == "down":
                 curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
-            if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS and curr_screen.ids['move_aux_char_1_lvl' + str(screen_num)].state == "down":
+            if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS and curr_screen.ids[
+                'move_aux_char_1_lvl' + str(screen_num)].state == "down":
                 curr_screen.ids['move_aux_char_1_lvl' + str(screen_num)].state = "normal"
-            if screen_num >= self.LEVEL_WHEN_AUX_CHAR_2_ENTERS and curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state == "down":
+            if screen_num >= self.LEVEL_WHEN_AUX_CHAR_2_ENTERS and curr_screen.ids[
+                'move_aux_char_2_lvl' + str(screen_num)].state == "down":
                 curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
 
             curr_screen.characters_dict['character']['shoot_special_state'] = True
@@ -375,11 +387,26 @@ class GameApp(kivy.app.App):
         curr_screen.state_paused = True
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 1.
-        if not curr_screen.phase_1_completed \
-                or (curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed):
-            # Stop enemy spawning
-            if self.clock_spawn_enemies_variable is not None:
-                self.clock_spawn_enemies_variable.cancel()
+        # Cancel enemy spawning
+        if len(curr_screen.spawn_enemies_clock_variables) > 0:
+            for i in range(len(curr_screen.spawn_enemies_clock_variables)):
+                curr_screen.spawn_enemies_clock_variables[i].cancel()
+                curr_screen.spawn_enemies_clock_variables[i] = None
+
+            curr_screen.spawn_enemies_clock_variables.clear()
+            # for clock_variable in curr_screen.spawn_enemies_clock_variables:
+            #     clock_variable.cancel()
+            #     clock_variable = None
+
+            # for clock_variable in curr_screen.spawn_enemies_clock_variables:
+            #     curr_screen.spawn_enemies_clock_variables.remove(clock_variable)
+            # Check all clock variables have been canceled and eliminated
+            assert len(curr_screen.spawn_enemies_clock_variables) == 0
+        # if not curr_screen.phase_1_completed \
+        #         or (curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed):
+        #     # Stop enemy spawning
+        #     if self.clock_spawn_enemies_variable is not None:
+        #         self.clock_spawn_enemies_variable.cancel()
         # Make enemies opaque on pause since I couldn't find a way to make the pause menu to be above the enemies
         for _, enemy in curr_screen.enemies_ids.items():
             enemy['image'].opacity = 0.1
@@ -394,24 +421,53 @@ class GameApp(kivy.app.App):
         curr_screen.state_paused = False
         pause_menu_widget = curr_screen.ids['pause_menu_lvl' + str(screen_num)]
         pause_menu_widget.opacity = 0.
-        if not curr_screen.phase_1_completed:
-            # Restart enemy spawning
-            self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                partial(self.spawn_enemy,
-                        screen_num,
-                        curr_screen.enemy_phase_1['type'],
-                        curr_screen.enemy_phase_1['level']),
-                enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
+        # Restart spawning of enemies if phase is not last
+        if curr_screen.current_phase < curr_screen.number_of_phases:
+            for enemy in curr_screen.enemies_phases[curr_screen.current_phase - 1].values():
+                curr_screen.spawn_enemies_clock_variables.append(
+                    Clock.schedule_interval(
+                        partial(self.spawn_enemy,
+                                screen_num,
+                                enemy['type'],
+                                enemy['level']),
+                        enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
+                    )
+                )
+            assert len(curr_screen.spawn_enemies_clock_variables) == len(
+                curr_screen.enemies_phases[curr_screen.current_phase - 1]
             )
-        elif curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed:
-            # Restart enemy spawning
-            self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                partial(self.spawn_enemy,
-                        screen_num,
-                        curr_screen.enemy_phase_2['type'],
-                        curr_screen.enemy_phase_2['level']),
-                enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['spawn_interval']
-            )
+        # if len(curr_screen.spawn_enemies_clock_variables) > 0 \
+        #         and curr_screen.current_phase < curr_screen.number_of_phases:
+        #     for clock_variable, enemy in zip(
+        #             curr_screen.spawn_enemies_clock_variables,
+        #             curr_screen.enemies_phases[curr_screen.current_phase - 1].values()
+        #     ):
+        #         clock_variable = Clock.schedule_interval(
+        #             partial(self.spawn_enemy,
+        #                     screen_num,
+        #                     enemy['type'],
+        #                     enemy['level']),
+        #             enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
+        #         )
+
+        # if not curr_screen.phase_1_completed:
+        #     # Restart enemy spawning
+        #     self.clock_spawn_enemies_variable = Clock.schedule_interval(
+        #         partial(self.spawn_enemy,
+        #                 screen_num,
+        #                 curr_screen.enemy_phase_1['type'],
+        #                 curr_screen.enemy_phase_1['level']),
+        #         enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
+        #     )
+        # elif curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed:
+        #     # Restart enemy spawning
+        #     self.clock_spawn_enemies_variable = Clock.schedule_interval(
+        #         partial(self.spawn_enemy,
+        #                 screen_num,
+        #                 curr_screen.enemy_phase_2['type'],
+        #                 curr_screen.enemy_phase_2['level']),
+        #         enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']]['spawn_interval']
+        #     )
         # Reestablish opacity to one on un-pause
         for _, enemy in curr_screen.enemies_ids.items():
             enemy['image'].opacity = 1

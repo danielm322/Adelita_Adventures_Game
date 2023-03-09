@@ -46,6 +46,8 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                               'hit_points'],
                                                       'direction_u_vector': enemy_direction_unit_vector,
                                                       'is_fighting': False,
+                                                      'reward_probability': enemies_dict[enemy_type][enemy_level][
+                                                          'spawn_reward_probability'],
                                                       'speed': r_speed}
 
 
@@ -151,7 +153,7 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
                 enemy['hit_points'] = enemy['hit_points'] - character['melee_damage']
                 if enemy['hit_points'] <= 0:
                     to_eliminate_flag = True
-                    self.kill_enemy(enemy['image'], screen_num)
+                    self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
             if character['damage_received'] >= character['hit_points']:
                 character['damage_received'] = character['hit_points']
 
@@ -176,13 +178,11 @@ def enemy_animation_completed(self, enemy, screen_num):
             self.sound_enemy_laughs.play()
 
 
-def kill_enemy(self, enemy_image, screen_num):
+def kill_enemy(self, enemy_image, screen_num, reward_probability):
     curr_screen = self.root.screens[screen_num]
     self.sound_enemy_dies.play()
     enemy_center = enemy_image.center
     curr_screen.remove_widget(enemy_image)
     # Spawn reward with probability defined per level and per enemy
-    if random.random() < \
-            enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']][
-                'spawn_reward_probability']:
+    if random.random() < reward_probability:
         self.spawn_reward(enemy_center, screen_num)

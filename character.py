@@ -45,9 +45,9 @@ def update_characters_from_dict(self, screen_num, dt):
     for character in curr_screen.characters_dict.values():
         if character['is_moving'] and not character['is_killed']:
             character_image = curr_screen.ids[character['name'] + str(screen_num)]
-            new_x = character_image.center_x +\
+            new_x = character_image.center_x + \
                     character['direction_unit_vector'][0] * character['speed'] * dt
-            new_y = character_image.center_y +\
+            new_y = character_image.center_y + \
                     character['direction_unit_vector'][1] * character['speed'] * dt
             character_image.center_x = new_x
             character_image.center_y = new_y
@@ -92,60 +92,57 @@ def check_character_collision(self, character_image, screen_num):
             curr_screen.remove_widget(reward['image'])
             curr_screen.rewards_gathered += 1
             self.sound_reward_collected.play()
-            # Update reward widget
-            if not curr_screen.phase_1_completed:
-                if curr_screen.rewards_gathered > curr_screen.rewards_to_win_ph_1:
-                    curr_screen.rewards_gathered = curr_screen.rewards_to_win_ph_1
+            # Update stars counter
+            if curr_screen.current_phase < curr_screen.number_of_phases:
+                curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = \
+                    str(curr_screen.rewards_gathered) + "/" \
+                    + str(curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1])
+            elif curr_screen.current_phase == curr_screen.number_of_phases:
+                curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = \
+                    str(curr_screen.rewards_gathered) + "/" \
+                    + str(curr_screen.rewards_to_win_phases[curr_screen.current_phase - 2])
 
-                curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
-                    curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_1)
-            elif curr_screen.phase_1_completed and curr_screen.number_of_phases == 3:
-                if curr_screen.rewards_gathered > curr_screen.rewards_to_win_ph_2:
-                    curr_screen.rewards_gathered = curr_screen.rewards_to_win_ph_2
+            # Pass to next phase
+            if curr_screen.current_phase < curr_screen.number_of_phases \
+                    and curr_screen.rewards_gathered == curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1]:
+                curr_screen.current_phase += 1
+                # Cancel enemy spawning
+                # This for loop is written like this to be able to convert to None the clock variables
+                if len(curr_screen.spawn_enemies_clock_variables) > 0:
+                    for i in range(len(curr_screen.spawn_enemies_clock_variables)):
+                        curr_screen.spawn_enemies_clock_variables[i].cancel()
+                        curr_screen.spawn_enemies_clock_variables[i] = None
 
-                curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
-                    curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_2)
-            if not curr_screen.phase_1_completed and curr_screen.rewards_gathered == curr_screen.rewards_to_win_ph_1:
-                # Stop spawning enemies phase 1
-                self.clock_spawn_enemies_variable.cancel()
-                self.clock_spawn_enemies_variable = None
-                curr_screen.phase_1_completed = True
-                if curr_screen.number_of_phases == 2:
+                    curr_screen.spawn_enemies_clock_variables.clear()
+                    # Check all clock variables have been canceled and eliminated
+                    assert len(curr_screen.spawn_enemies_clock_variables) == 0
+
+                if curr_screen.current_phase == curr_screen.number_of_phases:
                     self.spawn_boss(screen_num)
-
-                elif curr_screen.number_of_phases == 3:
-                    if enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']][
-                        'spawn_function'] == 'gaussian':
-                        enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']][
-                            'spawn_point'] = random.random()
-                        enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']][
-                            'end_point'] = random.random()
-                        if curr_screen.enemy_phase_2['type'] == 'yellow':
-                            enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']][
-                                'spawn_point'] *= 0.9
-                            enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']][
-                                'end_point'] *= 0.9
-                    self.clock_spawn_enemies_variable = Clock.schedule_interval(
-                        partial(self.spawn_enemy,
-                                screen_num,
-                                curr_screen.enemy_phase_2['type'],
-                                curr_screen.enemy_phase_2['level']),
-                        enemies_dict[curr_screen.enemy_phase_2['type']][curr_screen.enemy_phase_2['level']][
-                            'spawn_interval']
-                    )
+                else:
+                    for enemy in curr_screen.enemies_phases[curr_screen.current_phase - 1].values():
+                        # If new enemies have gaussian distribution of spawn and end points, initialize those values
+                        if enemies_dict[enemy['type']][enemy['level']]['spawn_function'] == 'gaussian':
+                            enemies_dict[enemy['type']][enemy['level']]['spawn_point'] = random.random()
+                            enemies_dict[enemy['type']][enemy['level']]['end_point'] = random.random()
+                            # Control amplitude of yellow enemy spawn and end points
+                            if enemy['type'] == 'yellow':
+                                enemies_dict[enemy['type']][enemy['level']]['spawn_point'] *= 0.9
+                                enemies_dict[enemy['type']][enemy['level']]['end_point'] *= 0.9
+                        # Spawn new enemies
+                        curr_screen.spawn_enemies_clock_variables.append(
+                            Clock.schedule_interval(
+                                partial(self.spawn_enemy,
+                                        screen_num,
+                                        enemy['type'],
+                                        enemy['level']),
+                                enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
+                            )
+                        )
                     curr_screen.rewards_gathered = 0
-                    curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
-                        curr_screen.rewards_gathered) + "/" + str(curr_screen.rewards_to_win_ph_2)
-
-            elif curr_screen.number_of_phases == 3 \
-                    and not curr_screen.phase_2_completed \
-                    and curr_screen.phase_1_completed \
-                    and curr_screen.rewards_gathered == curr_screen.rewards_to_win_ph_2:
-                # Stop spawning enemies phase 2
-                self.clock_spawn_enemies_variable.cancel()
-                self.clock_spawn_enemies_variable = None
-                curr_screen.phase_2_completed = True
-                self.spawn_boss(screen_num)
+                    curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = \
+                        str(curr_screen.rewards_gathered) + "/" + \
+                        str(curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1])
 
     if len(rewards_to_delete) > 0:
         for reward_key in rewards_to_delete:
@@ -160,10 +157,14 @@ def kill_character(self, screen_num, character_dict):
         self.sound_level_play.stop()
         self.sound_game_over.play()
         character_dict['is_moving'] = False
-        if not curr_screen.phase_1_completed \
-                or (curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed):
-            # Stop enemy spawning
-            self.clock_spawn_enemies_variable.cancel()
+        # Cancel enemy spawning
+        # This for loop is written like this to be able to convert to None the clock variables
+        for i in range(len(curr_screen.spawn_enemies_clock_variables)):
+            curr_screen.spawn_enemies_clock_variables[i].cancel()
+            curr_screen.spawn_enemies_clock_variables[i] = None
+        curr_screen.spawn_enemies_clock_variables.clear()
+        # Check all clock variables have been canceled and eliminated
+        assert len(curr_screen.spawn_enemies_clock_variables) == 0
         # Stop enemies, and bosses
         for _, enemy in curr_screen.enemies_ids.items():
             enemy['speed'] = 0.
