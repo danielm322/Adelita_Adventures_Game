@@ -16,13 +16,14 @@ from functools import partial
 from kivy.clock import Clock
 from kivy.properties import BooleanProperty, NumericProperty
 from kivy.utils import platform
-from levels import Level1, Level2
+from levels import Level1, Level2, Level3
 from pause_menu import PauseMenuWidget
 from helper_fns import read_game_info
 from enemies_dict import enemies_dict
 
 
 class GameApp(kivy.app.App):
+    # Imports: Do not delete even if not used in this file
     from character import check_character_collision, kill_character, get_character_bbox, \
         start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
@@ -36,18 +37,13 @@ class GameApp(kivy.app.App):
     from special_attack_char import shoot_special, update_specials, check_special_collision, enable_special_attack, \
         get_special_quad_coords
     from aux_char_1 import auto_shoot
-    # pause_menu_widget = ObjectProperty()
-    side_bar_width = 0.08  # In screen percentage
-    next_level = 1  # Default first level to be played (Activate just one level)
 
-    # clock_spawn_enemies_variable = None
-    clock_update_fn_variable = None
-    clock_banana_throw_variable = None
-
+    # Kiss properties
     kiss_width = 0.03
     kiss_height = 0.04
     kiss_speed = 25
 
+    # Special attack properties
     special_attack_properties = {
         'init_width': 0.02,
         'init_height': 0.04,
@@ -86,6 +82,10 @@ class GameApp(kivy.app.App):
     character_speed_factor = 1 / 300  # Percentage of screen covered by each character update  1/300 seems fine
 
     # App properties
+    side_bar_width = 0.08  # In screen percentage
+    next_level = 1  # Default first level to be played (Activate just one level)
+    clock_update_fn_variable = None
+    clock_banana_throw_variable = None
     APP_TIME_FACTOR = 40  # In number of updates per second
     SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
     MOVEMENT_PIXEL_TOLERANCE = 8  # Number of pixels of tolerance to accept a widget is in a given position
@@ -183,6 +183,8 @@ class GameApp(kivy.app.App):
     def screen_on_pre_enter(self, screen_num):
         curr_screen = self.root.screens[screen_num]
         curr_screen.current_phase = 1
+        curr_screen.ids['num_waves_lvl' + str(screen_num)].text = str(
+            curr_screen.current_phase) + "/" + str(curr_screen.number_of_phases)
         for character in curr_screen.characters_dict.values():
             character['is_killed'] = False
             character['damage_received'] = 0

@@ -1,3 +1,5 @@
+#:set font_size_indicators dp(20)
+
 ScreenManager:
     MainScreen:
     Level1:
@@ -83,18 +85,6 @@ ScreenManager:
                 on_press: app.pause_game(1)
             RemainingLifePercent
                 id: remaining_life_percent_lvl1
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl1
             KissButton:
                 id: kiss_button_lvl1
                 on_state: app.on_toggle_button_state(self, 1)
@@ -117,6 +107,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 1"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl1
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl1
             Character:
                 id: character_image_lvl1
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -140,18 +139,6 @@ ScreenManager:
                 on_press: app.pause_game(2)
             RemainingLifePercent
                 id: remaining_life_percent_lvl2
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl2
             KissButton:
                 id: kiss_button_lvl2
                 on_state: app.on_toggle_button_state(self, 2)
@@ -172,6 +159,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 2"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl2
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl2
             Character:
                 id: character_image_lvl2
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -193,18 +189,6 @@ ScreenManager:
                 on_press: app.pause_game(3)
             RemainingLifePercent
                 id: remaining_life_percent_lvl3
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl3
             KissButton:
                 id: kiss_button_lvl3
                 on_state: app.on_toggle_button_state(self, 3)
@@ -225,6 +209,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 3"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl3
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl3
             Character:
                 id: character_image_lvl3
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -246,18 +239,6 @@ ScreenManager:
                 on_press: app.pause_game(4)
             RemainingLifePercent
                 id: remaining_life_percent_lvl4
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl4
             KissButton:
                 id: kiss_button_lvl4
                 on_state: app.on_toggle_button_state(self, 4)
@@ -278,6 +259,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 4"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl4
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl4
             Character:
                 id: character_image_lvl4
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -299,18 +289,6 @@ ScreenManager:
                 on_press: app.pause_game(5)
             RemainingLifePercent
                 id: remaining_life_percent_lvl5
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl5
             KissButton:
                 id: kiss_button_lvl5
                 on_state: app.on_toggle_button_state(self, 5)
@@ -331,6 +309,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 5"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl5
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl5
             Character:
                 id: character_image_lvl5
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -357,18 +344,6 @@ ScreenManager:
             #    id: remaining_life_percent_aux_char_1_lvl6
             RemainingLifePercentAuxChar2
                 id: remaining_life_percent_aux_char_2_lvl6
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl6
             KissButton:
                 id: kiss_button_lvl6
                 on_state: app.on_toggle_button_state(self, 6)
@@ -389,6 +364,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 6"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl6
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl6
             Character:
                 id: character_image_lvl6
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -416,18 +400,6 @@ ScreenManager:
                 id: remaining_life_percent_aux_char_1_lvl7
             RemainingLifePercentAuxChar2
                 id: remaining_life_percent_aux_char_2_lvl7
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl7
             KissButton:
                 id: kiss_button_lvl7
                 on_state: app.on_toggle_button_state(self, 7)
@@ -449,6 +421,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 7"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl7
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl7
             Character:
                 id: character_image_lvl7
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -478,18 +459,6 @@ ScreenManager:
                 id: remaining_life_percent_aux_char_1_lvl8
             RemainingLifePercentAuxChar2
                 id: remaining_life_percent_aux_char_2_lvl8
-            BoxLayout:
-                size_hint: 1, 0.05
-                pos_hint: {"x": 0.0, "y": .36}
-                Label:
-                    size_hint: 0.35, 1
-                    canvas:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                            source: "graphics/entities/star_small.png"
-                NumCollectedStars:
-                    id: num_stars_collected_lvl8
             KissButton:
                 id: kiss_button_lvl8
                 on_state: app.on_toggle_button_state(self, 8)
@@ -511,6 +480,15 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
                     source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 8"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl8
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl8
             Character:
                 id: character_image_lvl8
                 #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
@@ -521,26 +499,21 @@ ScreenManager:
             PauseMenuWidget:
                 id: pause_menu_lvl8
 
-
-<NumCollectedStars@Label>:
-    text: "0/0"
-    font_size: 25
-    #background_normal: ''
-    #size_hint: (1, 0.15)
-    #pos_hint: {'x': 0.0, 'y': 0.20}
-
+###################################################
+# TOGGLE BUTTONS SECTION
+###################################################
 <KissButton@ToggleButton>:
     size_hint: 1, 0.17
     #text: "Kiss"
     pos_hint: {'x': 0.0, 'y': 0.0}
-    border: -8, -8, -8, -8
+    border: -4, -4, -4, -4
     background_normal: "graphics/entities/kiss1_bw.png"
     background_down: "graphics/entities/kiss1.png"
 
 <SpecialButton@ToggleButton>:
     size_hint: 1, 0.17
     #text: "Diaper"
-    pos_hint: {'x': 0.0, 'y': 0.18}
+    pos_hint: {'x': 0.0, 'y': 0.17}
     border: 8, 8, 8, 8
     background_normal: "graphics/entities/diaper_bw.png"
     background_down: "graphics/entities/diaper.png"
@@ -551,7 +524,7 @@ ScreenManager:
 <MoveAuxChar1@ToggleButton>:
     size_hint: 1, 0.17
     #text: "Mathis"
-    pos_hint: {'x': 0.0, 'y': 0.60}
+    pos_hint: {'x': 0.0, 'y': 0.49}
     border: 8, 8, 8, 8
     background_normal: "graphics/entities/ch_2_generic_bw.png"
     background_down: "graphics/entities/ch_2_generic.png"
@@ -561,12 +534,16 @@ ScreenManager:
 <MoveAuxChar2@ToggleButton>:
     size_hint: 1, 0.17
     #text: "Aux 2"
-    pos_hint: {'x': 0.0, 'y': 0.42}
+    pos_hint: {'x': 0.0, 'y': 0.34}
     border: 8, 8, 8, 8
     background_normal: "graphics/entities/ch_3_generic_bw.png"
     background_down: "graphics/entities/ch_3_generic.png"
     background_disabled_normal: "graphics/entities/Lock.png"
     disabled: not app.move_aux_char_2_button_enabled
+
+###################################################
+# CHARACTERS SECTION
+###################################################
 
 <Character@Image>:
     #id: character_image
@@ -651,6 +628,10 @@ ScreenManager:
             pos: self.pos
             size: self.size
 
+###################################################
+# PAUSE BUTTON AND LEVELS BUTTONS
+###################################################
+
 <PauseButton@Button>:
     pos_hint: {'x': 0.05, 'y': 0.9}
     size_hint: (0.9, 0.1)
@@ -667,6 +648,77 @@ ScreenManager:
     size_hint: .15, .09
     background_color: 1, .3, .4, .85
     opacity: 1 if self.state == 'normal' else .5
+
+###################################################
+# INDICATORS (TEXT BOX) SECTION
+###################################################
+
+<BoxIndicators@FloatLayout>:
+    size_hint: 0.26, 0.08
+    pos_hint: {"x": 0.003, "y": .91}
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, .5
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<LevelLabel@Label>:
+    size_hint: 0.35, 1
+    pos_hint: {"x": 0.002, "y": 0}
+    font_size: font_size_indicators
+    font_name: 'graphics/fonts/pricedown bl.otf'
+    outline_width: 1
+
+
+<NumCollectedStars@Label>:
+    text: "0/0"
+    font_size: font_size_indicators
+    #background_normal: ''
+    #size_hint: (1, 0.15)
+    pos_hint: {'x': 0.4, 'y': 0.0}
+    font_name: 'graphics/fonts/pricedown bl.otf'
+    outline_width: 1
+
+<NumWaves@Label>:
+    text: "0/0"
+    font_size: font_size_indicators
+    #background_normal: ''
+    #size_hint: (1, 0.15)
+    pos_hint: {'x': 0.4, 'y': 0.0}
+    font_name: 'graphics/fonts/pricedown bl.otf'
+    outline_width: 1
+
+
+<BoxStars@RelativeLayout>:
+    #size_hint: 0.08, 0.05
+    size_hint: 0.25, 1
+    pos_hint: {"x": 0.69, "y": 0}
+    Label:
+        size_hint: 0.5, 0.8
+        pos_hint: {"x": 0, "y": 0.1}
+        canvas:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: "graphics/entities/star_small.png"
+
+<BoxWaves@RelativeLayout>:
+    #size_hint: 0.08, 0.05
+    size_hint: 0.25, 1
+    pos_hint: {"x": 0.39, "y": 0}
+    Label:
+        size_hint: 0.5, 0.8
+        pos_hint: {"x": 0, "y": 0.1}
+        canvas:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: "graphics/entities/enemy_green.png"
+
+###################################################
+# PAUSE MENU SECTION
+###################################################
 
 <PauseMenuWidget>:
     #pos_hint: {'x': 0.0, 'y':0.}
