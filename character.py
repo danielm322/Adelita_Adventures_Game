@@ -106,6 +106,9 @@ def check_character_collision(self, character_image, screen_num):
             if curr_screen.current_phase < curr_screen.number_of_phases \
                     and curr_screen.rewards_gathered == curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1]:
                 curr_screen.current_phase += 1
+                # Update phase indicator in screen
+                curr_screen.ids['num_waves_lvl' + str(screen_num)].text = str(
+                    curr_screen.current_phase) + "/" + str(curr_screen.number_of_phases)
                 # Cancel enemy spawning
                 # This for loop is written like this to be able to convert to None the clock variables
                 if len(curr_screen.spawn_enemies_clock_variables) > 0:
