@@ -98,7 +98,7 @@ def update_enemies(self, screen_num, dt):
     enemies_to_delete = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         enemy['is_fighting'], to_eliminate_flag = self.check_enemy_collision(enemy, screen_num)
-        if (enemy['type'] == 'fire' or not enemy['is_fighting']) and not to_eliminate_flag:
+        if enemy['type'] == 'fire' or not enemy['is_fighting']:
             new_x = enemy['image'].pos_hint['center_x'] + enemy['direction_u_vector'][0] * enemy['speed'] * dt
             new_y = enemy['image'].pos_hint['center_y'] + enemy['direction_u_vector'][1] * enemy['speed'] * dt
             enemy['image'].pos_hint['center_x'] = new_x
@@ -108,7 +108,7 @@ def update_enemies(self, screen_num, dt):
 
         # with curr_screen.canvas:
         #     Line(circle=(enemy['image'].center_x, enemy['image'].center_y, 20))
-
+        # Remove fire if it has reached any border of the screen:
         if enemy['type'] == 'fire' \
                 and (
                    (enemy['direction_u_vector'][0] < 0 and new_x <= enemy['finish_pos']['center_x'])
@@ -118,20 +118,30 @@ def update_enemies(self, screen_num, dt):
         ):
             enemies_to_delete.append(enemy_key)
             self.enemy_animation_completed(enemy, screen_num)
+        # Remove fire if it has collided with a character:
+        if enemy['type'] == 'fire' and to_eliminate_flag:
+            self.remove_fire_from_screen(enemy['image'], screen_num)
+            enemies_to_delete.append(enemy_key)
+        # Remove enemies that have reached the left side of the screen and apply their damage
         elif enemy['type'] != 'fire' and enemy['image'].pos_hint['center_x'] <= enemy['finish_pos']['center_x']:
             enemies_to_delete.append(enemy_key)
             self.enemy_animation_completed(enemy, screen_num)
-        if to_eliminate_flag:
+        # Remove other enemies that have died because of melee attacks from a character
+        if enemy['type'] != 'fire' and to_eliminate_flag:
             enemies_to_delete.append(enemy_key)
 
     if len(enemies_to_delete) > 0:
-        for enemy_key in enemies_to_delete:
+        # First convert to set to remove possible duplicates
+        clear_list = list(set(enemies_to_delete))
+        for enemy_key in clear_list:
             del curr_screen.enemies_ids[enemy_key]
 
 
 def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
     # Flag to check if an enemy is colliding with a character, it stops its movement to deal damage (fight)
     is_fighting = False
+    # Flag to check if an enemy has to be eliminated because of losing its hit points in melee fight
+    # or because it is a fire, and it collides with a character
     to_eliminate_flag = False
     curr_screen = self.root.screens[screen_num]
     if enemy['type'] != 'fire':
@@ -160,6 +170,9 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
             self.adjust_character_life_bar(screen_num, character)
             if character['damage_received'] >= character['hit_points']:
                 self.kill_character(screen_num, character)
+            # Eliminate fires at first collision
+            if enemy['type'] == 'fire':
+                to_eliminate_flag = True
 
     return is_fighting, to_eliminate_flag
 
@@ -186,3 +199,8 @@ def kill_enemy(self, enemy_image, screen_num, reward_probability):
     # Spawn reward with probability defined per level and per enemy
     if random.random() < reward_probability:
         self.spawn_reward(enemy_center, screen_num)
+
+
+def remove_fire_from_screen(self, enemy_image, screen_num):
+    curr_screen = self.root.screens[screen_num]
+    curr_screen.remove_widget(enemy_image)
