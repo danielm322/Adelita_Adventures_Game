@@ -104,7 +104,7 @@ enemies_dict = {
         'level_1': {
             'hit_points': 100,
             'shield': 0,
-            'damage': 0.3,
+            'damage': 5,
             'fires_back': False,
             'speed_min': 2.5e-3,
             'speed_max': 2.7e-3,
@@ -119,7 +119,7 @@ enemies_dict = {
         'level_2': {
             'hit_points': 100,
             'shield': 0,
-            'damage': 0.6,
+            'damage': 10,
             'fires_back': False,
             'speed_min': 3.9e-3,
             'speed_max': 4.2e-3,
