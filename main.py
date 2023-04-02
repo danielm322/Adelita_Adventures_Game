@@ -189,6 +189,7 @@ class GameApp(kivy.app.App):
             character['is_killed'] = False
             character['damage_received'] = 0
             self.adjust_character_life_bar(screen_num, character)
+
         self.move_aux_char_1_button_enabled = False
         self.move_aux_char_2_button_enabled = False
 
@@ -226,7 +227,13 @@ class GameApp(kivy.app.App):
         curr_screen = self.root.screens[screen_num]
         # Strangely, adjusting character speed works well here, but not on pre enter:
         for character in curr_screen.characters_dict.values():
+            # Set characters speed
             character['speed'] = (curr_screen.size[0] + curr_screen.size[1]) * self.character_speed_factor
+            # Update remaining life bar widget
+            remaining_life_percent_lvl_widget = curr_screen.ids[character['life_bar_id'] + str(screen_num)]
+            character_image = curr_screen.ids[character['name'] + str(screen_num)]
+            remaining_life_percent_lvl_widget.x = character_image.x
+            remaining_life_percent_lvl_widget.y = character_image.top
         # Each character's speed can be modified to have different speeds for each character,
         # adding a speed factor to each character
         # Always begin in the first phase
