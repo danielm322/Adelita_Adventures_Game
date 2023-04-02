@@ -54,6 +54,10 @@ def update_characters_from_dict(self, screen_num, dt):
             # self.char_bounding_box.points = self.get_character_bbox(screen_num)
             # with curr_screen.canvas:
             #     Line(circle=(character_image.center_x, character_image.center_y, 10))
+            # Update remaining life bar widget
+            remaining_life_percent_lvl_widget = curr_screen.ids[character['life_bar_id'] + str(screen_num)]
+            remaining_life_percent_lvl_widget.x = character_image.x
+            remaining_life_percent_lvl_widget.y = character_image.top
             # Update special attack radius quad
             if character['shoot_special_state']:
                 self.special_attack_properties['quad'].points = self.get_special_quad_coords(screen_num)
