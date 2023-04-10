@@ -41,6 +41,8 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                       'finish_pos': finish_pos,
                                                       'fires_back': enemies_dict[enemy_type][enemy_level][
                                                           'fires_back'],
+                                                      'splits_in_half': enemies_dict[enemy_type][enemy_level][
+                                                          'splits_in_half'],
                                                       'hit_points':
                                                           enemies_dict[enemy_type][enemy_level][
                                                               'hit_points'],
@@ -86,11 +88,52 @@ def spawn_rocket_at_enemy_center_to_ch_center(self, screen_num, enemy_center_pix
                                                        'finish_pos': finish_pos,
                                                        'fires_back': enemies_dict[rocket_type][rocket_level][
                                                            'fires_back'],
+                                                       'splits_in_half': enemies_dict[rocket_type][rocket_level][
+                                                           'splits_in_half'],
                                                        'hit_points':
                                                            enemies_dict[rocket_type][rocket_level][
                                                                'hit_points'],
                                                        'direction_u_vector': direction_unit_vector,
                                                        'speed': r_speed}
+
+
+def spawn_enemy_underling(self, screen_num, start_pos, finish_pos, underlings_level):
+    curr_screen = self.root.screens[screen_num]
+    screen_size_ratio = curr_screen.size[1] / curr_screen.size[0]
+    # Randomly sample enemy speed
+    r_speed = random.uniform(enemies_dict['underlings'][underlings_level]['speed_min'],
+                             enemies_dict['underlings'][underlings_level]['speed_max'])
+    # Get enemy direction unit vector
+    enemy_direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
+    # Instantiate image
+    enemy = kivy.uix.image.Image(source=enemies_dict['underlings'][underlings_level]['source'],
+                                 # size_hint=(None,
+                                 size_hint=(enemies_dict['underlings'][underlings_level]['width'] * screen_size_ratio,
+                                            enemies_dict['underlings'][underlings_level]['height']),
+                                 # pos=start_pos,
+                                 pos_hint=start_pos,
+                                 allow_stretch=True,
+                                 keep_ratio=False)
+    # curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(enemy, index=-1)
+    curr_screen.add_widget(enemy, index=-1)
+    # create a unique identifier for each enemy
+    time_stamp = str(time.time())
+    curr_screen.enemies_ids['enemy_' + time_stamp] = {'image': enemy,
+                                                      'type': 'underlings',
+                                                      'level': underlings_level,
+                                                      'finish_pos': finish_pos,
+                                                      'fires_back': enemies_dict['underlings'][underlings_level][
+                                                          'fires_back'],
+                                                      'splits_in_half': enemies_dict['underlings'][underlings_level][
+                                                          'splits_in_half'],
+                                                      'hit_points':
+                                                          enemies_dict['underlings'][underlings_level][
+                                                              'hit_points'],
+                                                      'direction_u_vector': enemy_direction_unit_vector,
+                                                      'is_fighting': False,
+                                                      'reward_probability': enemies_dict['underlings'][underlings_level][
+                                                          'spawn_reward_probability'],
+                                                      'speed': r_speed}
 
 
 def update_enemies(self, screen_num, dt):

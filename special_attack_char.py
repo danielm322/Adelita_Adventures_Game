@@ -7,7 +7,7 @@ from kivy.graphics import Line
 from kivy.utils import platform
 
 from enemies_dict import enemies_dict
-from helper_fns import calc_parabola_vertex, write_level_passed
+from helper_fns import calc_parabola_vertex, write_level_passed, calculate_underlings_start_positions
 
 
 def shoot_special(self, screen_num, touch_point):
@@ -94,6 +94,8 @@ def check_special_collision(self, special, screen_num):
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
     enemies_to_spawn_fire = []
+    underlings_to_spawn_centers = []
+    underlings_to_spawn_args = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         if abs(special['image'].center[0] - enemy['image'].center[0]) <=\
                 self.special_attack_properties['attack_radius'] * curr_screen.size[0] \
@@ -106,6 +108,17 @@ def check_special_collision(self, special, screen_num):
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
                 self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
+                if enemy['splits_in_half']:
+                    underlings_to_spawn_centers.append(calculate_underlings_start_positions(enemy['image'].pos_hint,
+                                                                                            enemies_dict[
+                                                                                                enemy['type']][
+                                                                                                enemy['level']][
+                                                                                                'split_distance'])
+                                                       )
+
+                    underlings_to_spawn_args.append(
+                        (enemy['finish_pos'], enemies_dict[enemy['type']][enemy['level']]['underlings_level'])
+                    )
 
     bosses_to_delete = []
     bosses_to_spawn_fire = []
@@ -128,6 +141,14 @@ def check_special_collision(self, special, screen_num):
                                                            enemy_center,
                                                            'fire',
                                                            'level_1')
+    if len(underlings_to_spawn_centers) > 0:
+        for underlings_centers, args in zip(underlings_to_spawn_centers, underlings_to_spawn_args):
+            for underling_start_pos in underlings_centers:
+                self.spawn_enemy_underling(screen_num,
+                                           underling_start_pos,
+                                           *args,
+                                           )
+
     if len(bosses_to_spawn_fire) > 0:
         for boss_center in bosses_to_spawn_fire:
             self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,

@@ -4,7 +4,8 @@ import random
 # from kivy.graphics import Line
 # from kivy.graphics import Line
 from kivy.utils import platform
-from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector
+from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector, \
+    calculate_underlings_start_positions
 import kivy.uix.image
 import time
 from enemies_dict import enemies_dict
@@ -92,6 +93,8 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
     enemies_to_spawn_fire = []
+    underlings_to_spawn_centers = []
+    underlings_to_spawn_args = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         gap_x = curr_screen.width * enemy['image'].width / 3
         gap_y = curr_screen.height * enemy['image'].height / 3
@@ -110,6 +113,17 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
                 self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
+                if enemy['splits_in_half']:
+                    underlings_to_spawn_centers.append(calculate_underlings_start_positions(enemy['image'].pos_hint,
+                                                                                            enemies_dict[
+                                                                                                enemy['type']][
+                                                                                                enemy['level']][
+                                                                                                'split_distance'])
+                                                       )
+
+                    underlings_to_spawn_args.append(
+                        (enemy['finish_pos'], enemies_dict[enemy['type']][enemy['level']]['underlings_level'])
+                    )
 
     if len(enemies_to_spawn_fire) > 0:
         for enemy_center in enemies_to_spawn_fire:
@@ -117,6 +131,13 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
                                                            enemy_center,
                                                            'fire',
                                                            'level_1')
+    if len(underlings_to_spawn_centers) > 0:
+        for underlings_centers, args in zip(underlings_to_spawn_centers, underlings_to_spawn_args):
+            for underling_start_pos in underlings_centers:
+                self.spawn_enemy_underling(screen_num,
+                                           underling_start_pos,
+                                           *args,
+                                           )
 
     return kiss_already_hit, enemies_to_delete
 

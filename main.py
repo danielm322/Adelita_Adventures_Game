@@ -28,7 +28,7 @@ class GameApp(kivy.app.App):
         start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, \
-        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen
+        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen, spawn_enemy_underling
     from reward import spawn_reward, update_rewards
     from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
         boss_defeat_animation_finish, check_boss_collision, kill_boss

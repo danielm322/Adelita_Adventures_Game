@@ -7,6 +7,7 @@ enemies_dict = {
             'shield': 0,
             'damage': 0.3,
             'fires_back': False,
+            'splits_in_half': False,
             'speed_min': 1e-3,
             'speed_max': 1.5e-3,
             'spawn_point': None,
@@ -24,6 +25,7 @@ enemies_dict = {
             'shield': 0,
             'damage': 0.3,
             'fires_back': False,
+            'splits_in_half': False,
             'speed_min': 1.3e-3,
             'speed_max': 1.8e-3,
             'spawn_point': None,
@@ -43,6 +45,7 @@ enemies_dict = {
             'shield': 0,
             'damage': 0.5,
             'fires_back': False,
+            'splits_in_half': False,
             'speed_min': 0.7e-3,
             'speed_max': 0.9e-3,
             'spawn_point': None,
@@ -64,6 +67,7 @@ enemies_dict = {
             'shield': 0,
             'damage': 0.2,
             'fires_back': False,
+            'splits_in_half': False,
             'speed_min': 2e-3,
             'speed_max': 2.3e-3,
             'spawn_point': None,
@@ -85,6 +89,7 @@ enemies_dict = {
             'shield': 0,
             'damage': 0.3,
             'fires_back': True,
+            'splits_in_half': False,
             'speed_min': 0.7e-3,
             'speed_max': 1.2e-3,
             'spawn_point': None,
@@ -100,12 +105,59 @@ enemies_dict = {
             'source': "graphics/entities/enemy_purple.png"
         }
     },
+    'blue': {
+        'level_1': {
+            'hit_points': 4,
+            'shield': 0,
+            'damage': 0.3,
+            'fires_back': False,
+            'splits_in_half': True,
+            'split_distance': 0.10,  # In screen height proportion
+            'underlings_level': 'level_1',
+            'speed_min': 0.7e-3,
+            'speed_max': 1.2e-3,
+            'spawn_point': None,
+            'end_point': None,
+            'trajectory_variance': 0.10,
+            'spawn_interval': 3.0,  # In seconds
+            'finishes_damage': 20,
+            # 'spawn_reward_probability': 11,
+            'spawn_reward_probability': 0.11,
+            'width': 0.173,
+            'height': 0.20,
+            'spawn_function': 'gaussian',
+            'source': "graphics/entities/enemy_blue.png"
+        },
+    },
+    'underlings': {
+        'level_1': {
+            'hit_points': 2,
+            'shield': 0,
+            'damage': 0.2,
+            'fires_back': False,
+            'splits_in_half': False,
+            'speed_min': 2.3e-3,
+            'speed_max': 2.5e-3,
+            'spawn_point': None,
+            'end_point': None,
+            'trajectory_variance': 0.10,
+            'spawn_interval': 3.0,  # In seconds
+            'finishes_damage': 10,
+            # 'spawn_reward_probability': 11,
+            'spawn_reward_probability': 0.11,
+            'width': 0.097,
+            'height': 0.12,
+            'spawn_function': 'gaussian',
+            'source': "graphics/entities/enemy_blue_clear.png"
+        }
+    },
     'fire': {
         'level_1': {
             'hit_points': 100,
             'shield': 0,
             'damage': 5,
             'fires_back': False,
+            'splits_in_half': False,
             'speed_min': 2.5e-3,
             'speed_max': 2.7e-3,
             'spawn_point': None,
@@ -121,6 +173,7 @@ enemies_dict = {
             'shield': 0,
             'damage': 10,
             'fires_back': False,
+            'splits_in_half': False,
             'speed_min': 3.9e-3,
             'speed_max': 4.2e-3,
             'spawn_point': None,

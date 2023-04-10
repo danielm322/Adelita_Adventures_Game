@@ -10,6 +10,7 @@ ScreenManager:
     Level6:
     Level7:
     Level8:
+    Level9:
 
 <MainScreen>:
     name: "main"
@@ -69,6 +70,12 @@ ScreenManager:
                 root.manager.transition.direction = 'left'
                 app.root.current="level8"
             pos_hint: {"center_x": .7, "center_y": .35}
+        LevelButton:
+            text: "Level 9"
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current="level9"
+            pos_hint: {"center_x": .7, "center_y": .25}
 
 <Level1>:
     name: "level1"
@@ -498,6 +505,65 @@ ScreenManager:
                 id: remaining_life_percent_aux_char_2_lvl8
             PauseMenuWidget:
                 id: pause_menu_lvl8
+
+<Level9>:
+    name: "level9"
+    on_pre_enter: app.screen_on_pre_enter(9)
+    #on_pre_leave: app.screen_on_pre_leave(9)
+    on_enter: app.screen_on_enter(9)
+    on_leave: app.screen_on_leave(9)
+    BoxLayout:
+        orientation: "horizontal"
+        RelativeLayout:
+            size_hint: app.side_bar_width, 1
+            PauseButton:
+                id: pause_button_lvl9
+                on_press: app.pause_game(9)
+            KissButton:
+                id: kiss_button_lvl9
+                on_state: app.on_toggle_button_state(self, 9)
+            SpecialButton:
+                id: special_button_lvl9
+                on_state: app.on_special_button_state(self, 9)
+            MoveAuxChar1:
+                id: move_aux_char_1_lvl9
+                on_state: app.on_move_aux_char_1_button(self, 9)
+            MoveAuxChar2:
+                id: move_aux_char_2_lvl9
+                on_state: app.on_move_aux_char_2_button(self, 9)
+        FloatLayout:
+            #size_hint: 0, 0.9
+            id: layout_lvl9
+            on_touch_down: app.touch_down_handler(9, args)
+            canvas.before:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    source: "graphics/levels-bg/PvZ_day_bg_lvl1_cropped.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 9"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl9
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl9
+            Character:
+                id: character_image_lvl9
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            AuxChar1:
+                id: aux_char_1_image_lvl9
+            AuxChar2:
+                id: aux_char_2_image_lvl9
+            RemainingLifePercent
+                id: remaining_life_percent_lvl9
+            RemainingLifePercentAuxChar1
+                id: remaining_life_percent_aux_char_1_lvl9
+            RemainingLifePercentAuxChar2
+                id: remaining_life_percent_aux_char_2_lvl9
+            PauseMenuWidget:
+                id: pause_menu_lvl9
 
 ###################################################
 # TOGGLE BUTTONS SECTION

@@ -299,3 +299,12 @@ def get_entity_bbox(entity_image):
     x4 = entity_image.right
     y4 = entity_image.y
     return [x1, y1, x2, y2, x3, y3, x4, y4]
+
+
+def calculate_underlings_start_positions(enemy_center_pos_hint, split_distance):
+    x = enemy_center_pos_hint['center_x']
+    y_up = enemy_center_pos_hint['center_y'] + split_distance
+    y_down = enemy_center_pos_hint['center_y'] - split_distance
+    upper_underling_pos_hint = {'center_x': x, 'center_y': y_up}
+    lower_underling_pos_hint = {'center_x': x, 'center_y': y_down}
+    return upper_underling_pos_hint, lower_underling_pos_hint
