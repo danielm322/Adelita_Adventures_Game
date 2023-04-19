@@ -28,7 +28,8 @@ class GameApp(kivy.app.App):
         start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, \
-        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen, spawn_enemy_underling
+        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen, spawn_enemy_underling, \
+        launch_character
     from reward import spawn_reward, update_rewards
     from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
         boss_defeat_animation_finish, check_boss_collision, kill_boss
@@ -90,7 +91,7 @@ class GameApp(kivy.app.App):
     SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
     MOVEMENT_PIXEL_TOLERANCE = 8  # Number of pixels of tolerance to accept a widget is in a given position
     LEVEL_WHEN_SPECIAL_IS_ACTIVATED = 2
-    LEVEL_WHEN_AUX_CHAR_1_ENTERS = 7
+    LEVEL_WHEN_AUX_CHAR_1_ENTERS = 8
     LEVEL_WHEN_AUX_CHAR_2_ENTERS = 6
 
     def on_start(self):

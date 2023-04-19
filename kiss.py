@@ -107,13 +107,14 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
             enemy['hit_points'] = enemy['hit_points'] - 1
             curr_screen.remove_widget(kiss)
             kiss_already_hit = True
-            if enemy['fires_back']:
+            # if enemy['fires_back']:
+            if 'fires_back' in enemies_dict[enemy['type']][enemy['level']].keys():
                 enemies_to_spawn_fire.append(enemy['image'].center)
 
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
                 self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
-                if enemy['splits_in_half']:
+                if 'splits_in_half' in enemies_dict[enemy['type']][enemy['level']].keys():
                     underlings_to_spawn_centers.append(calculate_underlings_start_positions(enemy['image'].pos_hint,
                                                                                             enemies_dict[
                                                                                                 enemy['type']][

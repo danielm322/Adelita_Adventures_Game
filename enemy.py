@@ -39,10 +39,6 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                       'type': enemy_type,
                                                       'level': enemy_level,
                                                       'finish_pos': finish_pos,
-                                                      'fires_back': enemies_dict[enemy_type][enemy_level][
-                                                          'fires_back'],
-                                                      'splits_in_half': enemies_dict[enemy_type][enemy_level][
-                                                          'splits_in_half'],
                                                       'hit_points':
                                                           enemies_dict[enemy_type][enemy_level][
                                                               'hit_points'],
@@ -86,10 +82,6 @@ def spawn_rocket_at_enemy_center_to_ch_center(self, screen_num, enemy_center_pix
                                                        'type': rocket_type,
                                                        'level': rocket_level,
                                                        'finish_pos': finish_pos,
-                                                       'fires_back': enemies_dict[rocket_type][rocket_level][
-                                                           'fires_back'],
-                                                       'splits_in_half': enemies_dict[rocket_type][rocket_level][
-                                                           'splits_in_half'],
                                                        'hit_points':
                                                            enemies_dict[rocket_type][rocket_level][
                                                                'hit_points'],
@@ -122,10 +114,6 @@ def spawn_enemy_underling(self, screen_num, start_pos, finish_pos, underlings_le
                                                       'type': 'underlings',
                                                       'level': underlings_level,
                                                       'finish_pos': finish_pos,
-                                                      'fires_back': enemies_dict['underlings'][underlings_level][
-                                                          'fires_back'],
-                                                      'splits_in_half': enemies_dict['underlings'][underlings_level][
-                                                          'splits_in_half'],
                                                       'hit_points':
                                                           enemies_dict['underlings'][underlings_level][
                                                               'hit_points'],
@@ -209,6 +197,9 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
                     self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
             if character['damage_received'] >= character['hit_points']:
                 character['damage_received'] = character['hit_points']
+            # Implement special ability of launching a character
+            if 'launches_character' in enemies_dict[enemy['type']][enemy['level']].keys():
+                self.launch_character(character, enemy, screen_num)
 
             self.adjust_character_life_bar(screen_num, character)
             if character['damage_received'] >= character['hit_points']:
@@ -218,6 +209,23 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
                 to_eliminate_flag = True
 
     return is_fighting, to_eliminate_flag
+
+
+def launch_character(self, character_dict, enemy, screen_num):
+    curr_screen = self.root.screens[screen_num]
+    character_image = curr_screen.ids[character_dict['name'] + str(screen_num)]
+    random_number = random.randint(0, 1)
+    if random_number == 0:
+        new_y = character_image.center_y + enemies_dict[enemy['type']][enemy['level']]['character_y_displacement'] * \
+            curr_screen.size[1]
+    else:
+        new_y = character_image.center_y - enemies_dict[enemy['type']][enemy['level']]['character_y_displacement'] * \
+            curr_screen.size[1]
+    character_image.center_y = new_y
+    remaining_life_percent_lvl_widget = curr_screen.ids[character_dict['life_bar_id'] + str(screen_num)]
+    remaining_life_percent_lvl_widget.x = character_image.x
+    remaining_life_percent_lvl_widget.y = character_image.top
+    character_dict['is_moving'] = False
 
 
 def enemy_animation_completed(self, enemy, screen_num):
