@@ -28,7 +28,8 @@ class GameApp(kivy.app.App):
         start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, \
-        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen
+        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen, spawn_enemy_underling, \
+        launch_character
     from reward import spawn_reward, update_rewards
     from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
         boss_defeat_animation_finish, check_boss_collision, kill_boss
@@ -68,6 +69,7 @@ class GameApp(kivy.app.App):
     move_aux_char_2_button_enabled = BooleanProperty(True)
     aux_char_1_range = 0.3  # In screen proportion (same range in width and height, is a rectangle)
     aux_char_1_quad = None  # Quad to see the aux char 1 range
+    AUX_CHAR_1_FIRE_INTERVAL = 0.8  # In seconds
 
     # Rewards properties
     reward_width = 0.05
@@ -90,7 +92,7 @@ class GameApp(kivy.app.App):
     SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
     MOVEMENT_PIXEL_TOLERANCE = 8  # Number of pixels of tolerance to accept a widget is in a given position
     LEVEL_WHEN_SPECIAL_IS_ACTIVATED = 2
-    LEVEL_WHEN_AUX_CHAR_1_ENTERS = 7
+    LEVEL_WHEN_AUX_CHAR_1_ENTERS = 8
     LEVEL_WHEN_AUX_CHAR_2_ENTERS = 6
 
     def on_start(self):
@@ -262,7 +264,7 @@ class GameApp(kivy.app.App):
         if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS:
             self.clock_banana_throw_variable = Clock.schedule_interval(
                 partial(self.auto_shoot, screen_num),
-                0.8
+                self.AUX_CHAR_1_FIRE_INTERVAL
             )
         # with curr_screen.canvas:
         #     Color(1, 0, 0, 0.2)

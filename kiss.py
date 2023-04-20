@@ -4,7 +4,8 @@ import random
 # from kivy.graphics import Line
 # from kivy.graphics import Line
 from kivy.utils import platform
-from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector
+from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector, \
+    calculate_underlings_start_positions
 import kivy.uix.image
 import time
 from enemies_dict import enemies_dict
@@ -54,7 +55,7 @@ def update_kisses(self, screen_num, dt):
         kiss['image'].center_y = new_y
         # with curr_screen.canvas:
         #     Line(circle=(kiss['image'].center_x, kiss['image'].center_y, 20))
-        kiss_used, enemies_to_eliminate = self.check_kiss_collision_with_enemies(kiss['image'], screen_num)
+        kiss_used, enemies_to_eliminate = self.check_kiss_collision_with_enemies(kiss['image'], screen_num, kiss_key)
         if kiss_used:
             kisses_to_delete.append(kiss_key)
             if enemies_to_eliminate:
@@ -62,7 +63,7 @@ def update_kisses(self, screen_num, dt):
                     if enemy_to_eliminate not in enemies_to_delete:
                         enemies_to_delete.append(enemy_to_eliminate)
         elif curr_screen.current_phase == curr_screen.number_of_phases:
-            kiss_used, boss_to_eliminate = self.check_kiss_collision_with_bosses(kiss['image'], screen_num)
+            kiss_used, boss_to_eliminate = self.check_kiss_collision_with_bosses(kiss['image'], screen_num, kiss_key)
             if kiss_used:
                 kisses_to_delete.append(kiss_key)
                 if boss_to_eliminate:
@@ -87,11 +88,13 @@ def update_kisses(self, screen_num, dt):
             del curr_screen.bosses_ids[boss_key]
 
 
-def check_kiss_collision_with_enemies(self, kiss, screen_num):
+def check_kiss_collision_with_enemies(self, kiss, screen_num, kiss_key):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
     enemies_to_spawn_fire = []
+    underlings_to_spawn_centers = []
+    underlings_to_spawn_args = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
         gap_x = curr_screen.width * enemy['image'].width / 3
         gap_y = curr_screen.height * enemy['image'].height / 3
@@ -104,24 +107,44 @@ def check_kiss_collision_with_enemies(self, kiss, screen_num):
             enemy['hit_points'] = enemy['hit_points'] - 1
             curr_screen.remove_widget(kiss)
             kiss_already_hit = True
-            if enemy['fires_back']:
-                enemies_to_spawn_fire.append(enemy['image'].center)
+            # if enemy['fires_back']:
+            if 'fires_back' in enemies_dict[enemy['type']][enemy['level']].keys():
+                enemies_to_spawn_fire.append((enemy['image'].center, kiss_key))
 
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
                 self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
+                if 'splits_in_half' in enemies_dict[enemy['type']][enemy['level']].keys():
+                    underlings_to_spawn_centers.append(calculate_underlings_start_positions(enemy['image'].pos_hint,
+                                                                                            enemies_dict[
+                                                                                                enemy['type']][
+                                                                                                enemy['level']][
+                                                                                                'split_distance'])
+                                                       )
+
+                    underlings_to_spawn_args.append(
+                        (enemy['finish_pos'], enemies_dict[enemy['type']][enemy['level']]['underlings_level'])
+                    )
 
     if len(enemies_to_spawn_fire) > 0:
-        for enemy_center in enemies_to_spawn_fire:
+        for enemy_center_kiss_key in enemies_to_spawn_fire:
             self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
-                                                           enemy_center,
+                                                           enemy_center_kiss_key[0],
+                                                           enemy_center_kiss_key[1],
                                                            'fire',
                                                            'level_1')
+    if len(underlings_to_spawn_centers) > 0:
+        for underlings_centers, args in zip(underlings_to_spawn_centers, underlings_to_spawn_args):
+            for underling_start_pos in underlings_centers:
+                self.spawn_enemy_underling(screen_num,
+                                           underling_start_pos,
+                                           *args,
+                                           )
 
     return kiss_already_hit, enemies_to_delete
 
 
-def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
+def check_kiss_collision_with_bosses(self, kiss, screen_num, kiss_key, *args):
     kiss_already_hit = False
     curr_screen = self.root.screens[screen_num]
     # Boss collision check
@@ -142,12 +165,13 @@ def check_kiss_collision_with_bosses(self, kiss, screen_num, *args):
                 # Write level pass to file
                 write_level_passed(platform, screen_num)
             if curr_screen.boss_props['fires_back'] and not boss['hit_points'] <= 0:
-                bosses_to_spawn_fire.append(boss['image'].center)
+                bosses_to_spawn_fire.append((boss['image'].center, kiss_key))
 
     if len(bosses_to_spawn_fire) > 0:
-        for boss_center in bosses_to_spawn_fire:
+        for boss_center_kiss_key in bosses_to_spawn_fire:
             self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
-                                                           boss_center,
+                                                           boss_center_kiss_key[0],
+                                                           boss_center_kiss_key[1],
                                                            curr_screen.boss_props['fire_type'],
                                                            curr_screen.boss_props['fire_level'])
 

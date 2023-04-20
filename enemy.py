@@ -39,8 +39,6 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                       'type': enemy_type,
                                                       'level': enemy_level,
                                                       'finish_pos': finish_pos,
-                                                      'fires_back': enemies_dict[enemy_type][enemy_level][
-                                                          'fires_back'],
                                                       'hit_points':
                                                           enemies_dict[enemy_type][enemy_level][
                                                               'hit_points'],
@@ -51,9 +49,29 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                       'speed': r_speed}
 
 
-def spawn_rocket_at_enemy_center_to_ch_center(self, screen_num, enemy_center_pixels, rocket_type, rocket_level):
+def spawn_rocket_at_enemy_center_to_ch_center(self,
+                                              screen_num: int,
+                                              enemy_center_pixels: tuple,
+                                              rocket_key: str,
+                                              rocket_type: str,
+                                              rocket_level: str):
+    """
+    Spawns fire from an enemy to the character center that shot the rocket on the neemy
+    :param screen_num: Screen number
+    :param enemy_center_pixels: Center of the enemy that received the rocket and who will spawn fire
+    :param rocket_key: Name of the rocket that already impacted the enemy (Rocket started from a character).
+        Can be a kiss, special starting from the main character, or a banana, starting from Aux char 1
+    :param rocket_type: Rocket type that will be shot by the enemy
+    :param rocket_level: Rocket level that will be shot by the enemy
+    :return: None
+    """
     curr_screen = self.root.screens[screen_num]
-    character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
+    # This would mean the main character shot the rocket
+    if ('kiss' in rocket_key) or ('special' in rocket_key):
+        character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
+    # This would mean the aux char 1 shot the rocket
+    elif 'banana' in rocket_key:
+        character_image_center = curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     r_speed = random.uniform(enemies_dict[rocket_type][rocket_level]['speed_min'],
                              enemies_dict[rocket_type][rocket_level]['speed_max'])
     finish_pos_pixels = _find_kiss_endpoint_fast(enemy_center_pixels,
@@ -84,13 +102,46 @@ def spawn_rocket_at_enemy_center_to_ch_center(self, screen_num, enemy_center_pix
                                                        'type': rocket_type,
                                                        'level': rocket_level,
                                                        'finish_pos': finish_pos,
-                                                       'fires_back': enemies_dict[rocket_type][rocket_level][
-                                                           'fires_back'],
                                                        'hit_points':
                                                            enemies_dict[rocket_type][rocket_level][
                                                                'hit_points'],
                                                        'direction_u_vector': direction_unit_vector,
                                                        'speed': r_speed}
+
+
+def spawn_enemy_underling(self, screen_num, start_pos, finish_pos, underlings_level):
+    curr_screen = self.root.screens[screen_num]
+    screen_size_ratio = curr_screen.size[1] / curr_screen.size[0]
+    # Randomly sample enemy speed
+    r_speed = random.uniform(enemies_dict['underlings'][underlings_level]['speed_min'],
+                             enemies_dict['underlings'][underlings_level]['speed_max'])
+    # Get enemy direction unit vector
+    enemy_direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
+    # Instantiate image
+    enemy = kivy.uix.image.Image(source=enemies_dict['underlings'][underlings_level]['source'],
+                                 # size_hint=(None,
+                                 size_hint=(enemies_dict['underlings'][underlings_level]['width'] * screen_size_ratio,
+                                            enemies_dict['underlings'][underlings_level]['height']),
+                                 # pos=start_pos,
+                                 pos_hint=start_pos,
+                                 allow_stretch=True,
+                                 keep_ratio=False)
+    # curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(enemy, index=-1)
+    curr_screen.add_widget(enemy, index=-1)
+    # create a unique identifier for each enemy
+    time_stamp = str(time.time())
+    curr_screen.enemies_ids['enemy_' + time_stamp] = {'image': enemy,
+                                                      'type': 'underlings',
+                                                      'level': underlings_level,
+                                                      'finish_pos': finish_pos,
+                                                      'hit_points':
+                                                          enemies_dict['underlings'][underlings_level][
+                                                              'hit_points'],
+                                                      'direction_u_vector': enemy_direction_unit_vector,
+                                                      'is_fighting': False,
+                                                      'reward_probability': enemies_dict['underlings'][underlings_level][
+                                                          'spawn_reward_probability'],
+                                                      'speed': r_speed}
 
 
 def update_enemies(self, screen_num, dt):
@@ -166,6 +217,9 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
                     self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
             if character['damage_received'] >= character['hit_points']:
                 character['damage_received'] = character['hit_points']
+            # Implement special ability of launching a character
+            if 'launches_character' in enemies_dict[enemy['type']][enemy['level']].keys():
+                self.launch_character(character, enemy, screen_num)
 
             self.adjust_character_life_bar(screen_num, character)
             if character['damage_received'] >= character['hit_points']:
@@ -175,6 +229,23 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
                 to_eliminate_flag = True
 
     return is_fighting, to_eliminate_flag
+
+
+def launch_character(self, character_dict, enemy, screen_num):
+    curr_screen = self.root.screens[screen_num]
+    character_image = curr_screen.ids[character_dict['name'] + str(screen_num)]
+    random_number = random.randint(0, 1)
+    if random_number == 0:
+        new_y = character_image.center_y + enemies_dict[enemy['type']][enemy['level']]['character_y_displacement'] * \
+            curr_screen.size[1]
+    else:
+        new_y = character_image.center_y - enemies_dict[enemy['type']][enemy['level']]['character_y_displacement'] * \
+            curr_screen.size[1]
+    character_image.center_y = new_y
+    remaining_life_percent_lvl_widget = curr_screen.ids[character_dict['life_bar_id'] + str(screen_num)]
+    remaining_life_percent_lvl_widget.x = character_image.x
+    remaining_life_percent_lvl_widget.y = character_image.top
+    character_dict['is_moving'] = False
 
 
 def enemy_animation_completed(self, enemy, screen_num):
