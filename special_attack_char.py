@@ -80,17 +80,17 @@ def update_specials(self, screen_num, dt):
         # Stop special movement
         if special['speed_x'] > 0 and new_center_x > special['finish_pos'][0]:
             specials_to_delete.append(special_key)
-            self.check_special_collision(special, screen_num)
+            self.check_special_collision(special, screen_num, special_key)
         elif special['speed_x'] < 0 and new_center_x < special['finish_pos'][0]:
             specials_to_delete.append(special_key)
-            self.check_special_collision(special, screen_num)
+            self.check_special_collision(special, screen_num, special_key)
 
     if len(specials_to_delete) > 0:
         for special_key in specials_to_delete:
             del curr_screen.specials_ids[special_key]
 
 
-def check_special_collision(self, special, screen_num):
+def check_special_collision(self, special, screen_num, special_key):
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
     enemies_to_spawn_fire = []
@@ -103,7 +103,7 @@ def check_special_collision(self, special, screen_num):
                 self.special_attack_properties['attack_radius'] * curr_screen.size[1]:
             enemy['hit_points'] = enemy['hit_points'] - self.special_attack_properties['damage']
             if 'fires_back' in enemies_dict[enemy['type']][enemy['level']].keys():
-                enemies_to_spawn_fire.append(enemy['image'].center)
+                enemies_to_spawn_fire.append((enemy['image'].center, special_key))
 
             if enemy['hit_points'] <= 0:
                 enemies_to_delete.append(enemy_key)
@@ -133,12 +133,13 @@ def check_special_collision(self, special, screen_num):
                 bosses_to_delete.append(boss_key)
                 write_level_passed(platform, screen_num)
             if curr_screen.boss_props['fires_back'] and not boss['hit_points'] <= 0:
-                bosses_to_spawn_fire.append(boss['image'].center)
+                bosses_to_spawn_fire.append((boss['image'].center, special_key))
 
     if len(enemies_to_spawn_fire) > 0:
-        for enemy_center in enemies_to_spawn_fire:
+        for enemy_center_sp_key in enemies_to_spawn_fire:
             self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
-                                                           enemy_center,
+                                                           enemy_center_sp_key[0],
+                                                           enemy_center_sp_key[1],
                                                            'fire',
                                                            'level_1')
     if len(underlings_to_spawn_centers) > 0:
@@ -150,9 +151,10 @@ def check_special_collision(self, special, screen_num):
                                            )
 
     if len(bosses_to_spawn_fire) > 0:
-        for boss_center in bosses_to_spawn_fire:
+        for boss_center_so_key in bosses_to_spawn_fire:
             self.spawn_rocket_at_enemy_center_to_ch_center(screen_num,
-                                                           boss_center,
+                                                           boss_center_so_key[0],
+                                                           boss_center_so_key[1],
                                                            curr_screen.boss_props['fire_type'],
                                                            curr_screen.boss_props['fire_level'])
 

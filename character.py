@@ -218,6 +218,12 @@ def get_character_bbox(self, screen_num):
 
 
 def get_aux_char_1_quad_coords(self, screen_num):
+    """
+    Returns Aux-Char-1's range box's (Quad) coordinates.
+    :param self:
+    :param screen_num: Screen number
+    :return: Range box coordinates
+    """
     curr_screen = self.root.screens[screen_num]
     aux_char_1_image = curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)]
     x1 = aux_char_1_image.center_x - self.aux_char_1_range * curr_screen.size[0]

@@ -69,6 +69,7 @@ class GameApp(kivy.app.App):
     move_aux_char_2_button_enabled = BooleanProperty(True)
     aux_char_1_range = 0.3  # In screen proportion (same range in width and height, is a rectangle)
     aux_char_1_quad = None  # Quad to see the aux char 1 range
+    AUX_CHAR_1_FIRE_INTERVAL = 0.8  # In seconds
 
     # Rewards properties
     reward_width = 0.05
@@ -263,7 +264,7 @@ class GameApp(kivy.app.App):
         if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS:
             self.clock_banana_throw_variable = Clock.schedule_interval(
                 partial(self.auto_shoot, screen_num),
-                0.8
+                self.AUX_CHAR_1_FIRE_INTERVAL
             )
         # with curr_screen.canvas:
         #     Color(1, 0, 0, 0.2)

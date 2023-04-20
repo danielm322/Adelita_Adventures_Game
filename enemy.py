@@ -49,9 +49,29 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
                                                       'speed': r_speed}
 
 
-def spawn_rocket_at_enemy_center_to_ch_center(self, screen_num, enemy_center_pixels, rocket_type, rocket_level):
+def spawn_rocket_at_enemy_center_to_ch_center(self,
+                                              screen_num: int,
+                                              enemy_center_pixels: tuple,
+                                              rocket_key: str,
+                                              rocket_type: str,
+                                              rocket_level: str):
+    """
+    Spawns fire from an enemy to the character center that shot the rocket on the neemy
+    :param screen_num: Screen number
+    :param enemy_center_pixels: Center of the enemy that received the rocket and who will spawn fire
+    :param rocket_key: Name of the rocket that already impacted the enemy (Rocket started from a character).
+        Can be a kiss, special starting from the main character, or a banana, starting from Aux char 1
+    :param rocket_type: Rocket type that will be shot by the enemy
+    :param rocket_level: Rocket level that will be shot by the enemy
+    :return: None
+    """
     curr_screen = self.root.screens[screen_num]
-    character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
+    # This would mean the main character shot the rocket
+    if ('kiss' in rocket_key) or ('special' in rocket_key):
+        character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
+    # This would mean the aux char 1 shot the rocket
+    elif 'banana' in rocket_key:
+        character_image_center = curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     r_speed = random.uniform(enemies_dict[rocket_type][rocket_level]['speed_min'],
                              enemies_dict[rocket_type][rocket_level]['speed_max'])
     finish_pos_pixels = _find_kiss_endpoint_fast(enemy_center_pixels,

@@ -15,8 +15,6 @@ def spawn_boss(self, screen_num):
         'center_x': 1.0 + curr_screen.boss_props['width'] / 2,
         'center_y': 0.5
     }
-    # finish_pos = (0,
-    #               curr_screen.size[1] * (0.5 - curr_screen.boss_props['height'] / 2))
     finish_pos = {
         'center_x': 0. + self.side_bar_width,
         'center_y': 0.5
@@ -32,11 +30,10 @@ def spawn_boss(self, screen_num):
     time_stamp = str(time.time())
     curr_screen.bosses_ids['boss_' + time_stamp] = {'image': boss,
                                                     'hit_points': curr_screen.boss_props['hit_points'],
-                                                    # 'finish_pos': finish_pos,
-                                                    'speed': curr_screen.boss_props['speed'],
                                                     'direction_u_vector': direction_unit_vector,
                                                     'is_fighting': False
                                                     }
+    # For debugging: show the bounding box of the boss
     # with curr_screen.canvas:
     #     Color(1, 0, 0, 0.2)
     #     self.entity_bounding_box = Quad(points=get_entity_bbox(boss))
@@ -47,9 +44,11 @@ def update_bosses(self, screen_num, dt):
     for boss_key, boss in curr_screen.bosses_ids.items():
         boss['is_fighting'] = self.check_boss_collision(boss['image'], screen_num)
         if not boss['is_fighting']:
-            new_x = boss['image'].pos_hint['center_x'] + boss['direction_u_vector'][0] * boss['speed'] * dt
+            new_x = boss['image'].pos_hint['center_x'] + \
+                    boss['direction_u_vector'][0] * curr_screen.boss_props['speed'] * dt
             if curr_screen.boss_props['trajectory_type'] == 'linear':
-                new_y = boss['image'].pos_hint['center_y'] + boss['direction_u_vector'][1] * boss['speed'] * dt
+                new_y = boss['image'].pos_hint['center_y'] + \
+                        boss['direction_u_vector'][1] * curr_screen.boss_props['speed'] * dt
             else:
                 if curr_screen.boss_props['trajectory_function'] == 'sine':
                     new_y = 0.5 + curr_screen.boss_props['amplitude'] * sin(curr_screen.boss_props['period'] * new_x)**2
