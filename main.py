@@ -25,7 +25,8 @@ from enemies_dict import enemies_dict
 class GameApp(kivy.app.App):
     # Imports: Do not delete even if not used in this file
     from character import check_character_collision, kill_character, get_character_bbox, \
-        start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords
+        start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords, \
+        update_character_image_animation
     from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
     from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, \
         spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen, spawn_enemy_underling, \
@@ -81,7 +82,7 @@ class GameApp(kivy.app.App):
     boss_reward_animation_duration = 6
 
     # Character properties
-    character_speed_factor = 1 / 300  # Percentage of screen covered by each character update  1/300 seems fine
+    CHARACTER_SPEED_FACTOR = 1 / 300  # Percentage of screen covered by each character update  1/300 seems fine
 
     # App properties
     side_bar_width = 0.08  # In screen percentage
@@ -230,7 +231,7 @@ class GameApp(kivy.app.App):
         # Strangely, adjusting character speed works well here, but not on pre enter:
         for character in curr_screen.characters_dict.values():
             # Set characters speed
-            character['speed'] = (curr_screen.size[0] + curr_screen.size[1]) * self.character_speed_factor
+            character['speed'] = (curr_screen.size[0] + curr_screen.size[1]) * self.CHARACTER_SPEED_FACTOR
             # Update remaining life bar widget
             remaining_life_percent_lvl_widget = curr_screen.ids[character['life_bar_id'] + str(screen_num)]
             character_image = curr_screen.ids[character['name'] + str(screen_num)]

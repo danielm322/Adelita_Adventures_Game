@@ -9,6 +9,7 @@ from kivy.clock import Clock
 
 from enemies_dict import enemies_dict
 from helper_fns import get_direction_unit_vector
+from characters_dicts import character_states_to_images
 
 
 def start_character_animation_from_dict(self, screen_num, touch_pos, character_dict):
@@ -31,6 +32,7 @@ def start_character_animation_from_dict(self, screen_num, touch_pos, character_d
     character_dict['is_moving'] = True
     character_dict['finish_point_pos'] = finish_pos
     character_dict['direction_unit_vector'] = direction_unit_vector
+    character_dict['current_state'] = 'walking'
 
 
 def update_characters_from_dict(self, screen_num, dt):
@@ -43,36 +45,45 @@ def update_characters_from_dict(self, screen_num, dt):
     """
     curr_screen = self.root.screens[screen_num]
     for character in curr_screen.characters_dict.values():
-        if character['is_moving'] and not character['is_killed']:
-            character_image = curr_screen.ids[character['name'] + str(screen_num)]
-            new_x = character_image.center_x + \
-                    character['direction_unit_vector'][0] * character['speed'] * dt
-            new_y = character_image.center_y + \
-                    character['direction_unit_vector'][1] * character['speed'] * dt
-            character_image.center_x = new_x
-            character_image.center_y = new_y
-            # self.char_bounding_box.points = self.get_character_bbox(screen_num)
-            # with curr_screen.canvas:
-            #     Line(circle=(character_image.center_x, character_image.center_y, 10))
-            # Update remaining life bar widget
-            remaining_life_percent_lvl_widget = curr_screen.ids[character['life_bar_id'] + str(screen_num)]
-            remaining_life_percent_lvl_widget.x = character_image.x
-            remaining_life_percent_lvl_widget.y = character_image.top
-            # Update special attack radius quad
-            if character['shoot_special_state']:
-                self.special_attack_properties['quad'].points = self.get_special_quad_coords(screen_num)
-            if curr_screen.move_aux_char_1_state:
-                self.aux_char_1_quad.points = self.get_aux_char_1_quad_coords(screen_num)
-            # Check collision
-            self.check_character_collision(character_image, screen_num)
-            # Stop moving character if he arrived to the final point
-            if abs(
-                    character_image.center_x - character['finish_point_pos'][0]
-            ) < self.MOVEMENT_PIXEL_TOLERANCE \
-                    and abs(
-                character_image.center_y - character['finish_point_pos'][1]
-            ) < self.MOVEMENT_PIXEL_TOLERANCE:
-                character['is_moving'] = False
+        if not character['is_killed']:
+            if character['is_moving']:
+                character_image = curr_screen.ids[character['name'] + str(screen_num)]
+                new_x = character_image.center_x + \
+                        character['direction_unit_vector'][0] * character['speed'] * dt
+                new_y = character_image.center_y + \
+                        character['direction_unit_vector'][1] * character['speed'] * dt
+                character_image.center_x = new_x
+                character_image.center_y = new_y
+                # self.char_bounding_box.points = self.get_character_bbox(screen_num)
+                # with curr_screen.canvas:
+                #     Line(circle=(character_image.center_x, character_image.center_y, 10))
+                # Update remaining life bar widget
+                remaining_life_percent_lvl_widget = curr_screen.ids[character['life_bar_id'] + str(screen_num)]
+                remaining_life_percent_lvl_widget.x = character_image.x
+                remaining_life_percent_lvl_widget.y = character_image.top
+                # Update special attack radius quad
+                if character['shoot_special_state']:
+                    self.special_attack_properties['quad'].points = self.get_special_quad_coords(screen_num)
+                if curr_screen.move_aux_char_1_state:
+                    self.aux_char_1_quad.points = self.get_aux_char_1_quad_coords(screen_num)
+                # Check collision
+                self.check_character_collision(character_image, screen_num)
+                # Update character animation if walking
+                if not character['is_fighting'] and character['has_walking_state_animation']:
+                    self.update_character_image_animation(screen_num, character, dt)
+                # Stop moving character if he arrived to the final point
+                if abs(
+                        character_image.center_x - character['finish_point_pos'][0]
+                ) < self.MOVEMENT_PIXEL_TOLERANCE \
+                        and abs(
+                    character_image.center_y - character['finish_point_pos'][1]
+                ) < self.MOVEMENT_PIXEL_TOLERANCE:
+                    character['is_moving'] = False
+                    character['current_state'] = 'idle'
+
+            elif character['current_state'] == 'idle' and character['has_idle_state_animation']:
+                self.update_character_image_animation(screen_num, character, dt)
+
 
 
 def check_character_collision(self, character_image, screen_num):
@@ -200,6 +211,33 @@ def kill_character(self, screen_num, character_dict):
         self.move_aux_char_2_button_enabled = False
         character_image.center_x = -0.5 * curr_screen.size[0]
         character_image.center_y = -0.5 * curr_screen.size[1]
+
+
+def update_character_image_animation(self, screen_num: int, character_dict: dict, dt: float) -> None:
+    """
+    This function animates the characters independently of their state. The control of availability of
+    an animation for a given state for a given character is done before calling this function.
+    The function assumes that the passed character in its current state has a well-defined animation sequence.
+    The function updates an individual counter by a float quantity. Once the integer of the counter changes,
+     the image is updated
+    :param screen_num: Screen number
+    :param character_dict: The character dictionary as defined per level
+    :param dt: Time difference as passed to the update character function
+    :return: None
+    """
+    update_rate = dt * character_dict[character_states_to_images[character_dict['current_state']]['animation_speed']]
+    curr_screen = self.root.screens[screen_num]
+    current_image_counter = character_states_to_images[character_dict['current_state']]['counter']
+    previous_im_number = character_dict[current_image_counter]
+    character_dict[current_image_counter] += update_rate
+    # Control the maximum number of images
+    if character_dict[current_image_counter] >= \
+            character_dict[character_states_to_images[character_dict['current_state']]['number_of_images']]:
+        character_dict[current_image_counter] = 1.0
+    if int(previous_im_number) != int(character_dict[current_image_counter]):
+        current_file_names = character_states_to_images[character_dict['current_state']]['file_names']
+        curr_screen.ids[character_dict['name'] + str(screen_num)].source = \
+            f"{character_dict[current_file_names]}{str(int(character_dict[current_image_counter]))}.png"
 
 
 # For debugging purposes:
