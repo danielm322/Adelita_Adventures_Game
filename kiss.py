@@ -9,6 +9,7 @@ from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_directi
 import kivy.uix.image
 import time
 from enemies_dict import enemies_dict
+from characters_dicts import aux_char_1_dict
 
 
 def shoot_kiss(self, screen_num, touch_point):
@@ -49,8 +50,12 @@ def update_kisses(self, screen_num, dt):
     enemies_to_delete = []
     bosses_to_delete = []
     for kiss_key, kiss in curr_screen.kisses_ids.items():
-        new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * self.kiss_speed * dt
-        new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * self.kiss_speed * dt
+        if 'kiss' in kiss_key:
+            new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * self.kiss_speed * dt
+            new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * self.kiss_speed * dt
+        elif 'aux_char' in kiss_key:
+            new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * aux_char_1_dict['rocket_speed'] * dt
+            new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * aux_char_1_dict['rocket_speed'] * dt
         kiss['image'].center_x = new_x
         kiss['image'].center_y = new_y
         # with curr_screen.canvas:

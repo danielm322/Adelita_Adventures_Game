@@ -81,9 +81,12 @@ def update_characters_from_dict(self, screen_num, dt):
                     character['is_moving'] = False
                     character['current_state'] = 'idle'
 
-            elif character['current_state'] == 'idle' and character['has_idle_state_animation']:
+            # elif character['current_state'] == 'idle' and character['has_idle_state_animation']:
+            elif not character['is_fighting'] and character['has_idle_state_animation']:
                 self.update_character_image_animation(screen_num, character, dt)
 
+            elif character['is_fighting'] and character['has_fighting_state_animation']:
+                self.update_character_image_animation(screen_num, character, dt)
 
 
 def check_character_collision(self, character_image, screen_num):

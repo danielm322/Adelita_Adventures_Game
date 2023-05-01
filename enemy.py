@@ -203,6 +203,9 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
         gap_x = curr_screen.width * enemies_dict[enemy['type']][enemy['level']]['width'] / 1.2
         gap_y = curr_screen.height * enemies_dict[enemy['type']][enemy['level']]['height'] / 0.8
     for character in curr_screen.characters_dict.values():
+        # Safe proof that if character is not fighting their not fighting flag is false
+        # In this context fighting means dealing melee damage
+        character['is_fighting'] = False
         character_image = curr_screen.ids[character['name'] + str(screen_num)]
         if enemy['image'].collide_widget(character_image) and \
                 abs(enemy['image'].center[0] - character_image.center[0]) <= gap_x and \
@@ -213,12 +216,15 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
             # If character deals melee damage, character deals damage to enemy
             if character['melee_attacks']:
                 character['current_state'] = 'melee_attacking'
+                character['is_fighting'] = True
                 enemy['hit_points'] = enemy['hit_points'] - character['melee_damage']
                 # Update image of fighting character
-                update_character_image_animation(self, screen_num, character, dt)
+                # update_character_image_animation(self, screen_num, character, dt)
                 if enemy['hit_points'] <= 0:
                     to_eliminate_flag = True
                     self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
+                    character['current_state'] = 'idle'
+                    character['is_fighting'] = False
 
             if character['damage_received'] >= character['hit_points']:
                 character['damage_received'] = character['hit_points']
