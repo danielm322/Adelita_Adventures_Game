@@ -3,6 +3,7 @@ import time
 import kivy.uix.image
 
 from helper_fns import _find_kiss_endpoint_fast, get_direction_unit_vector
+from characters_dicts import aux_char_1_dict
 
 
 def auto_shoot(self, screen_num, *args):
@@ -37,23 +38,26 @@ def auto_shoot(self, screen_num, *args):
                 finish_pos = _find_kiss_endpoint_fast(start_pos,
                                                       enemy_to_shoot_center,
                                                       curr_screen.size,
-                                                      self.kiss_width,
-                                                      self.kiss_height,
+                                                      aux_char_1_dict['rocket_width'],
+                                                      aux_char_1_dict['rocket_height'],
                                                       self.side_bar_width)
                 direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
-                banana = kivy.uix.image.Image(source="graphics/entities/banana_small.png",
-                                              size_hint=(self.kiss_width, self.kiss_height),
+                rocket = kivy.uix.image.Image(source=aux_char_1_dict['rocket_image_source'],
+                                              size_hint=(aux_char_1_dict['rocket_width'],
+                                                         aux_char_1_dict['rocket_height']),
                                               pos=start_pos,
                                               allow_stretch=True,
                                               keep_ratio=False)
-                curr_screen.add_widget(banana, index=-1)
+                curr_screen.add_widget(rocket, index=-1)
                 # create a unique identifier for each enemy
                 time_stamp = str(time.time())
-                curr_screen.kisses_ids['banana_' + time_stamp] = {'image': banana,
-                                                                  'finish_pos': finish_pos,
-                                                                  'direction_u_vector': direction_unit_vector}
+                curr_screen.kisses_ids['aux_char_1_rkt_' + time_stamp] = {'image': rocket,
+                                                                          'finish_pos': finish_pos,
+                                                                          'direction_u_vector': direction_unit_vector}
                 # self.sound_kiss.play()
                 is_fired_flag = True
+                # Change aux char 1 state
+                curr_screen.characters_dict['aux_char_1']['current_state'] = 'throwing'
                 break
 
     # Shoot to bosses if no enemy around
@@ -71,20 +75,23 @@ def auto_shoot(self, screen_num, *args):
                     finish_pos = _find_kiss_endpoint_fast(start_pos,
                                                           boss_to_shoot_center,
                                                           curr_screen.size,
-                                                          self.kiss_width,
-                                                          self.kiss_height,
+                                                          aux_char_1_dict['rocket_width'],
+                                                          aux_char_1_dict['rocket_height'],
                                                           self.side_bar_width)
                     direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
-                    banana = kivy.uix.image.Image(source="graphics/entities/banana_small.png",
-                                                  size_hint=(self.kiss_width, self.kiss_height),
+                    rocket = kivy.uix.image.Image(source=aux_char_1_dict['rocket_image_source'],
+                                                  size_hint=(aux_char_1_dict['rocket_width'],
+                                                             aux_char_1_dict['rocket_height']),
                                                   pos=start_pos,
                                                   allow_stretch=True,
                                                   keep_ratio=False)
-                    curr_screen.add_widget(banana, index=-1)
+                    curr_screen.add_widget(rocket, index=-1)
                     # create a unique identifier for each enemy
                     time_stamp = str(time.time())
-                    curr_screen.kisses_ids['banana_' + time_stamp] = {'image': banana,
+                    curr_screen.kisses_ids['aux_char_1_rkt_' + time_stamp] = {'image': rocket,
                                                                       'finish_pos': finish_pos,
                                                                       'direction_u_vector': direction_unit_vector}
                     # self.sound_kiss.play()
+                    # Change aux char 1 state
+                    curr_screen.characters_dict['aux_char_1']['current_state'] = 'throwing'
                     break

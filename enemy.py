@@ -7,6 +7,7 @@ import kivy.uix.image
 
 from helper_fns import _get_enemy_start_end_positions, _find_kiss_endpoint_fast, get_direction_unit_vector
 from enemies_dict import enemies_dict
+from character import update_character_image_animation
 
 
 def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
@@ -70,7 +71,7 @@ def spawn_rocket_at_enemy_center_to_ch_center(self,
     if ('kiss' in rocket_key) or ('special' in rocket_key):
         character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     # This would mean the aux char 1 shot the rocket
-    elif 'banana' in rocket_key:
+    elif 'aux_char_1' in rocket_key:
         character_image_center = curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     r_speed = random.uniform(enemies_dict[rocket_type][rocket_level]['speed_min'],
                              enemies_dict[rocket_type][rocket_level]['speed_max'])
@@ -148,7 +149,7 @@ def update_enemies(self, screen_num, dt):
     curr_screen = self.root.screens[screen_num]
     enemies_to_delete = []
     for enemy_key, enemy in curr_screen.enemies_ids.items():
-        enemy['is_fighting'], to_eliminate_flag = self.check_enemy_collision(enemy, screen_num)
+        enemy['is_fighting'], to_eliminate_flag = self.check_enemy_collision(enemy, screen_num, dt)
         if enemy['type'] == 'fire' or not enemy['is_fighting']:
             new_x = enemy['image'].pos_hint['center_x'] + enemy['direction_u_vector'][0] * enemy['speed'] * dt
             new_y = enemy['image'].pos_hint['center_y'] + enemy['direction_u_vector'][1] * enemy['speed'] * dt
@@ -188,7 +189,7 @@ def update_enemies(self, screen_num, dt):
             del curr_screen.enemies_ids[enemy_key]
 
 
-def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
+def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
     # Flag to check if an enemy is colliding with a character, it stops its movement to deal damage (fight)
     is_fighting = False
     # Flag to check if an enemy has to be eliminated because of losing its hit points in melee fight
@@ -202,19 +203,30 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
         gap_x = curr_screen.width * enemies_dict[enemy['type']][enemy['level']]['width'] / 1.2
         gap_y = curr_screen.height * enemies_dict[enemy['type']][enemy['level']]['height'] / 0.8
     for character in curr_screen.characters_dict.values():
+        # Safe proof that if character is not fighting their not fighting flag is false
+        # In this context fighting means dealing melee damage
+        character['is_fighting'] = False
         character_image = curr_screen.ids[character['name'] + str(screen_num)]
         if enemy['image'].collide_widget(character_image) and \
                 abs(enemy['image'].center[0] - character_image.center[0]) <= gap_x and \
                 abs(enemy['image'].center[1] - character_image.center[1]) <= gap_y:
+            # This flag is for the enemy
             is_fighting = True
             # Enemy deals damage to character
             character['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['damage']
             # If character deals melee damage, character deals damage to enemy
             if character['melee_attacks']:
+                character['current_state'] = 'melee_attacking'
+                character['is_fighting'] = True
                 enemy['hit_points'] = enemy['hit_points'] - character['melee_damage']
+                # Update image of fighting character
+                # update_character_image_animation(self, screen_num, character, dt)
                 if enemy['hit_points'] <= 0:
                     to_eliminate_flag = True
                     self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
+                    character['current_state'] = 'idle'
+                    character['is_fighting'] = False
+
             if character['damage_received'] >= character['hit_points']:
                 character['damage_received'] = character['hit_points']
             # Implement special ability of launching a character
@@ -223,7 +235,8 @@ def check_enemy_collision(self, enemy, screen_num) -> Tuple[bool, bool]:
 
             self.adjust_character_life_bar(screen_num, character)
             if character['damage_received'] >= character['hit_points']:
-                self.kill_character(screen_num, character)
+                if not character['current_state'] == 'dead':
+                    self.begin_kill_character(screen_num, character)
             # Eliminate fires at first collision
             if enemy['type'] == 'fire':
                 to_eliminate_flag = True
@@ -255,7 +268,8 @@ def enemy_animation_completed(self, enemy, screen_num):
         character['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['finishes_damage']
         if character['damage_received'] >= character['hit_points']:
             character['damage_received'] = character['hit_points']
-            self.kill_character(screen_num, character)
+            if not character['current_state'] == 'dead':
+                self.begin_kill_character(screen_num, character)
         
         self.adjust_character_life_bar(screen_num, character)
         if enemy['type'] != 'fire':
