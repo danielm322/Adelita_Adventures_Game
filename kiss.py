@@ -41,6 +41,8 @@ def shoot_kiss(self, screen_num, touch_point):
     curr_screen.kisses_ids['kiss_' + time_stamp] = {'image': kiss,
                                                     'finish_pos': finish_pos,
                                                     'direction_u_vector': kiss_direction_unit_vector}
+    # Change main character state
+    curr_screen.characters_dict['character']['current_state'] = 'throwing'
     self.sound_kiss.play()
 
 

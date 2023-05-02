@@ -56,6 +56,8 @@ def auto_shoot(self, screen_num, *args):
                                                                           'direction_u_vector': direction_unit_vector}
                 # self.sound_kiss.play()
                 is_fired_flag = True
+                # Change aux char 1 state
+                curr_screen.characters_dict['aux_char_1']['current_state'] = 'throwing'
                 break
 
     # Shoot to bosses if no enemy around
@@ -90,4 +92,6 @@ def auto_shoot(self, screen_num, *args):
                                                                       'finish_pos': finish_pos,
                                                                       'direction_u_vector': direction_unit_vector}
                     # self.sound_kiss.play()
+                    # Change aux char 1 state
+                    curr_screen.characters_dict['aux_char_1']['current_state'] = 'throwing'
                     break

@@ -2,10 +2,11 @@ import time
 # import random
 import kivy.uix.image
 from kivy.graphics import Color, Quad
+from kivy.utils import platform
 from functools import partial
 from math import sin
 
-from helper_fns import get_direction_unit_vector, get_entity_bbox
+from helper_fns import get_direction_unit_vector, get_entity_bbox, write_level_passed
 
 
 def spawn_boss(self, screen_num):
@@ -41,8 +42,9 @@ def spawn_boss(self, screen_num):
 
 def update_bosses(self, screen_num, dt):
     curr_screen = self.root.screens[screen_num]
+    bosses_to_delete = []
     for boss_key, boss in curr_screen.bosses_ids.items():
-        boss['is_fighting'] = self.check_boss_collision(boss['image'], screen_num)
+        boss['is_fighting'], boss_to_eliminate = self.check_boss_collision(boss, screen_num)
         if not boss['is_fighting']:
             new_x = boss['image'].pos_hint['center_x'] + \
                     boss['direction_u_vector'][0] * curr_screen.boss_props['speed'] * dt
@@ -62,6 +64,13 @@ def update_bosses(self, screen_num, dt):
         if boss['image'].center_x <= self.side_bar_width * curr_screen.size[0]:
             self.boss_arrives_animation(screen_num)
 
+        if boss_to_eliminate:
+            bosses_to_delete.append(boss_key)
+
+    if len(bosses_to_delete) > 0:
+        for boss_key in bosses_to_delete:
+            del curr_screen.bosses_ids[boss_key]
+
 
 def boss_arrives_animation(self, screen_num):
     # Triggered when boss arrives to the finish line
@@ -69,7 +78,7 @@ def boss_arrives_animation(self, screen_num):
     for character in curr_screen.characters_dict.values():
         character['damage_received'] = character['hit_points']
         self.adjust_character_life_bar(screen_num, character)
-        self.kill_character(screen_num, character)
+        self.begin_kill_character(screen_num, character)
 
 
 def boss_defeat_animation_start(self, boss, screen_num):
@@ -95,25 +104,37 @@ def boss_defeat_animation_finish(self, screen_num, *args):
     curr_screen.remove_widget(boss)
 
 
-def check_boss_collision(self, boss_image, screen_num) -> bool:
+def check_boss_collision(self, boss_dict, screen_num) -> bool:
     is_fighting_flag = False
     curr_screen = self.root.screens[screen_num]
-
+    # Flag to see if boss has been eliminated by melee attacking
+    boss_to_eliminate_flag = False
     gap_x = curr_screen.width * curr_screen.boss_props['width'] / 4
     gap_y = curr_screen.height * curr_screen.boss_props['height'] / 2
     for character in curr_screen.characters_dict.values():
         character_image = curr_screen.ids[character['name'] + str(screen_num)]
-        if boss_image.collide_widget(character_image) and \
-                abs(boss_image.center[0] - character_image.center[0]) <= gap_x and \
-                abs(boss_image.center[1] - character_image.center[1]) <= gap_y:
+        if boss_dict['image'].collide_widget(character_image) and \
+                abs(boss_dict['image'].center[0] - character_image.center[0]) <= gap_x and \
+                abs(boss_dict['image'].center[1] - character_image.center[1]) <= gap_y:
             is_fighting_flag = True
             character['damage_received'] += curr_screen.boss_props['damage']
+            if character['melee_attacks']:
+                character['current_state'] = 'melee_attacking'
+                character['is_fighting'] = True
+                boss_dict['hit_points'] = boss_dict['hit_points'] - character['melee_damage']
+                if boss_dict['hit_points'] <= 0:
+                    self.kill_boss(boss_dict, screen_num)
+                    write_level_passed(platform, screen_num)
+                    boss_to_eliminate_flag = True
+                    character['current_state'] = 'idle'
+                    character['is_fighting'] = False
             if character['damage_received'] > character['hit_points']:
                 character['damage_received'] = character['hit_points']
             self.adjust_character_life_bar(screen_num, character)
-            if character['damage_received'] == character['hit_points']:
-                self.kill_character(screen_num, character)
-    return is_fighting_flag
+            if character['damage_received'] >= character['hit_points']:
+                if not character['current_state'] == 'dead':
+                    self.begin_kill_character(screen_num, character)
+    return is_fighting_flag, boss_to_eliminate_flag
 
 
 def kill_boss(self, boss, screen_num):

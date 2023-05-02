@@ -71,7 +71,7 @@ def spawn_rocket_at_enemy_center_to_ch_center(self,
     if ('kiss' in rocket_key) or ('special' in rocket_key):
         character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     # This would mean the aux char 1 shot the rocket
-    elif 'banana' in rocket_key:
+    elif 'aux_char_1' in rocket_key:
         character_image_center = curr_screen.ids['aux_char_1_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
     r_speed = random.uniform(enemies_dict[rocket_type][rocket_level]['speed_min'],
                              enemies_dict[rocket_type][rocket_level]['speed_max'])
@@ -210,6 +210,7 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
         if enemy['image'].collide_widget(character_image) and \
                 abs(enemy['image'].center[0] - character_image.center[0]) <= gap_x and \
                 abs(enemy['image'].center[1] - character_image.center[1]) <= gap_y:
+            # This flag is for the enemy
             is_fighting = True
             # Enemy deals damage to character
             character['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['damage']
@@ -234,7 +235,8 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
 
             self.adjust_character_life_bar(screen_num, character)
             if character['damage_received'] >= character['hit_points']:
-                self.kill_character(screen_num, character)
+                if not character['current_state'] == 'dead':
+                    self.begin_kill_character(screen_num, character)
             # Eliminate fires at first collision
             if enemy['type'] == 'fire':
                 to_eliminate_flag = True
@@ -266,7 +268,8 @@ def enemy_animation_completed(self, enemy, screen_num):
         character['damage_received'] += enemies_dict[enemy['type']][enemy['level']]['finishes_damage']
         if character['damage_received'] >= character['hit_points']:
             character['damage_received'] = character['hit_points']
-            self.kill_character(screen_num, character)
+            if not character['current_state'] == 'dead':
+                self.begin_kill_character(screen_num, character)
         
         self.adjust_character_life_bar(screen_num, character)
         if enemy['type'] != 'fire':

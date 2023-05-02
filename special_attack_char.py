@@ -59,6 +59,8 @@ def shoot_special(self, screen_num, touch_point):
         curr_screen.ids['special_button_lvl' + str(screen_num)].state = "normal"
         self.special_button_enabled = False
         curr_screen.canvas.remove_group(u"special_radius")
+        # Change main character state
+        curr_screen.characters_dict['character']['current_state'] = 'throwing'
         self.sound_baby_laughs.play()
         Clock.schedule_once(self.enable_special_attack, self.special_attack_properties['reload_time'] )
 

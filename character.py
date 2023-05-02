@@ -66,11 +66,8 @@ def update_characters_from_dict(self, screen_num, dt):
                     self.special_attack_properties['quad'].points = self.get_special_quad_coords(screen_num)
                 if curr_screen.move_aux_char_1_state:
                     self.aux_char_1_quad.points = self.get_aux_char_1_quad_coords(screen_num)
-                # Check collision
+                # Check collision with rewards
                 self.check_character_collision(character_image, screen_num)
-                # Update character animation if walking
-                if not character['is_fighting'] and character['has_walking_state_animation']:
-                    self.update_character_image_animation(screen_num, character, dt)
                 # Stop moving character if he arrived to the final point
                 if abs(
                         character_image.center_x - character['finish_point_pos'][0]
@@ -81,12 +78,8 @@ def update_characters_from_dict(self, screen_num, dt):
                     character['is_moving'] = False
                     character['current_state'] = 'idle'
 
-            # elif character['current_state'] == 'idle' and character['has_idle_state_animation']:
-            elif not character['is_fighting'] and character['has_idle_state_animation']:
-                self.update_character_image_animation(screen_num, character, dt)
-
-            elif character['is_fighting'] and character['has_fighting_state_animation']:
-                self.update_character_image_animation(screen_num, character, dt)
+        # Update character image regardless of character state
+        self.update_character_image_animation(screen_num, character, dt)
 
 
 def check_character_collision(self, character_image, screen_num):
@@ -170,9 +163,10 @@ def check_character_collision(self, character_image, screen_num):
             del curr_screen.rewards_ids[reward_key]
 
 
-def kill_character(self, screen_num, character_dict):
+def begin_kill_character(self, screen_num, character_dict):
     curr_screen = self.root.screens[screen_num]
     character_dict['is_killed'] = True
+    character_dict['current_state'] = 'dead'
     # Here I handle the main character death
     if character_dict['name'] == 'character_image_lvl':
         self.sound_level_play.stop()
@@ -193,25 +187,31 @@ def kill_character(self, screen_num, character_dict):
             boss['speed'] = 0.
         if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS:
             self.clock_banana_throw_variable.cancel()
-        kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 4)
 
     if character_dict['name'] == 'aux_char_1_image_lvl':
         self.clock_banana_throw_variable.cancel()
-        character_image = curr_screen.ids[character_dict['name'] + str(screen_num)]
-        # curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(character_image)
-        character_image.opacity = 0
         curr_screen.ids['move_aux_char_1_lvl' + str(screen_num)].state = "normal"
         self.move_aux_char_1_button_enabled = False
+
+    if character_dict['name'] == 'aux_char_2_image_lvl':
+        curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
+        self.move_aux_char_2_button_enabled = False
+
+
+def finish_kill_character(self, screen_num, character_dict):
+    curr_screen = self.root.screens[screen_num]
+    if character_dict['name'] == 'character_image_lvl':
+        kivy.clock.Clock.schedule_once(partial(self.back_to_main_screen, curr_screen.parent), 4)
+    elif character_dict['name'] == 'aux_char_1_image_lvl':
+        character_image = curr_screen.ids[character_dict['name'] + str(screen_num)]
+        character_image.opacity = 0
         # Move character out of screen to avoid collision with enemies
         character_image.center_x = -0.5 * curr_screen.size[0]
         character_image.center_y = -0.5 * curr_screen.size[1]
-
-    if character_dict['name'] == 'aux_char_2_image_lvl':
+    elif character_dict['name'] == 'aux_char_2_image_lvl':
         character_image = curr_screen.ids[character_dict['name'] + str(screen_num)]
-        # curr_screen.ids['layout_lvl' + str(screen_num)].remove_widget(character_image)
         character_image.opacity = 0
-        curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
-        self.move_aux_char_2_button_enabled = False
+        # self.move_aux_char_2_button_enabled = False
         character_image.center_x = -0.5 * curr_screen.size[0]
         character_image.center_y = -0.5 * curr_screen.size[1]
 
@@ -237,6 +237,17 @@ def update_character_image_animation(self, screen_num: int, character_dict: dict
     if character_dict[current_image_counter] >= \
             character_dict[character_states_to_images[character_dict['current_state']]['number_of_images']]:
         character_dict[current_image_counter] = 1.0
+        # State dead: finish dead sequence and stop death animation
+        if character_dict['current_state'] == 'dead':
+            character_dict[current_image_counter] = previous_im_number
+            self.finish_kill_character(screen_num, character_dict)
+        # State throwing: finish throwing sequence depending on if character is moving or not
+        elif character_dict['current_state'] == 'throwing':
+            if character_dict['is_moving']:
+                character_dict['current_state'] = 'walking'
+            else:
+                character_dict['current_state'] = 'idle'
+
     if int(previous_im_number) != int(character_dict[current_image_counter]):
         current_file_names = character_states_to_images[character_dict['current_state']]['file_names']
         curr_screen.ids[character_dict['name'] + str(screen_num)].source = \
