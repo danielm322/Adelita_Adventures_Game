@@ -72,17 +72,9 @@ class GameApp(kivy.app.App):
     aux_char_1_quad = None  # Quad to see the aux char 1 range
     AUX_CHAR_1_FIRE_INTERVAL = 0.8  # In seconds
 
-    # Rewards properties
-    reward_width = 0.05
-    reward_height = 0.1
-    reward_duration = 12  # In seconds to disappear
-
     # Boss rewards properties
     boss_reward_initial_size_hint = (0.05, 0.05)
     boss_reward_animation_duration = 6
-
-    # Character properties
-    # CHARACTER_SPEED_FACTOR = 1 / 300  # Percentage of screen covered by each character update  1/300 seems fine
 
     # App properties
     side_bar_width = 0.08  # In screen percentage
@@ -104,6 +96,7 @@ class GameApp(kivy.app.App):
 
     def init_audio(self):
         self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
+        self.sound_heal = SoundLoader.load("audio/Heal.ogg")
         self.sound_kiss = SoundLoader.load("audio/kiss_sound.wav")
         self.sound_enemy_dies = SoundLoader.load("audio/goblin_hurt.ogg")
         self.sound_enemy_laughs = SoundLoader.load("audio/goblin_laugh.ogg")
@@ -125,6 +118,7 @@ class GameApp(kivy.app.App):
         self.sound_enemy_dies.volume = 0.2
         self.sound_enemy_laughs.volume = 0.6
         self.sound_baby_laughs.volume = 0.5
+        self.sound_heal.volume = 1.5
 
     def activate_levels(self, next_level_num):
         num_levels = len(self.root.screens[0].ids['lvls_imagebuttons'].children)
