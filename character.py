@@ -10,6 +10,7 @@ from kivy.clock import Clock
 from enemies_dict import enemies_dict
 from helper_fns import get_direction_unit_vector
 from characters_dicts import character_states_to_images
+from reward import rewards_properties
 
 
 def start_character_animation_from_dict(self, screen_num, touch_pos, character_dict):
@@ -67,7 +68,7 @@ def update_characters_from_dict(self, screen_num, dt):
                 if curr_screen.move_aux_char_1_state:
                     self.aux_char_1_quad.points = self.get_aux_char_1_quad_coords(screen_num)
                 # Check collision with rewards
-                self.check_character_collision(character_image, screen_num)
+                self.check_character_collision(character, screen_num)
                 # Stop moving character if he arrived to the final point
                 if abs(
                         character_image.center_x - character['finish_point_pos'][0]
@@ -82,7 +83,7 @@ def update_characters_from_dict(self, screen_num, dt):
         self.update_character_image_animation(screen_num, character, dt)
 
 
-def check_character_collision(self, character_image, screen_num):
+def check_character_collision(self, character, screen_num):
     """
     This function checks collision with rewards only. Updates the rewards counter and activates other game phases when
     the required rewards for each phase are collected
@@ -92,17 +93,25 @@ def check_character_collision(self, character_image, screen_num):
     :return:
     """
     curr_screen = self.root.screens[screen_num]
-    gap_x = curr_screen.width * self.reward_width / 3
-    gap_y = curr_screen.height * self.reward_height / 1.5
     rewards_to_delete = []
     for reward_key, reward in curr_screen.rewards_ids.items():
+        gap_x = curr_screen.width * rewards_properties[reward['type']]['width'] / 3
+        gap_y = curr_screen.height * rewards_properties[reward['type']]['height'] / 1.5
+        character_image = curr_screen.ids[character['name'] + str(screen_num)]
         if character_image.collide_widget(reward['image']) and \
                 abs(character_image.center[0] - reward['image'].center[0]) <= gap_x and \
                 abs(character_image.center[1] - reward['image'].center[1]) <= gap_y:
             rewards_to_delete.append(reward_key)
             curr_screen.remove_widget(reward['image'])
-            curr_screen.rewards_gathered += 1
-            self.sound_reward_collected.play()
+            if reward['type'] == 'star':
+                curr_screen.rewards_gathered += 1
+                self.sound_reward_collected.play()
+            elif reward['type'] == 'heart':
+                self.sound_heal.play()
+                character['damage_received'] -= character['hit_points'] * rewards_properties['heart']['heal_proportion']
+                if character['damage_received'] < 0.0:
+                    character['damage_received'] = 0.0
+                self.adjust_character_life_bar(screen_num, character)
             # Update stars counter
             if curr_screen.current_phase < curr_screen.number_of_phases:
                 curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = \
