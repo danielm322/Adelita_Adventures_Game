@@ -12,7 +12,7 @@ enemies_dict = {
             'end_point': None,
             'spawn_interval': 4,  # In seconds
             'finishes_damage': 30,
-            'spawn_reward_probability': 0.15,
+            'spawn_reward_probability': 0.20,
             'width': 0.156,  # 0.869 aspect ratio wrt height
             'height': 0.18,
             'spawn_function': 'uniform',
@@ -28,7 +28,7 @@ enemies_dict = {
             'end_point': None,
             'spawn_interval': 2.5,  # In seconds
             'finishes_damage': 30,
-            'spawn_reward_probability': 0.15,
+            'spawn_reward_probability': 0.20,
             'width': 0.156,
             'height': 0.18,
             'spawn_function': 'uniform',
@@ -47,7 +47,7 @@ enemies_dict = {
             'trajectory_variance': 0.08,
             'spawn_interval': 2,  # In seconds
             'finishes_damage': 35,
-            'spawn_reward_probability': 0.10,
+            'spawn_reward_probability': 0.15,
             # 'spawn_reward_probability': 9,
             'width': 0.2,
             'height': 0.23,
@@ -67,7 +67,7 @@ enemies_dict = {
             'trajectory_variance': 0.08,
             'spawn_interval': 2,  # In seconds
             'finishes_damage': 20,
-            'spawn_reward_probability': 0.11,
+            'spawn_reward_probability': 0.16,
             # 'spawn_reward_probability': 11,
             'width': 0.113,
             'height': 0.13,
@@ -89,7 +89,7 @@ enemies_dict = {
             'spawn_interval': 2.5,  # In seconds
             'finishes_damage': 20,
             # 'spawn_reward_probability': 11,
-            'spawn_reward_probability': 0.11,
+            'spawn_reward_probability': 0.16,
             'width': 0.13,
             'height': 0.15,
             'spawn_function': 'gaussian',
@@ -112,7 +112,7 @@ enemies_dict = {
             'spawn_interval': 3.0,  # In seconds
             'finishes_damage': 20,
             # 'spawn_reward_probability': 11,
-            'spawn_reward_probability': 0.11,
+            'spawn_reward_probability': 0.16,
             'width': 0.173,
             'height': 0.20,
             'spawn_function': 'gaussian',
@@ -134,7 +134,7 @@ enemies_dict = {
             'spawn_interval': 3.0,  # In seconds
             'finishes_damage': 20,
             # 'spawn_reward_probability': 11,
-            'spawn_reward_probability': 0.11,
+            'spawn_reward_probability': 0.16,
             'width': 0.173,
             'height': 0.20,
             'spawn_function': 'gaussian',
@@ -154,7 +154,7 @@ enemies_dict = {
             'spawn_interval': 0.9,  # In seconds
             'finishes_damage': 10,
             # 'spawn_reward_probability': 11,
-            'spawn_reward_probability': 0.11,
+            'spawn_reward_probability': 0.16,
             'width': 0.097,
             'height': 0.12,
             'spawn_function': 'gaussian',

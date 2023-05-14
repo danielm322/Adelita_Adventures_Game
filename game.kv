@@ -20,7 +20,16 @@ ScreenManager:
     canvas.before:
         Rectangle:
             size: self.size
-            source: 'graphics/Main_menu_bg.jpg'
+            source: 'graphics/Tower_1.jpg'
+    Label:
+        text: "Adelita Adventures"
+        font_size: dp(80)
+        font_name: 'graphics/fonts/magic-school/MagicSchoolOne.ttf'
+        size_hint: .60, .20
+        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+        outline_width: 10
+        color: 0.8, 0, 0, 1
+        outline_color: 0, 0, 0.6, 1
     RelativeLayout:
         id: lvls_imagebuttons
         LevelButton:
