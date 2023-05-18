@@ -17,7 +17,7 @@ def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
     r_speed = random.uniform(enemies_dict[enemy_type][enemy_level]['speed_min'],
                              enemies_dict[enemy_type][enemy_level]['speed_max'])
     # Get enemy start and end positions
-    start_pos, finish_pos = _get_enemy_start_end_positions(self.side_bar_width,
+    start_pos, finish_pos = _get_enemy_start_end_positions(self.SIDE_BAR_WIDTH,
                                                            enemy_type,
                                                            enemy_level,
                                                            curr_screen.size)
@@ -80,7 +80,7 @@ def spawn_rocket_at_enemy_center_to_ch_center(self,
                                                  curr_screen.size,
                                                  enemies_dict[rocket_type][rocket_level]['width'],
                                                  enemies_dict[rocket_type][rocket_level]['height'],
-                                                 self.side_bar_width)
+                                                 self.SIDE_BAR_WIDTH)
     start_pos = {
         'center_x': enemy_center_pixels[0] / curr_screen.size[0],
         'center_y': enemy_center_pixels[1] / curr_screen.size[1],

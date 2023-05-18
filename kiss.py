@@ -11,24 +11,29 @@ import time
 from enemies_dict import enemies_dict
 from characters_dicts import aux_char_1_dict
 
+# Kiss properties
+KISS_WIDTH = 0.03
+KISS_HEIGHT = 0.04
+KISS_SPEED = 25
+
 
 def shoot_kiss(self, screen_num, touch_point):
     curr_screen = self.root.screens[screen_num]
     screen_size = curr_screen.size  # List [size_x, size_y]
     character_image_center = curr_screen.ids['character_image_lvl' + str(screen_num)].center  # List: [c_x, c_y]
-    start_pos = [character_image_center[0] - self.kiss_width * screen_size[0] / 2,
+    start_pos = [character_image_center[0] - KISS_WIDTH * screen_size[0] / 2,
                  character_image_center[1]]
     finish_pos = _find_kiss_endpoint_fast(start_pos,
                                           touch_point,
                                           screen_size,
-                                          self.kiss_width,
-                                          self.kiss_height,
-                                          self.side_bar_width)
+                                          KISS_WIDTH,
+                                          KISS_HEIGHT,
+                                          self.SIDE_BAR_WIDTH)
     # with curr_screen.canvas:
     #     Line(circle=(character_image_center[0], character_image_center[1], 20))
     kiss_direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
     kiss = kivy.uix.image.Image(source="graphics/entities/kiss1.png",
-                                size_hint=(self.kiss_width, self.kiss_height),
+                                size_hint=(KISS_WIDTH, KISS_HEIGHT),
                                 pos=start_pos,
                                 # center_x=character_image_center[0] + self.kiss_width * screen_size[0] / 2,
                                 # center_y=character_image_center[1],
@@ -53,8 +58,8 @@ def update_kisses(self, screen_num, dt):
     bosses_to_delete = []
     for kiss_key, kiss in curr_screen.kisses_ids.items():
         if 'kiss' in kiss_key:
-            new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * self.kiss_speed * dt
-            new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * self.kiss_speed * dt
+            new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * KISS_SPEED * dt
+            new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * KISS_SPEED * dt
         elif 'aux_char' in kiss_key:
             new_x = kiss['image'].center_x + kiss['direction_u_vector'][0] * aux_char_1_dict['rocket_speed'] * dt
             new_y = kiss['image'].center_y + kiss['direction_u_vector'][1] * aux_char_1_dict['rocket_speed'] * dt
@@ -78,7 +83,7 @@ def update_kisses(self, screen_num, dt):
         elif kiss['image'].center_x > curr_screen.width \
                 or (kiss['direction_u_vector'][0] < 0 and kiss['image'].center_x < kiss['finish_pos'][0]) \
                 or kiss['image'].y > curr_screen.height \
-                or kiss['image'].y < 0 - self.kiss_width * curr_screen.height:
+                or kiss['image'].y < 0 - KISS_WIDTH * curr_screen.height:
             kisses_to_delete.append(kiss_key)
             curr_screen.remove_widget(kiss['image'])
 

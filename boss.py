@@ -1,12 +1,92 @@
 import time
-# import random
+from typing import Tuple
 import kivy.uix.image
-from kivy.graphics import Color, Quad
+# from kivy.graphics import Color, Quad
 from kivy.utils import platform
 from functools import partial
 from math import sin
 
-from helper_fns import get_direction_unit_vector, get_entity_bbox, write_level_passed
+from helper_fns import (
+    get_direction_unit_vector,
+    # get_entity_bbox,
+    write_level_passed
+)
+
+boss_properties = {
+    'level_1': {
+        'width': 0.391,
+        'height': 0.45,
+        'hit_points': 25,
+        'damage': 1,
+        'speed': 1.5e-3,
+        'source': "graphics/entities/boss_1.png",
+        'boss_reward_image_source': "graphics/entities/diaper.png",
+        'fires_back': False,
+        'trajectory_type': 'linear'
+    },
+    'level_2': {
+        'width': 0.391,
+        'height': 0.45,
+        'hit_points': 30,
+        'damage': 1,
+        'speed': 1.6e-3,
+        'source': "graphics/entities/boss_1.png",
+        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
+        'fires_back': False,
+        'trajectory_type': 'non_linear',
+        'trajectory_function': 'sine',
+        'amplitude': 0.2,
+        'period': 15
+    },
+    'level_3': {
+        'width': 0.391,
+        'height': 0.45,
+        'hit_points': 30,
+        'damage': 1,
+        'speed': 1.3e-3,
+        'source': "graphics/entities/boss_1.png",
+        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
+        'fires_back': True,
+        'fire_type': 'fire',
+        'fire_level': 'level_2',
+        'trajectory_type': 'non_linear',
+        'trajectory_function': 'sine',
+        'amplitude': 0.2,
+        'period': 15
+    },
+    'level_4': {
+        'width': 0.391,
+        'height': 0.45,
+        'hit_points': 30,
+        'damage': 1,
+        'speed': 1.3e-3,
+        'source': "graphics/entities/boss_1.png",
+        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
+        'fires_back': True,
+        'fire_type': 'fire',
+        'fire_level': 'level_2',
+        'trajectory_type': 'non_linear',
+        'trajectory_function': 'sine',
+        'amplitude': 0.3,
+        'period': 15
+    },
+    'level_6': {
+        'width': 0.4,
+        'height': 0.45,
+        'hit_points': 30,
+        'damage': 1.5,
+        'speed': 1.0e-3,
+        'source': "graphics/entities/boss_1.png",
+        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
+        'fires_back': True,
+        'fire_type': 'fire',
+        'fire_level': 'level_2',
+        'trajectory_type': 'non_linear',
+        'trajectory_function': 'sine',
+        'amplitude': 0.15,
+        'period': 15
+    }
+}
 
 
 def spawn_boss(self, screen_num):
@@ -17,7 +97,7 @@ def spawn_boss(self, screen_num):
         'center_y': 0.5
     }
     finish_pos = {
-        'center_x': 0. + self.side_bar_width,
+        'center_x': 0. + self.SIDE_BAR_WIDTH,
         'center_y': 0.5
     }
     direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
@@ -61,7 +141,7 @@ def update_bosses(self, screen_num, dt):
         # self.entity_bounding_box.points = get_entity_bbox(boss['image'])
 
         # if boss['image'].x <= boss['finish_pos']['x'] * curr_screen.size[0]:
-        if boss['image'].center_x <= self.side_bar_width * curr_screen.size[0]:
+        if boss['image'].center_x <= self.SIDE_BAR_WIDTH * curr_screen.size[0]:
             self.boss_arrives_animation(screen_num)
 
         if boss_to_eliminate:
@@ -104,7 +184,7 @@ def boss_defeat_animation_finish(self, screen_num, *args):
     curr_screen.remove_widget(boss)
 
 
-def check_boss_collision(self, boss_dict, screen_num) -> bool:
+def check_boss_collision(self, boss_dict, screen_num) -> Tuple[bool, bool]:
     is_fighting_flag = False
     curr_screen = self.root.screens[screen_num]
     # Flag to see if boss has been eliminated by melee attacking
