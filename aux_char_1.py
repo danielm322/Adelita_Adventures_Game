@@ -26,13 +26,13 @@ def auto_shoot(self, screen_num, *args):
         for enemy in curr_screen.enemies_ids.values():
             if enemy['type'] != 'fire' \
                     and (
-                    abs(aux_char_1_image_center[0] - enemy['image'].center_x) < self.aux_char_1_range *
+                    abs(aux_char_1_image_center[0] - enemy['image'].center_x) < self.AUX_CHAR_1_RANGE *
                     curr_screen.size[0]
-                    and abs(aux_char_1_image_center[1] - enemy['image'].center_y) < self.aux_char_1_range *
+                    and abs(aux_char_1_image_center[1] - enemy['image'].center_y) < self.AUX_CHAR_1_RANGE *
                     curr_screen.size[1]
             ):
                 enemy_to_shoot_center = enemy['image'].center
-                start_pos = [aux_char_1_image_center[0] - self.kiss_width * curr_screen.size[0] / 2,
+                start_pos = [aux_char_1_image_center[0] - self.KISS_WIDTH * curr_screen.size[0] / 2,
                              aux_char_1_image_center[1]]
 
                 finish_pos = _find_kiss_endpoint_fast(start_pos,
@@ -40,7 +40,7 @@ def auto_shoot(self, screen_num, *args):
                                                       curr_screen.size,
                                                       aux_char_1_dict['rocket_width'],
                                                       aux_char_1_dict['rocket_height'],
-                                                      self.side_bar_width)
+                                                      self.SIDE_BAR_WIDTH)
                 direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
                 rocket = kivy.uix.image.Image(source=aux_char_1_dict['rocket_image_source'],
                                               size_hint=(aux_char_1_dict['rocket_width'],
@@ -65,11 +65,11 @@ def auto_shoot(self, screen_num, *args):
         if len(curr_screen.bosses_ids) > 0:
             for boss in curr_screen.bosses_ids.values():
                 if abs(aux_char_1_image_center[0] - boss['image'].center_x) < \
-                        self.aux_char_1_range * curr_screen.size[0] \
+                        self.AUX_CHAR_1_RANGE * curr_screen.size[0] \
                         and abs(aux_char_1_image_center[1] - boss['image'].center_y) < \
-                        self.aux_char_1_range * curr_screen.size[1]:
+                        self.AUX_CHAR_1_RANGE * curr_screen.size[1]:
                     boss_to_shoot_center = boss['image'].center
-                    start_pos = [aux_char_1_image_center[0] - self.kiss_width * curr_screen.size[0] / 2,
+                    start_pos = [aux_char_1_image_center[0] - self.KISS_WIDTH * curr_screen.size[0] / 2,
                                  aux_char_1_image_center[1]]
 
                     finish_pos = _find_kiss_endpoint_fast(start_pos,
@@ -77,7 +77,7 @@ def auto_shoot(self, screen_num, *args):
                                                           curr_screen.size,
                                                           aux_char_1_dict['rocket_width'],
                                                           aux_char_1_dict['rocket_height'],
-                                                          self.side_bar_width)
+                                                          self.SIDE_BAR_WIDTH)
                     direction_unit_vector = get_direction_unit_vector(start_pos, finish_pos)
                     rocket = kivy.uix.image.Image(source=aux_char_1_dict['rocket_image_source'],
                                                   size_hint=(aux_char_1_dict['rocket_width'],

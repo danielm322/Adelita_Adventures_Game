@@ -2,18 +2,22 @@ import kivy.uix.image
 import time
 from functools import partial
 
+# Boss rewards properties
+BOSS_REWARD_INITIAL_SIZE_HINT = (0.05, 0.05)
+BOSS_REWARD_ANIMATION_DURATION = 6
+
 
 def spawn_boss_reward(self, boss_center, screen_num):
     curr_screen = self.root.screens[screen_num]
     boss_reward = kivy.uix.image.Image(source=curr_screen.boss_props['boss_reward_image_source'],
-                                       size_hint=self.boss_reward_initial_size_hint,
+                                       size_hint=BOSS_REWARD_INITIAL_SIZE_HINT,
                                        pos=boss_center, allow_stretch=True)
     curr_screen.ids['layout_lvl' + str(screen_num)].add_widget(boss_reward, index=-1)
     time_stamp = str(time.time())
     curr_screen.bosses_rewards_ids['boss_reward_' + time_stamp] = boss_reward
     boss_reward_anim = kivy.animation.Animation(size_hint=(1, 1),
                                                 pos=(0, 0),
-                                                duration=self.boss_reward_animation_duration)
+                                                duration=BOSS_REWARD_ANIMATION_DURATION)
     boss_reward_anim.bind(on_complete=partial(self.boss_reward_animation_completed, time_stamp, screen_num))
     boss_reward_anim.start(boss_reward)
 

@@ -1,6 +1,7 @@
-# import random
 import kivy.uix.screenmanager
 from characters_dicts import main_character_dict, aux_char_1_dict, aux_char_2_dict
+from boss import boss_properties
+
 
 class Level1(kivy.uix.screenmanager.Screen):
     state_paused = False
@@ -22,17 +23,7 @@ class Level1(kivy.uix.screenmanager.Screen):
     characters_dict = {
         'character': dict(main_character_dict)
     }
-    boss_props = {
-        'width': 0.391,
-        'height': 0.45,
-        'hit_points': 25,
-        'damage': 1,
-        'speed': 1.5e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/diaper.png",
-        'fires_back': False,
-        'trajectory_type': 'linear'
-    }
+    boss_props = dict(boss_properties['level_1'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -67,20 +58,8 @@ class Level2(kivy.uix.screenmanager.Screen):
     characters_dict = {
         'character': dict(main_character_dict)
     }
-    boss_props = {
-        'width': 0.391,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1,
-        'speed': 1.6e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': False,
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.2,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_2'])
+
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -115,22 +94,7 @@ class Level3(kivy.uix.screenmanager.Screen):
     characters_dict = {
         'character': dict(main_character_dict)
     }
-    boss_props = {
-        'width': 0.391,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1,
-        'speed': 1.3e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.2,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_3'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -165,22 +129,7 @@ class Level4(kivy.uix.screenmanager.Screen):
     characters_dict = {
         'character': dict(main_character_dict)
     }
-    boss_props = {
-        'width': 0.391,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1,
-        'speed': 1.3e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.3,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_4'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -215,22 +164,7 @@ class Level5(kivy.uix.screenmanager.Screen):
     characters_dict = {
         'character': dict(main_character_dict)
     }
-    boss_props = {
-        'width': 0.4,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1,
-        'speed': 1.0e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.15,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_4'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -271,22 +205,7 @@ class Level6(kivy.uix.screenmanager.Screen):
         'character': dict(main_character_dict),
         'aux_char_2': dict(aux_char_2_dict)
     }
-    boss_props = {
-        'width': 0.4,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1.5,
-        'speed': 1.0e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.15,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_6'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -327,22 +246,7 @@ class Level7(kivy.uix.screenmanager.Screen):
         'character': dict(main_character_dict),
         'aux_char_2': dict(aux_char_2_dict)
     }
-    boss_props = {
-        'width': 0.4,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1.5,
-        'speed': 1.0e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.15,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_6'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -384,22 +288,7 @@ class Level8(kivy.uix.screenmanager.Screen):
         'aux_char_1': dict(aux_char_1_dict),
         'aux_char_2': dict(aux_char_2_dict)
     }
-    boss_props = {
-        'width': 0.4,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1.5,
-        'speed': 1.0e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.15,
-        'period': 15
-    }
+    boss_props = dict(boss_properties['level_6'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -445,22 +334,7 @@ class Level9(kivy.uix.screenmanager.Screen):
         'aux_char_1': dict(aux_char_1_dict),
         'aux_char_2': dict(aux_char_2_dict)
     }
-    boss_props = {
-        'width': 0.4,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1.5,
-        'speed': 1.0e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.15,
-        'period': 15,
-    }
+    boss_props = dict(boss_properties['level_6'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}
@@ -506,22 +380,7 @@ class Level10(kivy.uix.screenmanager.Screen):
         'aux_char_1': dict(aux_char_1_dict),
         'aux_char_2': dict(aux_char_2_dict)
     }
-    boss_props = {
-        'width': 0.4,
-        'height': 0.45,
-        'hit_points': 30,
-        'damage': 1.5,
-        'speed': 1.0e-3,
-        'source': "graphics/entities/boss_1.png",
-        'boss_reward_image_source': "graphics/entities/boss_reward_key.png",
-        'fires_back': True,
-        'fire_type': 'fire',
-        'fire_level': 'level_2',
-        'trajectory_type': 'non_linear',
-        'trajectory_function': 'sine',
-        'amplitude': 0.15,
-        'period': 15,
-    }
+    boss_props = dict(boss_properties['level_6'])
     # Entities Ids dicts to be used during gameplay
     kisses_ids = {}
     rewards_ids = {}

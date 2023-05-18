@@ -1,6 +1,4 @@
-# import time
 from kivy.config import Config
-# import os
 import random
 from kivy.graphics import Color, Quad
 
@@ -24,43 +22,58 @@ from enemies_dict import enemies_dict
 
 class GameApp(kivy.app.App):
     # Imports: Do not delete even if not used in this file
-    from character import check_character_collision, begin_kill_character, get_character_bbox, \
-        start_character_animation_from_dict, update_characters_from_dict, get_aux_char_1_quad_coords, \
-        update_character_image_animation, finish_kill_character
-    from kiss import shoot_kiss, check_kiss_collision_with_enemies, check_kiss_collision_with_bosses, update_kisses
-    from enemy import spawn_enemy, check_enemy_collision, enemy_animation_completed, update_enemies, \
-        spawn_rocket_at_enemy_center_to_ch_center, kill_enemy, remove_fire_from_screen, spawn_enemy_underling, \
+    from character import (
+        check_character_collision,
+        begin_kill_character,
+        get_character_bbox,
+        start_character_animation_from_dict,
+        update_characters_from_dict,
+        get_aux_char_1_quad_coords,
+        update_character_image_animation,
+        finish_kill_character
+    )
+    from kiss import (
+        shoot_kiss,
+        check_kiss_collision_with_enemies,
+        check_kiss_collision_with_bosses,
+        update_kisses,
+        KISS_SPEED,
+        KISS_HEIGHT,
+        KISS_WIDTH
+    )
+    from enemy import (
+        spawn_enemy,
+        check_enemy_collision,
+        enemy_animation_completed,
+        update_enemies,
+        spawn_rocket_at_enemy_center_to_ch_center,
+        kill_enemy,
+        remove_fire_from_screen,
+        spawn_enemy_underling,
         launch_character
+    )
+    from boss import (
+        spawn_boss,
+        update_bosses,
+        boss_arrives_animation,
+        boss_defeat_animation_start,
+        boss_defeat_animation_finish,
+        check_boss_collision,
+        kill_boss
+    )
+    from special_attack_char import (
+        shoot_special,
+        update_specials,
+        check_special_collision,
+        enable_special_attack,
+        get_special_quad_coords,
+        special_attack_properties
+    )
     from reward import spawn_reward, update_rewards
-    from boss import spawn_boss, update_bosses, boss_arrives_animation, boss_defeat_animation_start, \
-        boss_defeat_animation_finish, check_boss_collision, kill_boss
     from boss_reward import spawn_boss_reward, boss_reward_animation_completed
     from helper_fns import adjust_character_life_bar
-    from special_attack_char import shoot_special, update_specials, check_special_collision, enable_special_attack, \
-        get_special_quad_coords
     from aux_char_1 import auto_shoot
 
-    # Kiss properties
-    kiss_width = 0.03
-    kiss_height = 0.04
-    kiss_speed = 25
-
-    # Special attack properties
-    special_attack_properties = {
-        'init_width': 0.02,
-        'init_height': 0.04,
-        'max_width': 0.30,
-        'max_height': 0.32,
-        'extra_height_parabola': 0.35,  # Extra height of parabola in screen proportion
-        'time_to_land': 2.0,
-        'attack_radius': 0.15,  # In screen proportion
-        'quad': None,  # Square that limits special ability shoot
-        'damage': 10,
-        'reload_time': 7,
-        'grow_size_factor': 3,
-        'min_dist_x': 0.15,  # In screen proportion
-        'source_img': "graphics/entities/diaper.png",
-    }
     special_button_enabled = BooleanProperty(True)
     # char_bounding_box = None  # Debugging purposes
     # entity_bounding_box = None  # Debugging purposes
@@ -68,16 +81,12 @@ class GameApp(kivy.app.App):
     # Auxiliary characters properties
     move_aux_char_1_button_enabled = BooleanProperty(True)
     move_aux_char_2_button_enabled = BooleanProperty(True)
-    aux_char_1_range = 0.3  # In screen proportion (same range in width and height, is a rectangle)
+    AUX_CHAR_1_RANGE = 0.3  # In screen proportion (same range in width and height, is a rectangle)
     aux_char_1_quad = None  # Quad to see the aux char 1 range
     AUX_CHAR_1_FIRE_INTERVAL = 0.8  # In seconds
 
-    # Boss rewards properties
-    boss_reward_initial_size_hint = (0.05, 0.05)
-    boss_reward_animation_duration = 6
-
     # App properties
-    side_bar_width = 0.08  # In screen percentage
+    SIDE_BAR_WIDTH = 0.08  # In screen percentage
     next_level = 1  # Default first level to be played (Activate just one level)
     clock_update_fn_variable = None
     clock_banana_throw_variable = None
@@ -282,7 +291,7 @@ class GameApp(kivy.app.App):
     def touch_down_handler(self, screen_num, args):
         # print(args[1].is_double_tap)
         curr_screen = self.root.screens[screen_num]
-        if args[1].psx > self.side_bar_width \
+        if args[1].psx > self.SIDE_BAR_WIDTH \
                 and not curr_screen.state_paused \
                 and not curr_screen.characters_dict['character']['is_killed']:
             if not curr_screen.characters_dict['character']['shoot_state'] \
