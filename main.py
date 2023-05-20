@@ -14,7 +14,7 @@ from functools import partial
 from kivy.clock import Clock
 from kivy.properties import BooleanProperty, NumericProperty
 from kivy.utils import platform
-from levels import Level1, Level2, Level3
+from levels import *
 from pause_menu import PauseMenuWidget
 from helper_fns import read_game_info
 from enemies_dict import enemies_dict
@@ -69,33 +69,65 @@ class GameApp(kivy.app.App):
         get_special_quad_coords,
         special_attack_properties
     )
+    from special_attack_fire_triangle import (
+        activate_special_fire_triangle,
+        get_special_triangle_coords,
+        finish_special_triangle,
+        enable_special_triangle
+    )
     from reward import spawn_reward, update_rewards
     from boss_reward import spawn_boss_reward, boss_reward_animation_completed
     from helper_fns import adjust_character_life_bar
     from aux_char_1 import auto_shoot
 
-    special_button_enabled = BooleanProperty(True)
-    # char_bounding_box = None  # Debugging purposes
-    # entity_bounding_box = None  # Debugging purposes
-
     # Auxiliary characters properties
-    move_aux_char_1_button_enabled = BooleanProperty(True)
-    move_aux_char_2_button_enabled = BooleanProperty(True)
     AUX_CHAR_1_RANGE = 0.3  # In screen proportion (same range in width and height, is a rectangle)
-    aux_char_1_quad = None  # Quad to see the aux char 1 range
     AUX_CHAR_1_FIRE_INTERVAL = 0.8  # In seconds
 
     # App properties
     SIDE_BAR_WIDTH = 0.08  # In screen percentage
-    next_level = 1  # Default first level to be played (Activate just one level)
-    clock_update_fn_variable = None
-    clock_banana_throw_variable = None
     APP_TIME_FACTOR = 40  # In number of updates per second
     SCREEN_UPDATE_RATE = 1 / APP_TIME_FACTOR
     MOVEMENT_PIXEL_TOLERANCE = 8  # Number of pixels of tolerance to accept a widget is in a given position
     LEVEL_WHEN_SPECIAL_IS_ACTIVATED = 2
     LEVEL_WHEN_AUX_CHAR_1_ENTERS = 8
     LEVEL_WHEN_AUX_CHAR_2_ENTERS = 6
+    LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED = 11
+
+    # Special ability button. Although not a global parameter, needs to be here for correct recognition from kivy
+    special_button_enabled = BooleanProperty(True)
+
+    def __init__(self, **kwargs):
+        super(GameApp, self).__init__(**kwargs)
+        # Auxiliary characters buttons and quad variables
+        self.move_aux_char_1_button_enabled = BooleanProperty(True)
+        self.move_aux_char_2_button_enabled = BooleanProperty(True)
+        self.aux_char_1_quad = None  # Quad to see the aux char 1 range
+
+        # Gameplay variables:
+        self.next_level = 1  # Default first level to be played (Activate just one level)
+        self.clock_update_fn_variable = None
+        self.clock_banana_throw_variable = None
+
+        # Debugging
+        # char_bounding_box = None  # Debugging purposes
+        # entity_bounding_box = None  # Debugging purposes
+
+        # Triangle special ability variables
+        self.special_triangle_shape = None
+        self.special_triangle_border = None
+
+        # Initialization of audio
+        self.sound_reward_collected = None
+        self.sound_level_finished = None
+        self.sound_level_play = None
+        self.sound_game_over = None
+        self.sound_baby_laughs = None
+        self.sound_enemy_laughs = None
+        self.sound_enemy_dies = None
+        self.sound_kiss = None
+        self.sound_heal = None
+        self.sound_main_menu = None
 
     def on_start(self):
         self.init_audio()
@@ -215,6 +247,9 @@ class GameApp(kivy.app.App):
             curr_screen.ids['aux_char_2_image_lvl' + str(screen_num)].center_y = 0.75 * curr_screen.size[1]
             curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
             self.move_aux_char_2_button_enabled = True
+        if screen_num >= self.LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED:
+            curr_screen.ids['special_triangle_button_lvl' + str(screen_num)].state = 'normal'
+            curr_screen.ids['special_triangle_button_lvl' + str(screen_num)].disabled = False
         curr_screen.state_paused = False
         curr_screen.rewards_gathered = 0
         curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = str(
@@ -255,14 +290,6 @@ class GameApp(kivy.app.App):
                     enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
                 )
             )
-        # if self.clock_spawn_enemies_variable is None:
-        #     self.clock_spawn_enemies_variable = Clock.schedule_interval(
-        #         partial(self.spawn_enemy,
-        #                 screen_num,
-        #                 curr_screen.enemy_phase_1['type'],
-        #                 curr_screen.enemy_phase_1['level']),
-        #         enemies_dict[curr_screen.enemy_phase_1['type']][curr_screen.enemy_phase_1['level']]['spawn_interval']
-        #     )
         self.sound_level_play.play()
         # Start update screen function
         self.clock_update_fn_variable = Clock.schedule_interval(partial(self.update_screen, screen_num),
@@ -343,6 +370,28 @@ class GameApp(kivy.app.App):
                 Color(0, 0, 0, 0.2)
                 self.special_attack_properties['quad'] = Quad(points=quad_coords, group=u"special_radius")
 
+    def on_special_triangle_button_state(self, widget, screen_num):
+        curr_screen = self.root.screens[screen_num]
+        if widget.state == "normal":
+            curr_screen.special_triangle_state = False
+            curr_screen.canvas.remove_group(u"special_triangle_shape")
+        # Activate special fire triangle
+        else:
+            # if curr_screen.ids['special_button_lvl' + str(screen_num)].state == "down":
+            #     curr_screen.ids['special_button_lvl' + str(screen_num)].state = "normal"
+            #
+            # if curr_screen.ids['kiss_button_lvl' + str(screen_num)].state == "down":
+            #     curr_screen.ids['kiss_button_lvl' + str(screen_num)].state = "normal"
+            # if screen_num >= self.LEVEL_WHEN_AUX_CHAR_1_ENTERS and curr_screen.ids[
+            #     'move_aux_char_1_lvl' + str(screen_num)].state == "down":
+            #     curr_screen.ids['move_aux_char_1_lvl' + str(screen_num)].state = "normal"
+            # if screen_num >= self.LEVEL_WHEN_AUX_CHAR_2_ENTERS \
+            #         and curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state == "down":
+            #     curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
+
+            curr_screen.special_triangle_state = True
+            self.activate_special_fire_triangle(screen_num, widget)
+
     def on_toggle_button_state(self, widget, screen_num):
         curr_screen = self.root.screens[screen_num]
         if widget.state == "normal":
@@ -411,19 +460,8 @@ class GameApp(kivy.app.App):
                 curr_screen.spawn_enemies_clock_variables[i] = None
 
             curr_screen.spawn_enemies_clock_variables.clear()
-            # for clock_variable in curr_screen.spawn_enemies_clock_variables:
-            #     clock_variable.cancel()
-            #     clock_variable = None
-
-            # for clock_variable in curr_screen.spawn_enemies_clock_variables:
-            #     curr_screen.spawn_enemies_clock_variables.remove(clock_variable)
             # Check all clock variables have been canceled and eliminated
             assert len(curr_screen.spawn_enemies_clock_variables) == 0
-        # if not curr_screen.phase_1_completed \
-        #         or (curr_screen.number_of_phases == 3 and not curr_screen.phase_2_completed):
-        #     # Stop enemy spawning
-        #     if self.clock_spawn_enemies_variable is not None:
-        #         self.clock_spawn_enemies_variable.cancel()
         # Make enemies opaque on pause since I couldn't find a way to make the pause menu to be above the enemies
         for _, enemy in curr_screen.enemies_ids.items():
             enemy['image'].opacity = 0.1

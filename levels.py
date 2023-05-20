@@ -388,3 +388,55 @@ class Level10(kivy.uix.screenmanager.Screen):
     bosses_ids = {}
     bosses_rewards_ids = {}
     specials_ids = {}
+
+
+class Level11(kivy.uix.screenmanager.Screen):
+    state_paused = False
+    number_of_phases = 4
+    current_phase = 1
+    rewards_to_win_phases = [5, 4, 4]
+    rewards_gathered = 0
+    move_aux_char_1_state = False
+    move_aux_char_2_state = False
+    special_triangle_state = False
+    spawn_enemies_clock_variables = []
+    # This list will hold enemies for either several phases and/or several enemies par phase
+    enemies_phases = [
+        {'enemy_1': {
+            'type': 'blue',
+            'level': 'level_1'
+        },
+            'enemy_2': {
+                'type': 'orange',
+                'level': 'level_1'
+            }
+        },
+        {'enemy_1': {
+            'type': 'purple',
+            'level': 'level_1'
+        }
+        },
+        {'enemy_1': {
+            'type': 'yellow',
+            'level': 'level_1'
+        },
+            'enemy_2': {
+                'type': 'orange',
+                'level': 'level_1'
+            }
+
+        }
+    ]
+    characters_dict = {
+        'character': dict(main_character_dict),
+        'aux_char_1': dict(aux_char_1_dict),
+        'aux_char_2': dict(aux_char_2_dict)
+    }
+    boss_props = dict(boss_properties['level_6'])
+    # Entities Ids dicts to be used during gameplay
+    kisses_ids = {}
+    rewards_ids = {}
+    enemies_ids = {}
+    bosses_ids = {}
+    bosses_rewards_ids = {}
+    specials_ids = {}

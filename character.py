@@ -8,7 +8,7 @@ from kivy.clock import Clock
 # from math import sqrt
 
 from enemies_dict import enemies_dict
-from helper_fns import get_direction_unit_vector
+from helper_fns import get_direction_unit_vector, get_triangle_borders_coords
 from characters_dicts import character_states_to_images
 from reward import rewards_properties
 
@@ -81,6 +81,11 @@ def update_characters_from_dict(self, screen_num, dt):
 
         # Update character image regardless of character state
         self.update_character_image_animation(screen_num, character, dt)
+
+    # Update special triangle
+    if screen_num >= self.LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED and curr_screen.special_triangle_state:
+        self.special_triangle_shape.points = self.get_special_triangle_coords(screen_num)
+        self.special_triangle_border.points = get_triangle_borders_coords(self.special_triangle_shape.points)
 
 
 def check_character_collision(self, character, screen_num):
@@ -205,6 +210,13 @@ def begin_kill_character(self, screen_num, character_dict):
     if character_dict['name'] == 'aux_char_2_image_lvl':
         curr_screen.ids['move_aux_char_2_lvl' + str(screen_num)].state = "normal"
         self.move_aux_char_2_button_enabled = False
+
+    # Control the possibility of using the special triangle when at least one character is dead
+    if screen_num >= self.LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED:
+        if not curr_screen.special_triangle_state:
+            curr_screen.ids['special_triangle_button_lvl' + str(screen_num)].disabled = True
+        else:
+            self.finish_special_triangle(screen_num)
 
 
 def finish_kill_character(self, screen_num, character_dict):

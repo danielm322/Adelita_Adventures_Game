@@ -12,6 +12,7 @@ ScreenManager:
     Level8:
     Level9:
     Level10:
+    Level11:
 
 <MainScreen>:
     name: "main"
@@ -92,6 +93,12 @@ ScreenManager:
                 root.manager.transition.direction = 'left'
                 app.root.current="level10"
             pos_hint: {"center_x": .7, "center_y": .15}
+        LevelButton:
+            text: "Level 11"
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current="level11"
+            pos_hint: {"center_x": .9, "center_y": .55}
 
 <Level1>:
     name: "level1"
@@ -118,6 +125,8 @@ ScreenManager:
                 #on_state: app.on_move_aux_char_1_button(self, 6)
                 disabled: True
             MoveAuxChar2:
+                disabled: True
+            SpecialTriangleButton:
                 disabled: True
         FloatLayout:
             #size_hint: 0, 0.9
@@ -172,6 +181,8 @@ ScreenManager:
                 disabled: True
             MoveAuxChar2:
                 disabled: True
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             id: layout_lvl2
             on_touch_down: app.touch_down_handler(2, args)
@@ -221,6 +232,8 @@ ScreenManager:
                 #on_state: app.on_move_aux_char_1_button(self, 6)
                 disabled: True
             MoveAuxChar2:
+                disabled: True
+            SpecialTriangleButton:
                 disabled: True
         FloatLayout:
             id: layout_lvl3
@@ -272,6 +285,8 @@ ScreenManager:
                 disabled: True
             MoveAuxChar2:
                 disabled: True
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             id: layout_lvl4
             on_touch_down: app.touch_down_handler(4, args)
@@ -321,6 +336,8 @@ ScreenManager:
                 #on_state: app.on_move_aux_char_1_button(self, 6)
                 disabled: True
             MoveAuxChar2:
+                disabled: True
+            SpecialTriangleButton:
                 disabled: True
         FloatLayout:
             id: layout_lvl5
@@ -372,6 +389,8 @@ ScreenManager:
             MoveAuxChar2:
                 id: move_aux_char_2_lvl6
                 on_state: app.on_move_aux_char_2_button(self, 6)
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl6
@@ -428,6 +447,8 @@ ScreenManager:
             MoveAuxChar2:
                 id: move_aux_char_2_lvl7
                 on_state: app.on_move_aux_char_2_button(self, 7)
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl7
@@ -486,6 +507,8 @@ ScreenManager:
             MoveAuxChar2:
                 id: move_aux_char_2_lvl8
                 on_state: app.on_move_aux_char_2_button(self, 8)
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl8
@@ -545,6 +568,8 @@ ScreenManager:
             MoveAuxChar2:
                 id: move_aux_char_2_lvl9
                 on_state: app.on_move_aux_char_2_button(self, 9)
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl9
@@ -604,6 +629,8 @@ ScreenManager:
             MoveAuxChar2:
                 id: move_aux_char_2_lvl10
                 on_state: app.on_move_aux_char_2_button(self, 10)
+            SpecialTriangleButton:
+                disabled: True
         FloatLayout:
             #size_hint: 0, 0.9
             id: layout_lvl10
@@ -638,6 +665,68 @@ ScreenManager:
             PauseMenuWidget:
                 id: pause_menu_lvl10
 
+<Level11>:
+    name: "level11"
+    on_pre_enter: app.screen_on_pre_enter(11)
+    #on_pre_leave: app.screen_on_pre_leave(11)
+    on_enter: app.screen_on_enter(11)
+    on_leave: app.screen_on_leave(11)
+    BoxLayout:
+        orientation: "horizontal"
+        RelativeLayout:
+            size_hint: app.SIDE_BAR_WIDTH, 1
+            PauseButton:
+                id: pause_button_lvl11
+                on_press: app.pause_game(11)
+            KissButton:
+                id: kiss_button_lvl11
+                on_state: app.on_toggle_button_state(self, 11)
+            SpecialButton:
+                id: special_button_lvl11
+                on_state: app.on_special_button_state(self, 11)
+            MoveAuxChar1:
+                id: move_aux_char_1_lvl11
+                on_state: app.on_move_aux_char_1_button(self, 11)
+            MoveAuxChar2:
+                id: move_aux_char_2_lvl11
+                on_state: app.on_move_aux_char_2_button(self, 11)
+            SpecialTriangleButton:
+                id: special_triangle_button_lvl11
+                on_state: app.on_special_triangle_button_state(self, 11)
+        FloatLayout:
+            #size_hint: 0, 0.9
+            id: layout_lvl11
+            on_touch_down: app.touch_down_handler(11, args)
+            canvas.before:
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    source: "graphics/levels-bg/forest/game_background_4.jpg"
+            BoxIndicators:
+                LevelLabel:
+                    text: "Level 11"
+                BoxWaves:
+                    NumWaves:
+                        id: num_waves_lvl11
+                BoxStars:
+                    NumCollectedStars:
+                        id: num_stars_collected_lvl11
+            Character:
+                id: character_image_lvl11
+                #pos: root.center_x-self.size[0]/2, root.center_y-self.size[1]/2
+            AuxChar1:
+                id: aux_char_1_image_lvl11
+            AuxChar2:
+                id: aux_char_2_image_lvl11
+            RemainingLifePercent
+                id: remaining_life_percent_lvl11
+            RemainingLifePercentAuxChar1
+                id: remaining_life_percent_aux_char_1_lvl11
+            RemainingLifePercentAuxChar2
+                id: remaining_life_percent_aux_char_2_lvl11
+            PauseMenuWidget:
+                id: pause_menu_lvl11
+
 ###################################################
 # TOGGLE BUTTONS SECTION
 ###################################################
@@ -651,19 +740,26 @@ ScreenManager:
 
 <SpecialButton@ToggleButton>:
     size_hint: 1, 0.17
-    #text: "Diaper"
-    pos_hint: {'x': 0.0, 'y': 0.17}
+    pos_hint: {'x': 0.0, 'y': 0.18}
     border: 8, 8, 8, 8
     background_normal: "graphics/entities/diaper_bw.png"
     background_down: "graphics/entities/diaper.png"
     background_disabled_normal: "graphics/entities/Lock.png"
     disabled: not app.special_button_enabled
 
+<SpecialTriangleButton@ToggleButton>:
+    size_hint: 1, 0.17
+    pos_hint: {'x': 0.0, 'y': 0.71}
+    border: 8, 8, 8, 8
+    background_normal: "graphics/entities/fire-triangle_bw.png"
+    background_disabled_normal: "graphics/entities/Lock.png"
+    background_disabled_down: "graphics/entities/fire-triangle.png"
+    disabled: False
 
 <MoveAuxChar1@ToggleButton>:
     size_hint: 1, 0.17
     #text: "Mathis"
-    pos_hint: {'x': 0.0, 'y': 0.49}
+    pos_hint: {'x': 0.0, 'y': 0.52}
     border: 8, 8, 8, 8
     background_normal: "graphics/entities/Mage/Idle/idle1_bw.png"
     background_down: "graphics/entities/Mage/Idle/idle1.png"
@@ -673,12 +769,13 @@ ScreenManager:
 <MoveAuxChar2@ToggleButton>:
     size_hint: 1, 0.17
     #text: "Aux 2"
-    pos_hint: {'x': 0.0, 'y': 0.34}
+    pos_hint: {'x': 0.0, 'y': 0.36}
     border: 8, 8, 8, 8
     background_normal: "graphics/entities/Rogue/Idle/idle1_bw.png"
     background_down: "graphics/entities/Rogue/Idle/idle1.png"
     background_disabled_normal: "graphics/entities/Lock.png"
     disabled: not app.move_aux_char_2_button_enabled
+
 
 ###################################################
 # CHARACTERS SECTION
