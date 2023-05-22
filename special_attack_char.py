@@ -1,9 +1,6 @@
-import random
 import time
-
 import kivy.uix.image
 from kivy.clock import Clock
-from kivy.graphics import Line
 from kivy.utils import platform
 
 from enemies_dict import enemies_dict
@@ -36,8 +33,6 @@ def shoot_special(self, screen_num, touch_point):
                                              character_image_center,
                                              special_attack_properties['min_dist_x'],
                                              touch_point):
-        char_height = curr_screen.ids['character_image_lvl' + str(screen_num)].height
-        char_width = curr_screen.ids['character_image_lvl' + str(screen_num)].width
         # Strangely, the start point looks well on the telephone being centered on the character, but not on the PC,
         # so the next line is fine
         start_point = (character_image_center[0],

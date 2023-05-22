@@ -4,10 +4,13 @@ from typing import Tuple
 
 import kivy.uix.image
 # from kivy.graphics import Line
-
-from helper_fns import _get_enemy_start_end_positions, _find_kiss_endpoint_fast, get_direction_unit_vector
+from helper_fns import (
+    _get_enemy_start_end_positions,
+    _find_kiss_endpoint_fast,
+    get_direction_unit_vector,
+    check_point_inside_triangle
+)
 from enemies_dict import enemies_dict
-from character import update_character_image_animation
 
 
 def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):
@@ -196,6 +199,9 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
     # or because it is a fire, and it collides with a character
     to_eliminate_flag = False
     curr_screen = self.root.screens[screen_num]
+    # Check collision with fire triangle
+    if screen_num >= self.LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED and curr_screen.special_triangle_state:
+        characters_centers = []
     if enemy['type'] != 'fire':
         gap_x = curr_screen.width * enemies_dict[enemy['type']][enemy['level']]['width'] / 4
         gap_y = curr_screen.height * enemies_dict[enemy['type']][enemy['level']]['height'] / 1.5
@@ -203,6 +209,8 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
         gap_x = curr_screen.width * enemies_dict[enemy['type']][enemy['level']]['width'] / 1.2
         gap_y = curr_screen.height * enemies_dict[enemy['type']][enemy['level']]['height'] / 0.8
     for character in curr_screen.characters_dict.values():
+        if screen_num >= self.LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED and curr_screen.special_triangle_state:
+            characters_centers.extend(curr_screen.ids[character['name'] + str(screen_num)].center)
         # Safe proof that if character is not fighting their not fighting flag is false
         # In this context fighting means dealing melee damage
         character['is_fighting'] = False
@@ -241,6 +249,10 @@ def check_enemy_collision(self, enemy, screen_num, dt) -> Tuple[bool, bool]:
             if enemy['type'] == 'fire':
                 to_eliminate_flag = True
 
+    if screen_num >= self.LEVEL_WHEN_SPECIAL_TRIANGLE_IS_ACTIVATED and curr_screen.special_triangle_state:
+        if enemy['type'] != 'fire' and check_point_inside_triangle(characters_centers, enemy['image'].center):
+            to_eliminate_flag = True
+            self.kill_enemy(enemy['image'], screen_num, enemy['reward_probability'])
     return is_fighting, to_eliminate_flag
 
 

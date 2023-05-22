@@ -21,8 +21,6 @@ def auto_shoot(self, screen_num, *args):
     # Define a flag to know if the rocket has been fired
     is_fired_flag = False
     if len(curr_screen.enemies_ids) > 0:
-        # enemy_to_shoot_center = curr_screen.enemies_ids[0]['image'].center
-        # oldest_enemy = list(curr_screen.enemies_ids.values())[0]
         for enemy in curr_screen.enemies_ids.values():
             if enemy['type'] != 'fire' \
                     and (
@@ -89,8 +87,8 @@ def auto_shoot(self, screen_num, *args):
                     # create a unique identifier for each enemy
                     time_stamp = str(time.time())
                     curr_screen.kisses_ids['aux_char_1_rkt_' + time_stamp] = {'image': rocket,
-                                                                      'finish_pos': finish_pos,
-                                                                      'direction_u_vector': direction_unit_vector}
+                                                                              'finish_pos': finish_pos,
+                                                                              'direction_u_vector': direction_unit_vector}
                     # self.sound_kiss.play()
                     # Change aux char 1 state
                     curr_screen.characters_dict['aux_char_1']['current_state'] = 'throwing'
