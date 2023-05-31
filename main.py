@@ -15,6 +15,7 @@ from kivy.clock import Clock
 from kivy.properties import BooleanProperty, NumericProperty
 from kivy.utils import platform
 from levels import *
+import webbrowser
 from pause_menu import PauseMenuWidget
 from helper_fns import read_game_info
 from enemies_dict import enemies_dict
@@ -519,6 +520,13 @@ class GameApp(kivy.app.App):
     def main_screen_on_leave(self):
         self.sound_main_menu.stop()
 
+    @staticmethod
+    def github_link():
+        webbrowser.open("https://github.com/danielm322/Baby_Adventures_Game")
+
+    @staticmethod
+    def linkedin_link():
+        webbrowser.open("https://www.linkedin.com/in/daniel-montoya-ds/")
 
 class MainScreen(kivy.uix.screenmanager.Screen):
     pass

@@ -13,6 +13,7 @@ ScreenManager:
     Level9:
     Level10:
     Level11:
+    About:
 
 <MainScreen>:
     name: "main"
@@ -99,6 +100,13 @@ ScreenManager:
                 root.manager.transition.direction = 'left'
                 app.root.current="level11"
             pos_hint: {"center_x": .9, "center_y": .55}
+        # About section
+        LevelButton:
+            text: "About"
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current="about"
+            pos_hint: {"center_x": .9, "center_y": .90}
 
 <Level1>:
     name: "level1"
@@ -725,6 +733,70 @@ ScreenManager:
                 id: remaining_life_percent_aux_char_2_lvl11
             PauseMenuWidget:
                 id: pause_menu_lvl11
+
+<About>:
+    name: "about"
+    RelativeLayout:
+        canvas.before:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: 'graphics/House_1.jpg'
+        LevelButton:
+            text: "Main Screen"
+            on_release:
+                root.manager.transition.direction = 'right'
+                app.root.current="main"
+            pos_hint: {"center_x": .9, "center_y": .90}
+            #pos_hint: {"x": .8, "y": .80}
+        Label:
+            font_name: 'graphics/fonts/magic-school/MagicSchoolOne.ttf'
+            pos_hint: {'center_x': 0.4, 'center_y': 0.75}
+            #pos_hint: {'x': 0.0, 'y': 0.7}
+            font_size: dp(23)
+            halign: 'left'
+            text: "I am Daniel Montoya, AI researcher interested in computer vision, Python and gaming! \n The game is completely developed in Python using the Kivy cross-platform framework. \n You can enjoy this game, you can learn how I built it, and you can contribute to this game \n if you're interested."
+            outline_width: 4
+            color: 0.8, 0.8, 0.8, 1
+            outline_color: 0, 0, 0.6, 1
+        Button:
+            #pos_hint: {'center_x': 0.28, 'center_y': 0.35}
+            pos_hint: {'x': 0.0, 'y': 0.2}
+            size_hint: (0.38, 0.08)
+            font_size: dp(18)
+            #halign: 'left'
+            text: "Email: [u]daniel.montoyav@gmail.com[/u]"
+            markup: True
+            color: 0, 0, 0.6, 1
+            outline_width: 4
+            background_color: 0, 0, 0, 0
+        Button:
+            #pos_hint: {'center_x': 0.42, 'center_y': 0.25}
+            pos_hint: {'x': 0.03, 'y': 0.10}
+            size_hint: (0.6, 0.08)
+            font_size: dp(18)
+            #halign: 'left'
+            text: "Github: [u]https://github.com/danielm322/Baby_Adventures_Game[/u]"
+            markup: True
+            color: 0, 0, 0.6, 1
+            outline_width: 4
+            on_press: app.github_link()
+            background_color: 0, 0, 0, 0
+        Button:
+            #font_name: 'graphics/fonts/magic-school/MagicSchoolOne.ttf'
+            #pos_hint: {'center_x': 0.30, 'center_y': 0.05}
+            pos_hint: {'x': 0.0, 'y': 0.01}
+            size_hint: (0.6, 0.08)
+            font_size: dp(18)
+            #halign: 'left'
+            text: "LinkedIn: [u]https://www.linkedin.com/in/daniel-montoya-ds/[/u]"
+            markup: True
+            color: 0, 0, 0.6, 1
+            outline_width: 4
+            on_press: app.linkedin_link()
+            background_color: 0, 0, 0, 0
+
+
 
 ###################################################
 # TOGGLE BUTTONS SECTION
