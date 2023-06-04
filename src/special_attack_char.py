@@ -3,8 +3,8 @@ import kivy.uix.image
 from kivy.clock import Clock
 from kivy.utils import platform
 
-from enemies_dict import enemies_dict
-from helper_fns import calc_parabola_vertex, write_level_passed, calculate_underlings_start_positions
+from src.enemies_dict import enemies_dict
+from src.helper_fns import calc_parabola_vertex, write_level_passed, calculate_underlings_start_positions
 
 # Special attack properties
 special_attack_properties = {

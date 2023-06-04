@@ -2,7 +2,7 @@ from functools import partial
 from kivy.clock import Clock
 from kivy.graphics import Color, Triangle, Line
 
-from helper_fns import get_triangle_borders_coords
+from src.helper_fns import get_triangle_borders_coords
 
 # In seconds
 SPECIAL_TRIANGLE_DURATION = 7.0

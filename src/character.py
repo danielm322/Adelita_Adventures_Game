@@ -1,16 +1,13 @@
 import random
-
 import kivy.animation
 from functools import partial
 from kivy.clock import Clock
 # from kivy.graphics import Line
-
 # from math import sqrt
-
-from enemies_dict import enemies_dict
-from helper_fns import get_direction_unit_vector, get_triangle_borders_coords
-from characters_dicts import character_states_to_images
-from reward import rewards_properties
+from src.enemies_dict import enemies_dict
+from src.helper_fns import get_direction_unit_vector, get_triangle_borders_coords
+from src.characters_dicts import character_states_to_images
+from src.reward import rewards_properties
 
 
 def start_character_animation_from_dict(self, screen_num, touch_pos, character_dict):
@@ -93,7 +90,7 @@ def check_character_collision(self, character, screen_num):
     This function checks collision with rewards only. Updates the rewards counter and activates other game phases when
     the required rewards for each phase are collected
     :param self:
-    :param character_image: Kivy Image instance
+    :param character: Character dictionary
     :param screen_num:
     :return:
     """
@@ -128,49 +125,9 @@ def check_character_collision(self, character, screen_num):
                     + str(curr_screen.rewards_to_win_phases[curr_screen.current_phase - 2])
 
             # Pass to next phase
-            if curr_screen.current_phase < curr_screen.number_of_phases \
-                    and curr_screen.rewards_gathered == curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1]:
-                curr_screen.current_phase += 1
-                # Update phase indicator in screen
-                curr_screen.ids['num_waves_lvl' + str(screen_num)].text = str(
-                    curr_screen.current_phase) + "/" + str(curr_screen.number_of_phases)
-                # Cancel enemy spawning
-                # This for loop is written like this to be able to convert to None the clock variables
-                if len(curr_screen.spawn_enemies_clock_variables) > 0:
-                    for i in range(len(curr_screen.spawn_enemies_clock_variables)):
-                        curr_screen.spawn_enemies_clock_variables[i].cancel()
-                        curr_screen.spawn_enemies_clock_variables[i] = None
-
-                    curr_screen.spawn_enemies_clock_variables.clear()
-                    # Check all clock variables have been canceled and eliminated
-                    assert len(curr_screen.spawn_enemies_clock_variables) == 0
-
-                if curr_screen.current_phase == curr_screen.number_of_phases:
-                    self.spawn_boss(screen_num)
-                else:
-                    for enemy in curr_screen.enemies_phases[curr_screen.current_phase - 1].values():
-                        # If new enemies have gaussian distribution of spawn and end points, initialize those values
-                        if enemies_dict[enemy['type']][enemy['level']]['spawn_function'] == 'gaussian':
-                            enemies_dict[enemy['type']][enemy['level']]['spawn_point'] = random.random()
-                            enemies_dict[enemy['type']][enemy['level']]['end_point'] = random.random()
-                            # Control amplitude of yellow enemy spawn and end points
-                            if enemy['type'] == 'yellow':
-                                enemies_dict[enemy['type']][enemy['level']]['spawn_point'] *= 0.9
-                                enemies_dict[enemy['type']][enemy['level']]['end_point'] *= 0.9
-                        # Spawn new enemies
-                        curr_screen.spawn_enemies_clock_variables.append(
-                            Clock.schedule_interval(
-                                partial(self.spawn_enemy,
-                                        screen_num,
-                                        enemy['type'],
-                                        enemy['level']),
-                                enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
-                            )
-                        )
-                    curr_screen.rewards_gathered = 0
-                    curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = \
-                        str(curr_screen.rewards_gathered) + "/" + \
-                        str(curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1])
+            if curr_screen.current_phase < curr_screen.number_of_phases and \
+                    curr_screen.rewards_gathered == curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1]:
+                self.advance_to_next_phase(curr_screen, screen_num)
 
     if len(rewards_to_delete) > 0:
         for reward_key in rewards_to_delete:
@@ -308,3 +265,47 @@ def get_aux_char_1_quad_coords(self, screen_num):
     x4 = aux_char_1_image.center_x + self.AUX_CHAR_1_RANGE * curr_screen.size[0]
     y4 = aux_char_1_image.center_y - self.AUX_CHAR_1_RANGE * curr_screen.size[1]
     return [x1, y1, x2, y2, x3, y3, x4, y4]
+
+
+def advance_to_next_phase(self, curr_screen, screen_num):
+    curr_screen.current_phase += 1
+    # Update phase indicator in screen
+    curr_screen.ids['num_waves_lvl' + str(screen_num)].text = str(
+        curr_screen.current_phase) + "/" + str(curr_screen.number_of_phases)
+    # Cancel enemy spawning
+    # This for loop is written like this to be able to convert to None the clock variables
+    if len(curr_screen.spawn_enemies_clock_variables) > 0:
+        for i in range(len(curr_screen.spawn_enemies_clock_variables)):
+            curr_screen.spawn_enemies_clock_variables[i].cancel()
+            curr_screen.spawn_enemies_clock_variables[i] = None
+
+        curr_screen.spawn_enemies_clock_variables.clear()
+        # Check all clock variables have been canceled and eliminated
+        assert len(curr_screen.spawn_enemies_clock_variables) == 0
+
+    if curr_screen.current_phase == curr_screen.number_of_phases:
+        self.spawn_boss(screen_num)
+    else:
+        for enemy in curr_screen.enemies_phases[curr_screen.current_phase - 1].values():
+            # If new enemies have gaussian distribution of spawn and end points, initialize those values
+            if enemies_dict[enemy['type']][enemy['level']]['spawn_function'] == 'gaussian':
+                enemies_dict[enemy['type']][enemy['level']]['spawn_point'] = random.random()
+                enemies_dict[enemy['type']][enemy['level']]['end_point'] = random.random()
+                # Control amplitude of yellow enemy spawn and end points
+                if enemy['type'] == 'yellow':
+                    enemies_dict[enemy['type']][enemy['level']]['spawn_point'] *= 0.9
+                    enemies_dict[enemy['type']][enemy['level']]['end_point'] *= 0.9
+            # Spawn new enemies
+            curr_screen.spawn_enemies_clock_variables.append(
+                Clock.schedule_interval(
+                    partial(self.spawn_enemy,
+                            screen_num,
+                            enemy['type'],
+                            enemy['level']),
+                    enemies_dict[enemy['type']][enemy['level']]['spawn_interval']
+                )
+            )
+        curr_screen.rewards_gathered = 0
+        curr_screen.ids['num_stars_collected_lvl' + str(screen_num)].text = \
+            str(curr_screen.rewards_gathered) + "/" + \
+            str(curr_screen.rewards_to_win_phases[curr_screen.current_phase - 1])

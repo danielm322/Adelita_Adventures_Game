@@ -6,7 +6,7 @@ from kivy.utils import platform
 from functools import partial
 from math import sin
 
-from helper_fns import (
+from src.helper_fns import (
     get_direction_unit_vector,
     # get_entity_bbox,
     write_level_passed

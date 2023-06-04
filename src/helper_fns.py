@@ -2,7 +2,7 @@ import random
 from math import sqrt
 from os import path, getcwd
 from os.path import join
-from enemies_dict import enemies_dict
+from src.enemies_dict import enemies_dict
 
 from kivy.utils import platform
 if platform == "android":

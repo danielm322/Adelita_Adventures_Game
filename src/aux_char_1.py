@@ -2,8 +2,8 @@ import time
 
 import kivy.uix.image
 
-from helper_fns import _find_kiss_endpoint_fast, get_direction_unit_vector
-from characters_dicts import aux_char_1_dict
+from src.helper_fns import _find_kiss_endpoint_fast, get_direction_unit_vector
+from src.characters_dicts import aux_char_1_dict
 
 
 def auto_shoot(self, screen_num, *args):

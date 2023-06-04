@@ -4,13 +4,13 @@ from typing import Tuple
 
 import kivy.uix.image
 # from kivy.graphics import Line
-from helper_fns import (
+from src.helper_fns import (
     _get_enemy_start_end_positions,
     _find_kiss_endpoint_fast,
     get_direction_unit_vector,
     check_point_inside_triangle
 )
-from enemies_dict import enemies_dict
+from src.enemies_dict import enemies_dict
 
 
 def spawn_enemy(self, screen_num, enemy_type, enemy_level, *args):

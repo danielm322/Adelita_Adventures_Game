@@ -1,6 +1,6 @@
 import kivy.uix.screenmanager
-from characters_dicts import main_character_dict, aux_char_1_dict, aux_char_2_dict
-from boss import boss_properties
+from src.characters_dicts import main_character_dict, aux_char_1_dict, aux_char_2_dict
+from src.boss import boss_properties
 
 
 class Level1(kivy.uix.screenmanager.Screen):

@@ -1,15 +1,13 @@
-import random
 # from math import sqrt
-
 # from kivy.graphics import Line
 # from kivy.graphics import Line
 from kivy.utils import platform
-from helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector, \
-    calculate_underlings_start_positions
 import kivy.uix.image
 import time
-from enemies_dict import enemies_dict
-from characters_dicts import aux_char_1_dict
+from src.enemies_dict import enemies_dict
+from src.characters_dicts import aux_char_1_dict
+from src.helper_fns import _find_kiss_endpoint_fast, write_level_passed, get_direction_unit_vector, \
+    calculate_underlings_start_positions
 
 # Kiss properties
 KISS_WIDTH = 0.03
