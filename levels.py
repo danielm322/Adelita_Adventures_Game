@@ -440,7 +440,3 @@ class Level11(kivy.uix.screenmanager.Screen):
     bosses_ids = {}
     bosses_rewards_ids = {}
     specials_ids = {}
-
-
-class About(kivy.uix.screenmanager.Screen):
-    pass
