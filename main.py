@@ -15,6 +15,7 @@ from kivy.clock import Clock
 from kivy.properties import BooleanProperty, NumericProperty
 from kivy.utils import platform
 from levels import *
+import webbrowser
 from pause_menu import PauseMenuWidget
 from helper_fns import read_game_info
 from enemies_dict import enemies_dict
@@ -133,6 +134,7 @@ class GameApp(kivy.app.App):
     sound_kiss = None
     sound_heal = None
     sound_main_menu = None
+    sound_about_section = None
 
     def on_start(self):
         self.init_audio()
@@ -142,6 +144,7 @@ class GameApp(kivy.app.App):
 
     def init_audio(self):
         self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
+        self.sound_about_section = SoundLoader.load("audio/8-bit-arcade-138828.ogg")
         self.sound_heal = SoundLoader.load("audio/Heal.ogg")
         self.sound_kiss = SoundLoader.load("audio/kiss_sound.wav")
         self.sound_enemy_dies = SoundLoader.load("audio/goblin_hurt.ogg")
@@ -155,8 +158,10 @@ class GameApp(kivy.app.App):
 
         self.sound_main_menu.loop = True
         self.sound_level_play.loop = True
+        self.sound_about_section.loop = True
         self.sound_main_menu.volume = 0.4
         self.sound_level_play.volume = 0.4
+        self.sound_about_section.volume = 0.5
         self.sound_game_over.volume = 1
         self.sound_kiss.volume = .5
         self.sound_level_finished.volume = .6
@@ -508,8 +513,8 @@ class GameApp(kivy.app.App):
         curr_screen = args[0]
         self.back_to_main_screen(curr_screen.parent)
 
-    def back_to_main_screen(self, screenManager, *args):
-        screenManager.current = "main"
+    def back_to_main_screen(self, screen_manager, *args):
+        screen_manager.current = "main"
 
     def main_screen_on_enter(self):
         self.sound_main_menu.play()
@@ -519,8 +524,37 @@ class GameApp(kivy.app.App):
     def main_screen_on_leave(self):
         self.sound_main_menu.stop()
 
+    def enter_about_section(self, screen_manager):
+        screen_manager.transition.direction = 'left'
+        self.root.current = "about"
+        self.sound_about_section.play()
+
+    def quit_about_section(self):
+        if self.root.current == "main":
+            self.sound_about_section.stop()
+
+    @staticmethod
+    def email_me():
+        webbrowser.open("mailto:daniel.montoyav@gmail.com")
+
+    @staticmethod
+    def github_link():
+        webbrowser.open("https://github.com/danielm322/Baby_Adventures_Game")
+
+    @staticmethod
+    def linkedin_link():
+        webbrowser.open("https://www.linkedin.com/in/daniel-montoya-ds/")
+
 
 class MainScreen(kivy.uix.screenmanager.Screen):
+    pass
+
+
+class About(kivy.uix.screenmanager.Screen):
+    pass
+
+
+class Credits(kivy.uix.screenmanager.Screen):
     pass
 
 

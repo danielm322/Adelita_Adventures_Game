@@ -13,6 +13,8 @@ ScreenManager:
     Level9:
     Level10:
     Level11:
+    About:
+    Credits:
 
 <MainScreen>:
     name: "main"
@@ -99,6 +101,11 @@ ScreenManager:
                 root.manager.transition.direction = 'left'
                 app.root.current="level11"
             pos_hint: {"center_x": .9, "center_y": .55}
+        # About section
+        LevelButton:
+            text: "About"
+            on_release: app.enter_about_section(root.manager)
+            pos_hint: {"center_x": .9, "center_y": .90}
 
 <Level1>:
     name: "level1"
@@ -725,6 +732,109 @@ ScreenManager:
                 id: remaining_life_percent_aux_char_2_lvl11
             PauseMenuWidget:
                 id: pause_menu_lvl11
+
+<About>:
+    name: "about"
+    on_leave: app.quit_about_section()
+    RelativeLayout:
+        canvas.before:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: 'graphics/House_1.jpg'
+        LevelButton:
+            text: "Main Screen"
+            on_release:
+                root.manager.transition.direction = 'right'
+                app.root.current="main"
+            pos_hint: {"center_x": .9, "center_y": .90}
+        LevelButton:
+            text: "Credits"
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current="credits"
+            pos_hint: {"center_x": .9, "center_y": .80}
+        Label:
+            font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
+            pos_hint: {'center_x': 0.43, 'center_y': 0.75}
+            font_size: dp(23)
+            halign: 'left'
+            text: "I am Daniel Montoya, AI researcher interested in computer vision, Python and gaming! \nThe game is completely developed in Python using the Kivy cross-platform framework. \nYou can enjoy this game, you can learn how I built it, and you can contribute to this game \nif you're interested."
+            outline_width: 4
+            color: 0.8, 0.8, 0.8, 1
+            outline_color: 0, 0, 0.6, 1
+        Label:
+            font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
+            pos_hint: {'center_x': 0.16, 'center_y': 0.1}
+            font_size: dp(23)
+            halign: 'left'
+            text: "Feel free to contact me:"
+            outline_width: 4
+            color: 0.8, 0.8, 0.8, 1
+            outline_color: 0, 0, 0.6, 1
+        Button:
+            pos_hint: {'x': 0.27, 'y': 0.05}
+            size_hint: (0.05, 0.1)
+            background_color: 0, 0, 0, 0
+            on_press: app.email_me()
+            canvas:
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                    source: "graphics/gmail_icon.png"
+        Button:
+            pos_hint: {'x': 0.34, 'y': 0.05}
+            size_hint: (0.05, 0.1)
+            background_color: 0, 0, 0, 0
+            on_press: app.github_link()
+            canvas:
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                    source: "graphics/github_icon.png"
+        Button:
+            pos_hint: {'x': 0.41, 'y': 0.05}
+            size_hint: (0.05, 0.1)
+            background_color: 0, 0, 0, 0
+            on_press: app.linkedin_link()
+            canvas:
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                    source: "graphics/linkedin-icon.png"
+
+
+<Credits>:
+    name: "credits"
+    on_leave: app.quit_about_section()
+    RelativeLayout:
+        canvas.before:
+            Rectangle:
+                pos: self.pos
+                size: self.size
+                source: 'graphics/Workshop_1.jpg'
+        LevelButton:
+            text: "Main Screen"
+            on_release:
+                root.manager.transition.direction = 'right'
+                app.root.current="main"
+            pos_hint: {"center_x": .9, "center_y": .90}
+        LevelButton:
+            text: "About"
+            on_release:
+                root.manager.transition.direction = 'right'
+                app.root.current="about"
+            pos_hint: {"center_x": .7, "center_y": .90}
+        Label:
+            font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.48}
+            font_size: dp(23)
+            halign: 'left'
+            text: "All character sprites and battle backgrounds come from the Craftpix Freebies Tier (craftpix.net/freebies) \nAdele character: Women pack: enchantress \nNinja and rogue characters: Assasin, Mage, Viking Pack \nEnemies: tokegameart.net: Wizard tiny style character \nBattle Backgrounds: Forest Battle backgrounds \nMain screens backgrounds: Itch.io witches and wizards backgrounds. \nSound effects: Pixabay.com : A hero of the 80s, Super Hero Intro, 8 bit arcade"
+            outline_width: 4
+            color: 0.8, 0.8, 0.8, 1
+            outline_color: 0, 0, 0.6, 1
+
 
 ###################################################
 # TOGGLE BUTTONS SECTION
