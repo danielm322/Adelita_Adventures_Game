@@ -26,6 +26,7 @@ def activate_special_fire_triangle(self, screen_num, widget):
                                             group=u"special_triangle_shape",
                                             width=2)
     widget.disabled = True
+    self.sound_thunder.play()
     # Set a counter for special triangle duration
     Clock.schedule_once(partial(self.finish_special_triangle, screen_num), SPECIAL_TRIANGLE_DURATION)
 

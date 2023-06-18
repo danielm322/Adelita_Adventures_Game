@@ -22,6 +22,7 @@ import kivy.uix.screenmanager
 from kivy.properties import BooleanProperty
 from kivy.utils import platform
 from src.levels import *
+from src.tutorials import Tutorial1
 import webbrowser
 from src.pause_menu import PauseMenuWidget
 from src.helper_fns import read_game_info
@@ -97,7 +98,9 @@ class GameApp(kivy.app.App):
         main_screen_on_enter,
         main_screen_on_leave,
         enter_about_section,
-        quit_about_section
+        quit_about_section,
+        enter_tutorials_section,
+        quit_tutorials_section
     )
     from src.state_management import (
         on_special_button_state,
@@ -164,6 +167,7 @@ class GameApp(kivy.app.App):
     sound_heal = None
     sound_main_menu = None
     sound_about_section = None
+    sound_thunder = None
 
     def on_start(self):
         self.init_audio()
@@ -174,6 +178,8 @@ class GameApp(kivy.app.App):
     def init_audio(self):
         self.sound_main_menu = SoundLoader.load("audio/a-hero-of-the-80s-126684.ogg")
         self.sound_about_section = SoundLoader.load("audio/8-bit-arcade-138828.ogg")
+        self.sound_tutorials_section = SoundLoader.load("audio/neon-gaming-128925.ogg")
+
         self.sound_heal = SoundLoader.load("audio/Heal.ogg")
         self.sound_kiss = SoundLoader.load("audio/kiss_sound.wav")
         self.sound_enemy_dies = SoundLoader.load("audio/goblin_hurt.ogg")
@@ -184,13 +190,16 @@ class GameApp(kivy.app.App):
         self.sound_level_finished = SoundLoader.load("audio/success-fanfare-trumpets-6185.ogg")
         self.sound_reward_collected = SoundLoader.load(
             "audio/short-success-sound-glockenspiel-treasure-video-game-6346.ogg")
+        self.sound_thunder = SoundLoader.load("audio/Thunder_02.ogg")
 
         self.sound_main_menu.loop = True
         self.sound_level_play.loop = True
         self.sound_about_section.loop = True
+        self.sound_tutorials_section.loop = True
         self.sound_main_menu.volume = 0.4
         self.sound_level_play.volume = 0.4
         self.sound_about_section.volume = 0.5
+        self.sound_tutorials_section.volume = 0.5
         self.sound_game_over.volume = 1
         self.sound_kiss.volume = .5
         self.sound_level_finished.volume = .6
@@ -199,6 +208,7 @@ class GameApp(kivy.app.App):
         self.sound_enemy_laughs.volume = 0.6
         self.sound_baby_laughs.volume = 0.5
         self.sound_heal.volume = 1.5
+        self.sound_thunder.volume = 1.4
 
     def activate_levels(self, next_level_num):
         num_levels = len(self.root.screens[0].ids['lvls_imagebuttons'].children)
