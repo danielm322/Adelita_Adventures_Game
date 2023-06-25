@@ -4,7 +4,7 @@ The game is intended to be played on the phone, using both thumbs to control the
 
 This is an amateur's work so there are plenty of possible improvements, please write on the issues section, or create your own pull requests!
 
-![Gif](https://github.com/danielm322/Baby_Adventures_Game/tree/main/graphics/plpaygame.gif)
+![Gif](https://github.com/danielm322/Baby_Adventures_Game/blob/main/graphics/playgame.gif)
 
 
 ## Developing or running in your computer
