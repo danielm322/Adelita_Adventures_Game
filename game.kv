@@ -17,6 +17,7 @@ ScreenManager:
     Credits:
     Tutorial1:
     Tutorial2:
+    Tutorial3:
 
 
 <MainScreen>:
@@ -766,24 +767,12 @@ ScreenManager:
                 root.manager.transition.direction = 'left'
                 app.root.current="credits"
             pos_hint: {"center_x": .9, "center_y": .80}
-        Label:
-            font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
+        TextLabel:
             pos_hint: {'center_x': 0.43, 'center_y': 0.75}
-            font_size: dp(23)
-            halign: 'left'
-            text: "I am Daniel Montoya, AI researcher interested in computer vision, Python and gaming! \nThe game is completely developed in Python using the Kivy cross-platform framework. \nYou can enjoy this game, you can learn how I built it, and you can contribute to this game \nif you're interested."
-            outline_width: 4
-            color: 0.8, 0.8, 0.8, 1
-            outline_color: 0, 0, 0.6, 1
-        Label:
-            font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
+            text: "I am Daniel Montoya, AI researcher interested in computer vision, Python \nand gaming! The game is completely developed in Python using the Kivy \ncross-platform framework. You can enjoy this game, you can learn how I built it, \nand you can contribute to this game if you're interested."
+        TextLabel:
             pos_hint: {'center_x': 0.16, 'center_y': 0.1}
-            font_size: dp(23)
-            halign: 'left'
             text: "Feel free to contact me:"
-            outline_width: 4
-            color: 0.8, 0.8, 0.8, 1
-            outline_color: 0, 0, 0.6, 1
         Button:
             pos_hint: {'x': 0.27, 'y': 0.05}
             size_hint: (0.05, 0.1)
@@ -837,15 +826,9 @@ ScreenManager:
                 root.manager.transition.direction = 'right'
                 app.root.current="about"
             pos_hint: {"center_x": .7, "center_y": .90}
-        Label:
-            font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
+        TextLabel:
             pos_hint: {'center_x': 0.5, 'center_y': 0.48}
-            font_size: dp(23)
-            halign: 'left'
-            text: "All character sprites and battle backgrounds come from the Craftpix Freebies Tier (craftpix.net/freebies) \nAdele character: Women pack: enchantress \nNinja and rogue characters: Assasin, Mage, Viking Pack \nEnemies: tokegameart.net: Wizard tiny style character \nBattle Backgrounds: Forest Battle backgrounds \nMain screens backgrounds: Itch.io witches and wizards backgrounds. \nSound effects: Pixabay.com : A hero of the 80s, Super Hero Intro, 8 bit arcade"
-            outline_width: 4
-            color: 0.8, 0.8, 0.8, 1
-            outline_color: 0, 0, 0.6, 1
+            text: "All character sprites and battle backgrounds come from the Craftpix Freebies Tier \n(craftpix.net/freebies) \nAdele character: Women pack: enchantress \nNinja and rogue characters: Assasin, Mage, Viking Pack \nEnemies: tokegameart.net: Wizard tiny style character \nBattle Backgrounds: Forest Battle backgrounds \nMain screens backgrounds: Itch.io witches and wizards backgrounds. \nSound effects: Pixabay.com : A hero of the 80s, Super Hero Intro, 8 bit arcade"
 
 
 <Tutorial1>:
@@ -873,11 +856,10 @@ ScreenManager:
             source: "graphics/tutorials/Battle_sample1.jpg"
             size_hint: (0.5, 0.5)
             pos_hint: {"x": 0.42, "y": 0.02}
+            allow_stretch: True
         TextLabel:
-            pos_hint: {'x': -0.02, 'y': 0.2}
-            text: "Live epic battles with Adele, Zack and Matt, in this action and strategy game!\nYou will need to stop enemies from flooding the forest and gather stars at the same time. \nAs you defeat enemies, some of them will spawn a star or a heart, gather them quicly \nor they will disappear! The heart will give you back life you might have lost, the star will allow you to \nadvance through the levels."
-        TextLabel:
-
+            pos_hint: {'x': -0.005, 'y': 0.2}
+            text: "Live epic battles with Adele, Zack and Matt in this action and strategy game!\nYou will need to stop enemies from flooding the forest and gather stars at the same \ntime. As you defeat enemies, some of them will spawn a star or a heart, gather them quicly \nor they will disappear! The heart will give you back life you might have lost, the star will allow \nyou to advance through the levels."
 
 
 <Tutorial2>:
@@ -901,13 +883,21 @@ ScreenManager:
                 root.manager.transition.direction = 'right'
                 app.root.current="tutorial1"
             pos_hint: {"center_x": .9, "center_y": .80}
+        LevelButton:
+            text: "Next page"
+            on_release:
+                root.manager.transition.direction = 'left'
+                app.root.current="tutorial3"
+            pos_hint: {"center_x": .9, "center_y": .70}
         TextLabel:
-            text: "Sidebar buttons:"
+            text: "Side bar buttons:"
             outline_color: 0.8, 0, 0, 1
             pos_hint: {'center_x': 0.1, 'center_y': 0.95}
         Image:
             source: "graphics/tutorials/side_bar_modes.jpg"
             pos_hint: {"center_x": 0.08, "center_y": 0.45}
+            size_hint: (0.11, 0.83)
+            allow_stretch: True
         TextLabel:
             pos_hint: {'center_x': 0.2, 'center_y': 0.82}
             text: "Pause game menu"
@@ -928,14 +918,55 @@ ScreenManager:
             text: "Send kisses mode"
         TextLabel:
             halign: 'right'
-            pos_hint: {'center_x': 0.65, 'center_y': 0.6}
-            text: "You will unlock characters and abilities as you advance throught the game,\nnew enemies with different abilities will arrive too!"
+            pos_hint: {'center_x': 0.65, 'center_y': 0.5}
+            text: "You will unlock characters and abilities as you advance through \nthe game, new enemies with different abilities will arrive too!"
         TextLabel:
             halign: 'right'
-            pos_hint: {'center_x': 0.7, 'center_y': 0.3}
-            text: "Activate different modes by tapping on the appropriate button.\nThe default is the move Adele mode,\nactive when the rest of the buttons are in black and white"
+            pos_hint: {'center_x': 0.67, 'center_y': 0.2}
+            text: "Activate different modes by tapping on the appropriate button.\nThe default is the move Adele mode, active when \nthe rest of the buttons are in black and white"
 
-
+<Tutorial3>:
+    name: "tutorial3"
+    on_leave: app.quit_tutorials_section()
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'graphics/Workshop_2.jpg'
+    RelativeLayout:
+        LevelButton:
+            text: "Main Screen"
+            on_release:
+                root.manager.transition.direction = 'right'
+                app.root.current="main"
+            pos_hint: {"center_x": .9, "center_y": .90}
+        LevelButton:
+            text: "Previous page"
+            on_release:
+                root.manager.transition.direction = 'right'
+                app.root.current="tutorial2"
+            pos_hint: {"center_x": .9, "center_y": .80}
+        TextLabel:
+            pos_hint: {'x': -0.08, 'y': 0.4}
+            text: "->Move Adele by tapping on the point of the screen you want her to move to"
+        TextLabel:
+            pos_hint: {'x': -0.08, 'y': 0.3}
+            text: "->In kiss mode enabled, tap on the screen the direction of the kiss"
+        TextLabel:
+            pos_hint: {'x': -0.08, 'y': 0.2}
+            text: "->In diaper mode enabled, tap on the screen the target position, it will deal area damage!"
+        TextLabel:
+            pos_hint: {'x': -0.08, 'y': 0.05}
+            text: "->Matt will automatically deal melee damage to adjacent enemies. Change his position \nby activating his move mode, and tap on the screen his desired position"
+            halign: "center"
+        TextLabel:
+            pos_hint: {'x': -0.08, 'y': -0.15}
+            text: "->Zack will automatically shoot to enemies within his range. Change his position \nby activating his move mode, and tap on the screen his desired position"
+            halign: "center"
+        TextLabel:
+            pos_hint: {'x': -0.08, 'y': -0.35}
+            text: "->The energy triangle: the ultimate attack of the trio, will kill all enemies inside it! \nMove the characters to modify the area of the triangle"
+            halign: "center"
 
 ###################################################
 # TOGGLE BUTTONS SECTION
@@ -1083,8 +1114,8 @@ ScreenManager:
     opacity: 1 if self.state == 'normal' else .5
 
 <TextLabel@Label>:
-    font_name: 'graphics/fonts/magic-school/MagicSchoolTwo.ttf'
-    font_size: dp(23)
+    font_name: 'graphics/fonts/vinque/vinque rg.otf'
+    font_size: dp(16)
     halign: 'left'
     outline_width: 4
     color: 0.8, 0.8, 0.8, 1
