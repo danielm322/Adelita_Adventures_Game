@@ -246,6 +246,17 @@ def enter_about_section(self, screen_manager):
     self.sound_about_section.play()
 
 
+def enter_tutorials_section(self, screen_manager):
+    screen_manager.transition.direction = 'left'
+    self.root.current = "tutorial1"
+    self.sound_tutorials_section.play()
+
+
+def quit_tutorials_section(self):
+    if self.root.current == "main":
+        self.sound_tutorials_section.stop()
+
+
 def quit_about_section(self):
     if self.root.current == "main":
         self.sound_about_section.stop()
